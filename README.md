@@ -14,7 +14,7 @@
 
 
 ### Features
-**Jenkins OCI Plugin** provides functionality to dynamically allocate OCI resources for continuous integration tasks, and to bring up and down services or nodes as required to serve Jenkins Build Jobs. The plugin integrates with OCI similar to existing Plugins like AWS, Azure, etc.
+**Jenkins OCI Plugin** provides functionality to dynamically allocate OCI resources for continuous integration tasks, and to bring up and down services or nodes as required to serve Jenkins Build Jobs.
 The Plugin Configuration options include support for Labels, multiple Templates, Shapes, Images, Slave Limits, Timeouts.
 
 
