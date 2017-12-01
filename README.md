@@ -1,13 +1,14 @@
 ## Jenkins OCI Plugin ##
 
-**Jenkins OCI Plugin** allows users to access and manage cloud resources on the Oracle Cloud Infrastructure (OCI) from Jenkins.  
+**Jenkins OCI Plugin** allows users to access and manage cloud resources on the Oracle Cloud Infrastructure (OCI) from Jenkins.
+A Jenkins master instance with Jenkins OCI Plugin can spin up slaves (Instances) on demand within the Oracle Cloud Infrastructure, and remove the slaves automatically once the Job completes.
 
 ### Table of Contents ###
 1. [Features](#features)
 1. [Prerequisites](#prerequisites)
 1. [Installation](#installation)
 1. [Configuration](#configuration)
-2. [Known issues and limitations](#known_issues_and_limitations)
+2. [Known issues and limitations](#known issues and limitations)
 1. [Licensing](#licensing)
 1. [Contributing](#contributing)
 2. [Changelog](#changelog)
@@ -15,7 +16,8 @@
 
 ### Features
 **Jenkins OCI Plugin** provides functionality to dynamically allocate OCI resources for continuous integration tasks, and to bring up and down services or nodes as required to serve Jenkins Build Jobs.
-The Plugin Configuration options include support for Labels, multiple Templates, Shapes, Images, Slave Limits, Timeouts.
+
+After installing Jenkins OCI Plugin, you can add a OCI Cloud option and a Template with the desired Shape, Image, VCN, etc. The Template will have a Label that you can use in your Jenkins Job. Multiple Templates are supported. The Template options include Labels, Domains, Credentials, Shapes, Images, Slave Limits, and Timeouts.
 
 
 ### Prerequisites
@@ -36,7 +38,7 @@ For example:
     $ cd oci-java-sdk
     $ mvn compile install
 
-Compile hpi using maven:
+Compile the Jenkins OCI Plugin hpi file using maven:
 
     $ git clone https://github.com/oracle/jenkins-oci-plugin
     $ cd jenkins-oci-plugin
@@ -50,7 +52,7 @@ or
 
 - Copy the downloaded .hpi file into the JENKINS_HOME/plugins directory on the Jenkins master
 
-Restart Jenkins.
+Restart Jenkins and "OCI Plugin" is visible in the Installed section of Manage Plugins.
 
 ### Configuration
 
@@ -76,7 +78,7 @@ Restart Jenkins.
 1. In the "Cloud" section click "Add a new cloud" → OCI Cloud
 1. Select the previously created OCI Cloud credentials
 1. Click "Add Template"
-1. Fill in your preferred details for your template adding a label (i.e. "sample_label"). 
+1. Fill in your preferred details for your template adding a label (i.e. "sample_label"), shape, image, etc. 
 
 
 
@@ -86,7 +88,7 @@ Restart Jenkins.
 1. Create a Freestyle project
 1. In the Job Configuration
 	- Check "Restrict where this project can be run" and fill in the label (i.e. "sample_label")
-	1. In "Build" section click "Add build step" → Execute shell and fill echo "Hello World; sleep 60"
+	1. In "Build" section click "Add build step" → Execute shell → echo "Hello World"; sleep 60;
 1. Save
 2. On the newly configured job → Click "Build"
 
@@ -99,7 +101,6 @@ The following are a list of known issues and limitations for this plugin. Also y
 - Ability to keep Slave forever for analysis.
 - Ability to create slave independently of jobs.
 - Currently there is nothing seen in Jenkins UI during Instance provisioning.
-- Hardcoded Region on several places
 - Implement a "ProvisionStrategy" for concurrent Job Runs. To be able to run same jobs concurrently. Workaround is to create "parametrized" job.
 - Currently only RSA keys are supported for Images. 
 - Add a Max Retry limit on Provisioning Slaves. Currently if a Slave cannot be provisioned, it keeps trying. 
