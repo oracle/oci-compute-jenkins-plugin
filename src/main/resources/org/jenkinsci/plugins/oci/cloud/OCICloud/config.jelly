@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Jenkins OCI Plugin
+
+Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
+Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+-->
+<?jelly escape-by-default='true'?>
+<j:jelly
+  xmlns:j="jelly:core"
+  xmlns:st="jelly:stapler"
+  xmlns:d="jelly:define"
+  xmlns:l="/lib/layout"
+  xmlns:t="/lib/hudson"
+  xmlns:f="/lib/form"
+  xmlns:c="/lib/credentials">
+
+  <f:entry field="name" title="${%CloudName}">
+    <f:textbox default="oci"/>
+  </f:entry>
+
+  <f:entry field="credentialsId" title="${%Credentials}">
+    <c:select expressionAllowed="false"/>
+  </f:entry>
+
+  <f:entry field="nodesMax" title="${%NodesMax}">
+    <f:number clazz="positive-number" min="1" step="1" default="8"/>
+  </f:entry>
+
+  <f:entry field="timeout" title="${%Timeout}">
+    <f:number clazz="positive-number" min="1" step="1" default="600"/>
+  </f:entry>
+
+  <f:section title="${%SlaveSection}">
+    <f:entry>
+      <f:repeatableHeteroProperty field="templates" addCaption="${%AddCaption}" deleteCaption="${%DeleteCaption}"/>
+    </f:entry>
+  </f:section>
+</j:jelly>

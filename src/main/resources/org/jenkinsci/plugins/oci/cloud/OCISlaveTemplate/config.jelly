@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Jenkins OCI Plugin
+
+Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
+Licensed under the Universal Permissive License v 1.0 as shown at http://oss.oracle.com/licenses/upl.
+-->
+<?jelly escape-by-default='true'?>
+<j:jelly
+  xmlns:j="jelly:core"
+  xmlns:st="jelly:stapler"
+  xmlns:d="jelly:define"
+  xmlns:l="/lib/layout"
+  xmlns:t="/lib/hudson"
+  xmlns:f="/lib/form"
+  xmlns:c="/lib/credentials">
+
+  <f:entry field="name" title="${%TemplateName}">
+    <f:textbox/>
+  </f:entry>
+
+  <f:entry field="labelString" title="${%TemplateLabels}">
+      <f:textbox/>
+  </f:entry>
+
+  <f:slave-mode node="${instance}" name="mode"/>
+
+  <f:entry field="sshCredentialsId" title="${%SshCredentials}">
+    <c:select expressionAllowed="false"/>
+  </f:entry>
+
+  <f:entry field="compartmentOCID" title="${%CompartmentID}">
+     <f:select default="compartmentOCID"/>
+  </f:entry>
+
+  <f:entry field="availabilityDomain" title="${%AvailabilityDomain}">
+     <f:select default="availabilityDomain"/>
+  </f:entry>
+
+  <f:entry field="shape" title="${%Shape}">
+     <f:select default="shape"/>
+  </f:entry>
+
+  <f:entry field="imageOCID" title="${%Image}">
+     <f:select default="imageOCID"/>
+  </f:entry>
+
+  <f:entry field="vcnOCID" title="${%Vcn}">
+    <f:select default="subnetOCID"/>
+  </f:entry>
+
+  <f:entry field="subnetOCID" title="${%Subnet}">
+     <f:select default="subnetOCID"/>
+  </f:entry>
+</j:jelly>
