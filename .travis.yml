@@ -1,0 +1,9 @@
+language: java
+jdk:
+  - oraclejdk8
+sudo: false
+before_install:
+  - curl -OL https://github.com/oracle/oci-java-sdk/archive/v1.2.17.tar.gz
+  - tar -xvf v1.2.17.tar.gz
+  - pushd oci-java-sdk-1.2.17/ && mvn clean install && popd
+script: mvn clean verify
