@@ -1,5 +1,5 @@
 ## Jenkins OCI Plugin ##
-[![Buil d Status](https://travis-ci.org/oracle/jenkins-oci-plugin.svg?branch=master)](https://travis-ci.org/oracle/jenkins-oci-plugin)
+[![Buil d Status](https://travis-ci.org/oracle/oci-compute-jenkins-plugin.svg?branch=master)](https://travis-ci.org/oracle/oci-compute-jenkins-plugin)
 
 **Jenkins OCI Plugin** allows users to access and manage cloud resources on the Oracle Cloud Infrastructure (OCI) from Jenkins.
 A Jenkins master instance with Jenkins OCI Plugin can spin up slaves (Instances) on demand within the Oracle Cloud Infrastructure, and remove the slaves automatically once the Job completes.
