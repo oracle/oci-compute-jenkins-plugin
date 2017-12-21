@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>2.11</version>
+  </parent>
+  <groupId>org.jenkins-ci.plugins</groupId>
+  <artifactId>oracle-cloud-infrastructure-compute</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>hpi</packaging>
+
+  <properties>
+    <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
+    <jenkins.version>1.648</jenkins.version>
+    <!-- Java Level to use. Java 7 required when using core >= 1.612 -->
+    <!-- Java 8 required due to https://docs.us-phoenix-1.oraclecloud.com/Content/API/SDKDocs/javasdk.htm#Java -->
+    <java.level>8</java.level>
+    <!-- Jenkins Test Harness version you use to test the plugin. -->
+    <!-- For Jenkins version >= 1.580.1 use JTH 2.x or higher. -->
+    <jenkins-test-harness.version>2.13</jenkins-test-harness.version>
+    <!-- Other properties you may want to use:
+         ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
+         ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
+    -->
+    <oci-java-sdk.version>1.2.20</oci-java-sdk.version>
+  </properties>
+
+  <name>Oracle Cloud Infrastructure Compute Plugin</name>
+  <description> Provision/Recycle agents on Oracle Cloud Infrastructure Compute dynamically, for tutorial, license and 3rd party library usage, refer </description>
+  <url>https://wiki.jenkins-ci.org/display/JENKINS/Oracle+Cloud+Infrastructure+Compute+Plugin</url>
+
+  <licenses>
+    <license>
+      <name>The Universal Permissive License (UPL), Version 1.0</name>
+      <url>http://www.oracle.com/technetwork/licenses/upl-license-2927578.html</url>
+      <distribution>repo</distribution>
+    </license>
+    <license>
+      <name>Apache License 2.0</name>
+      <url>http://apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+
+  <scm>
+    <connection>scm:git:https://github.com/oracle/oci-compute-jenkins-plugin</connection>
+    <developerConnection>scm:git:git@github.com/oracle/oci-compute-jenkins-plugin.git</developerConnection>
+    <url>https://github.com/oracle/oci-compute-jenkins-plugin</url>
+  </scm>
+
+  <issueManagement>
+	<system>JIRS</system>
+	<url>https://jira.oraclecorp.com/jira/browse/OPCTOOL</url>
+  </issueManagement>
+
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.oracle.oci.sdk</groupId>
+      <artifactId>oci-java-sdk-common</artifactId>
+      <version>${oci-java-sdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oracle.oci.sdk</groupId>
+      <artifactId>oci-java-sdk-core</artifactId>
+      <version>${oci-java-sdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oracle.oci.sdk</groupId>
+      <artifactId>oci-java-sdk-identity</artifactId>
+      <version>${oci-java-sdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>bouncycastle-api</artifactId>
+      <version>1.648.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jmock</groupId>
+      <artifactId>jmock-junit4</artifactId>
+      <version>2.8.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!-- Override the <argLine> from the parent POM to include @{argLine},
+               which is updated by jacoco-maven-plugin to add -javaagent. -->
+          <argLine>@{argLine} -Djava.awt.headless=true ${argLine}</argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- Project Report Configuration -->
+  <reporting>
+    <plugins>
+         <plugin>
+           <groupId>org.apache.maven.plugins</groupId>
+           <artifactId>maven-project-info-reports-plugin</artifactId>
+           <version>2.9</version>
+           <reportSets>
+            <reportSet>
+               <reports>
+                 <report>dependencies</report>
+                 <report>scm</report>
+                 <report>issue-tracking</report>
+                 <report>license</report>
+               </reports>
+            </reportSet>
+           </reportSets>
+           <configuration>
+             <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+             <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+           </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.8</version>
+            <reportSets>
+            <reportSet>
+               <reports>
+                 <report>javadoc</report>
+               </reports>
+            </reportSet>
+           </reportSets>
+        </plugin>
+   </plugins>
+  </reporting>
+
+</project>

@@ -1,0 +1,19 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:f="/lib/form" xmlns:m="jelly:hudson.util.jelly.MorphTagLibrary">
+  <st:adjunct includes="com.oracle.cloud.baremetal.jenkins.lib.idRepeatable_"/>
+
+  <input type="hidden" name="${nextIdField}" value="${instance == null ? 0 : instance[nextIdField]}" />
+
+  <f:repeatable field="${field}" header="${header}" add="${add}">
+    <j:choose>
+      <j:when test="${instance == null}">
+        <input type="hidden" name="${idField}" class="idRepeatable" nextIdField="../${nextIdField}" />
+      </j:when>
+      <j:otherwise>
+        <input type="hidden" name="${idField}" value="${instance[idField]}" />
+      </j:otherwise>
+    </j:choose>
+
+    <d:invokeBody />
+  </f:repeatable>
+</j:jelly>
