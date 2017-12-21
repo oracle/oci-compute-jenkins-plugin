@@ -1,4 +1,6 @@
 # Oracle Cloud Infrastructure Compute Plugin
+[![Buil d Status](https://travis-ci.org/oracle/oci-compute-jenkins-plugin.svg?branch=master)](https://travis-ci.org/oracle/oci-compute-jenkins-plugin)
+**Refer "old-code-base" branch for old codebase before Dec 21th, 2017**
 
 Oracle Cloud Infrastructure (OCI) Compute Plugin allow Jenkins to create compute instances on Oracle Cloud Infrastructure (OCI) Compute and start agents on them dynamically, according to the job workload. When jobs finish and agents are idle for specified time, compute instances would be terminated and related cloud resources, eg, volumes, ip, etc,  would be recycled.  
 
