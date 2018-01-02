@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 
+import com.oracle.cloud.baremetal.jenkins.JenkinsUtil;
 import com.trilead.ssh2.Connection;
 import com.trilead.ssh2.HTTPProxyData;
 import com.trilead.ssh2.ServerHostKeyVerifier;
 
 import hudson.ProxyConfiguration;
-import jenkins.model.Jenkins;
 
 public class SshConnector {
 
@@ -18,7 +18,7 @@ public class SshConnector {
     private static final int PORT = 22;
 
     public ProxyConfiguration getProxyConfiguration() {
-        return Jenkins.getInstance().proxy;
+        return JenkinsUtil.getJenkinsInstance().proxy;
     }
 
     public Connection createConnection(String host) throws IOException, InterruptedException {
@@ -39,12 +39,13 @@ public class SshConnector {
     }
 
     public void connect(Connection conn, int timeoutMillis) throws IOException {
-        conn.connect(new ServerHostKeyVerifier() {
-            @Override
-            public boolean verifyServerHostKey(String hostname, int port, String serverHostKeyAlgorithm, byte[] serverHostKey) {
-                return true;
-            }
-        }, timeoutMillis, timeoutMillis);
+        conn.connect(new SshServerHostKeyVerifier(), timeoutMillis, timeoutMillis);
     }
 
+    static class SshServerHostKeyVerifier implements ServerHostKeyVerifier {
+        @Override
+        public boolean verifyServerHostKey(String hostname, int port, String serverHostKeyAlgorithm, byte[] serverHostKey) {
+            return true;
+        }
+    }
 }

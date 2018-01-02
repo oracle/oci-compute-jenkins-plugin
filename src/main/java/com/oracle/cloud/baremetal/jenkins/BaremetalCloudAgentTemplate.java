@@ -37,7 +37,6 @@ import hudson.model.labels.LabelAtom;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.bouncycastle.api.PEMEncodable;
-import jenkins.model.Jenkins;
 
 public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAgentTemplate>{
     private static final Logger LOGGER = Logger.getLogger(BaremetalCloud.class.getName());
@@ -284,16 +283,12 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     @Extension
     public static class DescriptorImpl extends Descriptor<BaremetalCloudAgentTemplate> {
 
-        @Override
-        public String getDisplayName() {
-            return null;
-        }
 
         @Override
         public String getHelpFile(String fieldName) {
             String p = super.getHelpFile(fieldName);
             if (p == null)
-                p = Jenkins.getInstance().getDescriptor(BaremetalCloudAgent.class).getHelpFile(fieldName);
+                p = JenkinsUtil.getJenkinsInstance().getDescriptor(BaremetalCloudAgent.class).getHelpFile(fieldName);
 
             return p;
         }

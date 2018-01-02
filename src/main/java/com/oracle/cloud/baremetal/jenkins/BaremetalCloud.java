@@ -30,6 +30,7 @@ import com.oracle.cloud.baremetal.jenkins.client.SDKBaremetalCloudClientFactory;
 import com.oracle.cloud.baremetal.jenkins.ssh.SshConnector;
 import com.trilead.ssh2.Connection;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.model.Computer;
 import hudson.model.ComputerSet;
@@ -238,17 +239,17 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
                 awaitInstanceSshAvailable(publicIp, template.getSshConnectTimeoutMillis(), timeoutHelper);
                 template.resetFailureCount();
-            }catch(Exception ex){
+            } catch(IOException | RuntimeException ex){
                 try{
                     recycleCloudResources(instance.getId());
                     LOGGER.log(Level.WARNING, "Provision node: " + instanceName + " failed, and created resources have been recycled.", ex);
-                }catch(Exception e2){
+                } catch(IOException | RuntimeException e2) {
                     LOGGER.log(Level.WARNING, "Provision node: " + instanceName + " failed, and failed to recycle node " + instanceName, ex);
                 }
                 throw ex;
             }
             return newBaremetalCloudAgent(name, template, this.name, instance.getId(), publicIp);
-        } catch (Exception e) {
+        } catch (IOException | RuntimeException e) {
             String message = e.getMessage();
             template.increaseFailureCount(message != null ? message : e.toString());
             throw e;
@@ -312,6 +313,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
      * @throws ServletException if a servlet exception occurs
      * @throws IOException if a IO error occurs
      */
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     public void doProvision(
             @QueryParameter int templateId,
             StaplerRequest req,
@@ -340,7 +342,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
     }
 
     void addNode(Node node) throws IOException {
-        Jenkins.getInstance().addNode(node);
+        JenkinsUtil.getJenkinsInstance().addNode(node);
     }
 
     private class ExplicitProvisioner extends Provisioner {
@@ -438,8 +440,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
             } catch (IOException e) {
                 LOGGER.log(Level.FINER, "Ignoring exception connecting to SSH during privision", e);
             } finally {
-                if(null != conn)
-                    conn.close();
+                conn.close();
             }
         } while (timeoutHelper.sleep());
 
@@ -451,7 +452,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
     }
 
     List<Node> getNodes() {
-        return Jenkins.getInstance().getNodes();
+        return JenkinsUtil.getJenkinsInstance().getNodes();
     }
 
     @Override
@@ -468,7 +469,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
         }
 
         List<? extends Cloud> getClouds() {
-            return Jenkins.getInstance().clouds;
+            return JenkinsUtil.getJenkinsInstance().clouds;
         }
 
         public FormValidation doCheckCloudName(@QueryParameter String value) {

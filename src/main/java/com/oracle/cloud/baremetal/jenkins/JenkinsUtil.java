@@ -11,7 +11,7 @@ public class JenkinsUtil {
     //Generic type-safe wrapper for {@link Jenkins#getDescriptorOrDie}.
     public static <T extends Describable<T>> Descriptor<T> getDescriptorOrDie(Class<? extends T> type) {
         @SuppressWarnings("unchecked")
-        Descriptor<T> desc = Jenkins.getInstance().getDescriptorOrDie(type);
+        Descriptor<T> desc = JenkinsUtil.getJenkinsInstance().getDescriptorOrDie(type);
         if (!desc.isSubTypeOf(type)) {
             throw new IllegalStateException(type.toString());
         }
@@ -21,7 +21,7 @@ public class JenkinsUtil {
     // Generic type-safe wrapper for {@link Jenkins#getDescriptorOrDie} to be
     // used when a concrete descriptor class is used.
     public static <S extends Describable<S>, T extends S, D extends Descriptor<S>> D getDescriptorOrDie(Class<T> type, Class<D> descriptorType) {
-        return descriptorType.cast(Jenkins.getInstance().getDescriptorOrDie(type));
+        return descriptorType.cast(JenkinsUtil.getJenkinsInstance().getDescriptorOrDie(type));
     }
 
     /**
@@ -76,6 +76,14 @@ public class JenkinsUtil {
     //Unescapes a string escaped by {@link Util#escape}.
     public static String unescape(String s) {
         return new Unescaper(s).unescape();
+    }
+
+    public static Jenkins getJenkinsInstance() {
+        Jenkins jenkins = Jenkins.getInstance();
+        if (jenkins == null) {
+            throw new IllegalStateException("Fail to get Jenkins instance, which means it has not been started, or was already shut down");
+        }
+        return jenkins;
     }
 }
 

@@ -70,7 +70,7 @@ public class FormFillFailure extends IOException implements HttpResponse {
         try {
             Class<? extends HttpResponse> c = Class.forName("hudson.util.FormFillFailure").asSubclass(HttpResponse.class);
             return c.getMethod("error", String.class);
-        } catch (Exception e) {
+        } catch (ClassNotFoundException |NoSuchMethodException e) {
             return null;
         }
     }

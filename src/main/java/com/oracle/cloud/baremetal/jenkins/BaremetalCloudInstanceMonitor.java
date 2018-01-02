@@ -10,7 +10,6 @@ import hudson.Extension;
 import hudson.model.AsyncPeriodicWork;
 import hudson.model.Node;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 
 @Extension
 public class BaremetalCloudInstanceMonitor extends AsyncPeriodicWork {
@@ -29,7 +28,7 @@ public class BaremetalCloudInstanceMonitor extends AsyncPeriodicWork {
     }
 
     List<Node> getNodes() {
-        return Jenkins.getInstance().getNodes();
+        return JenkinsUtil.getJenkinsInstance().getNodes();
     }
 
 	@Override
@@ -46,7 +45,7 @@ public class BaremetalCloudInstanceMonitor extends AsyncPeriodicWork {
 					}else{
 						LOGGER.info("Cloud Infrastructure instance is online: " + agent.getDisplayName());
 					}
-				}catch (Exception e){
+				} catch (IOException | InterruptedException | RuntimeException e){
 					LOGGER.info("Failed to terminate node : " + agent.getDisplayName());
 					removeNode(agent);
 				}
@@ -56,7 +55,7 @@ public class BaremetalCloudInstanceMonitor extends AsyncPeriodicWork {
 
 	void removeNode(BaremetalCloudAgent agent){
 		try{
-			Jenkins.getInstance().removeNode(agent);
+		    JenkinsUtil.getJenkinsInstance().removeNode(agent);
 		} catch (IOException e) {
             LOGGER.log(Level.WARNING, "Failed to remove node: " + agent.getDisplayName());
         }

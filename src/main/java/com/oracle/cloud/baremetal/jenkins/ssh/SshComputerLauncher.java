@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
 
+import com.oracle.cloud.baremetal.jenkins.JenkinsUtil;
 import com.trilead.ssh2.Connection;
 import com.trilead.ssh2.SCPClient;
 import com.trilead.ssh2.Session;
@@ -18,7 +19,6 @@ import hudson.remoting.Channel;
 import hudson.remoting.Channel.Listener;
 import hudson.slaves.ComputerLauncher;
 import hudson.slaves.SlaveComputer;
-import jenkins.model.Jenkins;
 
 public class SshComputerLauncher extends ComputerLauncher {
     private static final Logger LOGGER = Logger.getLogger(SshComputerLauncher.class.getName());
@@ -132,10 +132,9 @@ public class SshComputerLauncher extends ComputerLauncher {
                 sess.close();
             }
 
-            scp.put(Jenkins.getInstance().getJnlpJars("slave.jar").readFully(), "slave.jar", remoteFS);
+            scp.put(JenkinsUtil.getJenkinsInstance().getJnlpJars("slave.jar").readFully(), "slave.jar", remoteFS);
 
-            String jvmopts = null;
-            String launchString = "java " + (jvmopts != null ? jvmopts : "") + " -jar " + remoteFS + "/slave.jar";
+            String launchString = "java -jar " + remoteFS + "/slave.jar";
 
             LOGGER.info("Launching slave agent (via Trilead SSH2 Connection): " + launchString);
             final Session sess = conn.openSession();

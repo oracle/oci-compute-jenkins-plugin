@@ -21,10 +21,8 @@ import hudson.slaves.AbstractCloudComputer;
 import hudson.slaves.AbstractCloudSlave;
 import hudson.slaves.CloudRetentionStrategy;
 import hudson.slaves.NodeProperty;
-import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
-@SuppressWarnings("serial")
 public class BaremetalCloudAgent extends AbstractCloudSlave{
 
 	/**
@@ -32,6 +30,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
      * <a href="https://docs.us-phoenix-1.oraclecloud.com/Content/GSG/Tasks/testingconnection.htm">Connecting to Your Linux Instance from a Unix-style System</a>.
      */
     private static final Logger LOGGER = Logger.getLogger(BaremetalCloud.class.getName());
+    private static final long serialVersionUID = 1;
 
 	private static CloudRetentionStrategy createRetentionStrategy(String idleTerminationMinutes) {
         int idleMinutes = idleTerminationMinutes == null || idleTerminationMinutes.trim().isEmpty() ? 0 : Integer.parseInt(idleTerminationMinutes);
@@ -115,7 +114,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
     }
 
     public BaremetalCloud getCloud() {
-        return (BaremetalCloud) Jenkins.getInstance().getCloud(cloudName);
+        return (BaremetalCloud) JenkinsUtil.getJenkinsInstance().getCloud(cloudName);
     }
 
     void sleep(long millis) throws InterruptedException {

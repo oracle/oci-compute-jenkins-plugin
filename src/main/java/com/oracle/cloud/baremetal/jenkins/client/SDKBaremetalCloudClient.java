@@ -180,8 +180,8 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                     publicIp =  publicIpLocal;
                 }
             }
-            return publicIp;
         }
+        return publicIp;
     }
 
 
