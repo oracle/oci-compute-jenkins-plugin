@@ -54,8 +54,8 @@
   </scm>
 
   <issueManagement>
-	<system>JIRS</system>
-	<url>https://jira.oraclecorp.com/jira/browse/OPCTOOL</url>
+	<system>JIRA</system>
+	<url>issues.jenkins-ci.org</url>
   </issueManagement>
 
   <repositories>
