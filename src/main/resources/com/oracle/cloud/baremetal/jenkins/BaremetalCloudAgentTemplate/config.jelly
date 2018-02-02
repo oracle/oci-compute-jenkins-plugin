@@ -82,7 +82,7 @@
 		  </f:entry>
 		
 		  <f:entry title="${%numExecutors}" field="numExecutors">
-		    <f:textbox />
+		    <f:textbox default="1"/>
 		  </f:entry>
 		
 		  <f:entry title="${%initScript}" field="initScript">
