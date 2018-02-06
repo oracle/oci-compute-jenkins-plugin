@@ -36,6 +36,7 @@ import hudson.model.Node;
 import hudson.model.labels.LabelAtom;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.bouncycastle.api.PEMEncodable;
 
 public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAgentTemplate>{
@@ -97,7 +98,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.imageId = imageId;
         this.shape = shape;
         this.sshPublickey = sshPublickey;
-        this.sshPrivatekey = sshPrivatekey;
+        this.sshPrivatekey = getEncryptedValue(sshPrivatekey);
         this.description = description;
         this.remoteFS = remoteFS;
         this.sshUser = sshUser;
@@ -143,7 +144,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     }
 
     public String getSshPrivatekey() {
-        return sshPrivatekey;
+        return getPlainText(sshPrivatekey);
     }
 
     public String getDisplayName() {
@@ -184,6 +185,14 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getLabelString() {
         return labelString;
+    }
+
+    protected String getEncryptedValue(String str) {
+        return str == null ? null : Secret.fromString(str).getEncryptedValue();
+    }
+
+    protected String getPlainText(String str) {
+        return str == null ? null : Secret.decrypt(str).getPlainText();
     }
 
     Collection<LabelAtom> parseLabels(String labels) {
