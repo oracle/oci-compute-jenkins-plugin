@@ -18,6 +18,7 @@ import org.jmock.Expectations;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
 
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClientFactory;
@@ -34,6 +35,15 @@ public class BaremetalCloudAgentTemplateUnitTest {
 
     @Rule
     public final BaremetalCloudMockery mockery = new BaremetalCloudMockery();
+
+    /*
+     * Prevents:
+     *   "java.lang.IllegalStateException: cannot initialize confidential key store until Jenkins has started"
+     *
+     * which was introduced in the unit tests with usage of hudson.util.Secret for SSH key storage.
+     */
+    @Rule
+    public JenkinsRule jenkinsRule = new JenkinsRule();
 
     @Test
     public void testGetDisplayName() {
