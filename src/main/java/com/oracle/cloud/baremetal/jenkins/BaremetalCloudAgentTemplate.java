@@ -283,7 +283,6 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     @Extension
     public static class DescriptorImpl extends Descriptor<BaremetalCloudAgentTemplate> {
 
-
         @Override
         public String getHelpFile(String fieldName) {
             String p = super.getHelpFile(fieldName);
