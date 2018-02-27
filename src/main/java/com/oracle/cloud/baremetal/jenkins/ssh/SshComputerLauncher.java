@@ -132,6 +132,7 @@ public class SshComputerLauncher extends ComputerLauncher {
                 sess.close();
             }
 
+            ensureJavaInstalled(conn, listener);
             scp.put(JenkinsUtil.getJenkinsInstance().getJnlpJars("slave.jar").readFully(), "slave.jar", remoteFS);
 
             String launchString = "java -jar " + remoteFS + "/slave.jar";
@@ -148,6 +149,15 @@ public class SshComputerLauncher extends ComputerLauncher {
             });
         } finally {
 
+        }
+    }
+
+    private void ensureJavaInstalled(final Connection connection, final TaskListener listener) throws IOException, InterruptedException {
+        int ret = connection.exec("java -fullversion", listener.getLogger());
+
+        if (ret != 0) {
+            listener.fatalError("Agent does not have java installed");
+            throw new IOException("Agent does not have java installed: " + this.host);
         }
     }
 
