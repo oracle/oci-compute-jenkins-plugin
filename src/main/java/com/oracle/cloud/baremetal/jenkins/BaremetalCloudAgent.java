@@ -14,6 +14,7 @@ import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 import com.oracle.cloud.baremetal.jenkins.ssh.SshComputerLauncher;
 
 import hudson.Extension;
+import hudson.model.Computer;
 import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.model.Descriptor.FormException;
@@ -21,6 +22,7 @@ import hudson.slaves.AbstractCloudComputer;
 import hudson.slaves.AbstractCloudSlave;
 import hudson.slaves.CloudRetentionStrategy;
 import hudson.slaves.NodeProperty;
+import hudson.slaves.RetentionStrategy;
 import net.sf.json.JSONObject;
 
 public class BaremetalCloudAgent extends AbstractCloudSlave{
@@ -32,8 +34,12 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
     private static final Logger LOGGER = Logger.getLogger(BaremetalCloud.class.getName());
     private static final long serialVersionUID = 1;
 
-	private static CloudRetentionStrategy createRetentionStrategy(String idleTerminationMinutes) {
+    private static RetentionStrategy<? extends Computer> createRetentionStrategy(String idleTerminationMinutes) {
         int idleMinutes = idleTerminationMinutes == null || idleTerminationMinutes.trim().isEmpty() ? 0 : Integer.parseInt(idleTerminationMinutes);
+
+        if (idleMinutes == 0) {
+            return new RetentionStrategy.Always();
+        }
         return new CloudRetentionStrategy(idleMinutes);
     }
 
