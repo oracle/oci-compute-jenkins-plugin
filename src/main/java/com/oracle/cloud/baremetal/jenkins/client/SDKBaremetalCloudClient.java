@@ -66,10 +66,33 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         ClientRuntime.setClientUserAgent("Oracle-Jenkins/" + Jenkins.VERSION);
     }
 
+    private Identity getIdentityClient() {
+        Identity identityClient = new IdentityClient(provider, null, new HTTPProxyConfigurator());
+        identityClient.setRegion(regionId);
+        return identityClient;
+    }
+
+    private ComputeClient getComputeClient() {
+        ComputeClient computeClient = new ComputeClient(provider, null, new HTTPProxyConfigurator());
+        computeClient.setRegion(regionId);
+        return computeClient;
+    }
+
+    private VirtualNetworkClient getVirtualNetworkClient() {
+        VirtualNetworkClient networkClient = new VirtualNetworkClient(provider, null, new HTTPProxyConfigurator());
+        networkClient.setRegion(regionId);
+        return networkClient;
+    }
+
+    private VirtualNetworkAsyncClient getVirtualNetworkAsyncClient() {
+        VirtualNetworkAsyncClient networkClient = new VirtualNetworkAsyncClient(provider, null, new HTTPProxyConfigurator());
+        networkClient.setRegion(regionId);
+        return networkClient;
+    }
+
     @Override
     public void authenticate() throws BmcException {
-        Identity identityClient = new IdentityClient(provider);
-        identityClient.setRegion(regionId);
+        Identity identityClient = getIdentityClient();
 
         try{
             identityClient.getUser(GetUserRequest.builder().userId(provider.getUserId()).build());
@@ -89,7 +112,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     @Override
     public Instance createInstance(String name, BaremetalCloudAgentTemplate template) throws Exception {
         Instance instance = null;
-        try (ComputeClient computeClient = new ComputeClient(provider)) {
+        try (ComputeClient computeClient = getComputeClient()) {
 
             String ad = template.getAvailableDomain();
             String compartmentIdStr = template.getcompartmentId();
@@ -103,8 +126,6 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             if(template.getAssignPublicIP() != null) {
                 assignPublicIP = template.getAssignPublicIP();
             }
-
-            computeClient.setRegion(regionId);
 
             Map<String, String> metadata = new HashMap<>();
             metadata.put("ssh_authorized_keys", sshPublicKey);
@@ -154,8 +175,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public Instance waitForInstanceProvisioningToComplete(String instanceId) throws Exception {
-        try (ComputeClient computeClient = new ComputeClient(provider)) {
-            computeClient.setRegion(regionId);
+        try (ComputeClient computeClient = getComputeClient()) {
             ComputeWaiters waiter = computeClient.getWaiters();
             GetInstanceResponse response = waiter.forInstance(
                     GetInstanceRequest
@@ -172,11 +192,9 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     @Override
     public String getInstanceIp(BaremetalCloudAgentTemplate template, String instanceId) throws Exception {
         String Ip = "";
-        try (ComputeClient computeClient = new ComputeClient(provider);
-            VirtualNetworkClient vcnClient = new VirtualNetworkClient(provider)) {
 
-            computeClient.setRegion(regionId);
-            vcnClient.setRegion(regionId);
+        try (ComputeClient computeClient = getComputeClient();
+                VirtualNetworkClient vcnClient = getVirtualNetworkClient()) {
 
             String compartmentId = template.getcompartmentId();
 
@@ -220,8 +238,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public List<Compartment> getCompartmentsList(String tenantId) throws Exception {
-        try (Identity identityClient = new IdentityClient(provider)) {
-            identityClient.setRegion(regionId);
+        try (Identity identityClient = getIdentityClient()) {
             List<Compartment> compartmentIds;
             compartmentIds = identityClient.listCompartments(ListCompartmentsRequest.builder().compartmentId(tenantId).build()).getItems();
             return compartmentIds;
@@ -237,10 +254,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         List<Compartment> compartmentList = getCompartmentsList(tenantId);
         List<AvailabilityDomain> listAvailabilityDomains = new ArrayList<>();
 
-        try (Identity identityClient = new IdentityClient(provider);) {
-
-        identityClient.setRegion(regionId);
-
+        try (Identity identityClient = getIdentityClient()) {
         // list Domains in all available compartments
         for (Compartment compartment : compartmentList) {
             try {
@@ -264,8 +278,8 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     public List<Image> getImagesList(String tenantId) throws Exception {
         List<Compartment> compartmentList = getCompartmentsList(tenantId);
         List<Image> listImage = new ArrayList<>();
-        try (ComputeClient computeClient = new ComputeClient(provider)) {
-            computeClient.setRegion(regionId);
+
+        try (ComputeClient computeClient = getComputeClient()) {
             // list image in all available compartments
             for (Compartment compartment : compartmentList) {
                 try {
@@ -285,11 +299,11 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public List<Shape> getShapesList(String tenantId, String availableDomain, String imageId) throws Exception {
-        try (ComputeClient computeClient = new ComputeClient(provider)) {
+        try (ComputeClient computeClient = getComputeClient()) {
             List<Shape> listShape = new ArrayList<>();
             List<Compartment> compartmentList = getCompartmentsList(tenantId);
-            computeClient.setRegion(regionId);
-         // The image and shape can be from different compartment
+
+            // The image and shape can be from different compartment
             for (Compartment compartment : compartmentList) {
                 try {
                      listShape.addAll(computeClient.listShapes(ListShapesRequest.builder().compartmentId(compartment.getId()).availabilityDomain(availableDomain).imageId(imageId).build()).getItems());
@@ -311,8 +325,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         List<Compartment> compartmentList = getCompartmentsList(tenantId);
         List<Vcn> vcnList = new ArrayList<>();
 
-        try (VirtualNetworkAsyncClient vnc = new VirtualNetworkAsyncClient(provider)) {
-            vnc.setRegion(regionId);
+        try (VirtualNetworkAsyncClient vnc = getVirtualNetworkAsyncClient()) {
             List<Future<ListVcnsResponse>> futureList = new ArrayList<>();
 
             // Asynchronously list VCNs in all available compartments
@@ -342,11 +355,8 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     public List<Subnet> getSubNetList(String tenantId,String vcnId) throws Exception {
         List<Subnet> listSubnet = new ArrayList<>();
         List<Compartment> compartmentList = getCompartmentsList(tenantId);
-        try (VirtualNetworkClient vnc = new VirtualNetworkClient(provider)) {
-            vnc.setRegion(regionId);
-
-         // The VCN and subnet can be from different compartment
-
+        try (VirtualNetworkClient vnc = getVirtualNetworkClient()) {
+            // The VCN and subnet can be from different compartment
             for (Compartment compartment : compartmentList) {
                 try {
                     listSubnet.addAll(vnc.listSubnets(ListSubnetsRequest.builder().compartmentId(compartment.getId()).vcnId(vcnId).build()).getItems());
@@ -366,8 +376,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     @Override
     public GetSubnetResponse getSubNet(String subnetId) throws Exception {
         GetSubnetResponse subnetResponse;
-        try (VirtualNetworkClient vnc = new VirtualNetworkClient(provider)) {
-            vnc.setRegion(regionId);
+        try (VirtualNetworkClient vnc = getVirtualNetworkClient()) {
             subnetResponse = vnc.getSubnet(GetSubnetRequest.builder().subnetId(subnetId).build());
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get subnet list", e);
@@ -378,8 +387,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public String terminateInstance(String instanceId) throws Exception {
-        try (ComputeClient computeClient = new ComputeClient(provider)) {
-            computeClient.setRegion(regionId);
+        try (ComputeClient computeClient = getComputeClient()) {
             TerminateInstanceResponse response = computeClient
                     .terminateInstance(TerminateInstanceRequest.builder().instanceId(instanceId).build());
             return response.getOpcRequestId();
@@ -388,8 +396,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public Instance waitForInstanceTerminationToComplete(String instanceId) throws Exception {
-        try (ComputeClient computeClient = new ComputeClient(provider)) {
-            computeClient.setRegion(regionId);
+        try (ComputeClient computeClient = getComputeClient()) {
             ComputeWaiters waiter = computeClient.getWaiters();
             GetInstanceResponse response = waiter.forInstance(
                     GetInstanceRequest.builder()
@@ -402,8 +409,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public Instance.LifecycleState getInstanceState(String instanceId) throws Exception {
-    	try (ComputeClient computeClient = new ComputeClient(provider)) {
-            computeClient.setRegion(regionId);
+        try (ComputeClient computeClient = getComputeClient()) {
             GetInstanceResponse response = computeClient.getInstance(GetInstanceRequest.builder().instanceId(instanceId).build());
             return response.getInstance().getLifecycleState();
     	}
