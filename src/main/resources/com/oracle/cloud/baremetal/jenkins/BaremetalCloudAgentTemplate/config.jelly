@@ -45,7 +45,15 @@
 	  <f:entry title="${%subnetId}" field="subnetId">
 	    <f:select />
 	  </f:entry>
-	
+			  
+      <f:entry title="${%assignPublicIP}" field="assignPublicIP">
+         <f:checkbox default='true'/>
+      </f:entry>
+    
+      <f:entry title="${%usePublicIP}" field="usePublicIP">
+         <f:checkbox default='true'/>
+      </f:entry>
+      
 	  <f:entry title="${%sshPublickey}" field="sshPublickey">
 	    <f:textarea style="height:100px;"/>
 	  </f:entry>
@@ -68,7 +76,7 @@
 		  <f:entry title="${%sshUser}" field="sshUser">
 		    <f:textbox default="opc"/>
 		  </f:entry>
-		  
+      
 		  <f:entry title="${%startTimeoutSeconds}" field="startTimeoutSeconds">
         	<f:textbox default="${descriptor.defaultStartTimeoutSeconds}" />
       	  </f:entry>

@@ -22,6 +22,7 @@ import com.oracle.bmc.core.model.Image;
 import com.oracle.bmc.core.model.Shape;
 import com.oracle.bmc.core.model.Subnet;
 import com.oracle.bmc.core.model.Vcn;
+import com.oracle.bmc.core.responses.GetSubnetResponse;
 import com.oracle.bmc.identity.model.AvailabilityDomain;
 import com.oracle.bmc.identity.model.Compartment;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
@@ -63,6 +64,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final int templateId;
     public final String remoteFS;
     public final String sshUser;
+    public final Boolean assignPublicIP;
+    public final Boolean usePublicIP;
     public final String startTimeoutSeconds;
     public final String sshConnectTimeoutSeconds;
     public final String initScriptTimeoutSeconds;
@@ -83,6 +86,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String description,
             final String remoteFS,
             final String sshUser,
+            final Boolean assignPublicIP,
+            final Boolean usePublicIP,
             final String numExecutors,
             Node.Mode mode,
             final String labelString,
@@ -103,6 +108,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.description = description;
         this.remoteFS = remoteFS;
         this.sshUser = sshUser;
+        this.assignPublicIP=assignPublicIP;
+        this.usePublicIP=usePublicIP;
         this.numExecutors = numExecutors;
         this.mode = mode;
         this.labelString = labelString;
@@ -164,6 +171,14 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getSshUser() {
         return sshUser;
+    }
+
+    public Boolean getAssignPublicIP() {
+    		return assignPublicIP;
+    }
+
+    public Boolean getUsePublicIP() {
+    		return usePublicIP;
     }
 
     public int getNumExecutors() {
@@ -327,6 +342,42 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
         public FormValidation doCheckSshConnectTimeoutSeconds(@QueryParameter String value) {
             return checkSshConnectTimeoutSeconds(value).getFormValidation();
+        }
+
+        public FormValidation doCheckAssignPublicIP(
+                @QueryParameter @RelativePath("..") String userId,
+                @QueryParameter @RelativePath("..") String fingerprint,
+                @QueryParameter @RelativePath("..") String tenantId,
+                @QueryParameter @RelativePath("..") String apikey,
+                @QueryParameter @RelativePath("..") String passphrase,
+                @QueryParameter @RelativePath("..") String regionId,
+                @QueryParameter String compartmentId,
+                @QueryParameter String subnetId,
+                @QueryParameter Boolean assignPublicIP) {
+               if (subnetId != null && !subnetId.equals("") && (assignPublicIP == null || assignPublicIP)) {
+
+                   BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId);
+
+                   try{
+                       GetSubnetResponse subnetResponse = client.getSubNet(subnetId);
+                       if (subnetResponse.getSubnet().getProhibitPublicIpOnVnic()) {
+                           return FormValidation.error(Messages.BaremetalCloudAgentTemplate_assignPublicIP_unable());
+                       }
+                   }catch (Exception e) {
+                       LOGGER.log(Level.WARNING, "Failed to get subnet: " + subnetId, e);
+                   }
+               }
+
+               return FormValidation.ok();
+        }
+
+        public FormValidation doCheckUsePublicIP(
+                @QueryParameter Boolean assignPublicIP,
+                @QueryParameter Boolean usePublicIP) {
+               if (usePublicIP != null && assignPublicIP != null && usePublicIP && !assignPublicIP) {
+                   return FormValidation.error(Messages.BaremetalCloudAgentTemplate_usePublicIP_unable());
+               }
+               return FormValidation.ok();
         }
 
         private static boolean anyRequiredFieldEmpty(String... fields) {

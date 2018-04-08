@@ -41,14 +41,14 @@ public interface BaremetalCloudClient extends AutoCloseable {
     Instance waitForInstanceProvisioningToComplete(String instanceId) throws Exception;
 
     /**
-     * Get an instance public ip with the specified instance id
+     * Get an instance public or private ip with the specified instance id
      *
      * @param instanceId the instance id created before
      * @param template baremetal cloud agent template
      * @return the instance ip
      * @throws Exception if an error occurs
      */
-    String getInstancePublicIp(BaremetalCloudAgentTemplate template, String instanceId) throws Exception;
+    String getInstanceIp(BaremetalCloudAgentTemplate template, String instanceId) throws Exception;
 
      /**
      * Get the compartment list

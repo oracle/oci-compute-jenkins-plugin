@@ -14,6 +14,7 @@ import com.oracle.bmc.core.ComputeClient;
 import com.oracle.bmc.core.ComputeWaiters;
 import com.oracle.bmc.core.VirtualNetworkAsyncClient;
 import com.oracle.bmc.core.VirtualNetworkClient;
+import com.oracle.bmc.core.model.CreateVnicDetails;
 import com.oracle.bmc.core.model.Image;
 import com.oracle.bmc.core.model.Instance;
 import com.oracle.bmc.core.model.LaunchInstanceDetails;
@@ -98,10 +99,20 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             String sshPublicKey = template.getSshPublickey();
             String instanceName = name;
 
+            boolean assignPublicIP = true;
+            if(template.getAssignPublicIP() != null) {
+                assignPublicIP = template.getAssignPublicIP();
+            }
+
             computeClient.setRegion(regionId);
 
             Map<String, String> metadata = new HashMap<>();
             metadata.put("ssh_authorized_keys", sshPublicKey);
+
+            GetSubnetResponse subnetResponse = getSubNet(subnetIdStr);
+            if(subnetResponse.getSubnet().getProhibitPublicIpOnVnic()) {
+                assignPublicIP=false;
+            }
 
             LaunchInstanceResponse response = computeClient.launchInstance(LaunchInstanceRequest
                     .builder()
@@ -110,6 +121,11 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                             .builder()
                             .availabilityDomain(ad)
                             .compartmentId(compartmentIdStr)
+                            .createVnicDetails(
+                                    CreateVnicDetails.builder()
+                                    .assignPublicIp(assignPublicIP)
+                                    .subnetId(subnetIdStr)
+                                    .build())
                             .displayName(instanceName)
                             .imageId(imageIdStr)
                             .metadata(metadata)
@@ -154,7 +170,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
 
     @Override
-    public String getInstancePublicIp(BaremetalCloudAgentTemplate template, String instanceId) throws Exception {
+    public String getInstanceIp(BaremetalCloudAgentTemplate template, String instanceId) throws Exception {
         String Ip = "";
         try (ComputeClient computeClient = new ComputeClient(provider);
             VirtualNetworkClient vcnClient = new VirtualNetworkClient(provider)) {
@@ -183,6 +199,9 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                 // then check the vnic for a public IP or private IP
                 String publicIpLocal = getVnicResponse.getVnic().getPublicIp();
                 boolean usePublicIP = true;
+                if(template.getUsePublicIP()!= null) {
+                    usePublicIP = template.getUsePublicIP();
+                }
                 if (usePublicIP && publicIpLocal != null) {
                     LOGGER.info("Get public ip for instance " + instanceId + ": " + publicIpLocal);
                     Ip =  publicIpLocal;

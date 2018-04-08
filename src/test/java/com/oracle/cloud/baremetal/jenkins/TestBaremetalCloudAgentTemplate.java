@@ -19,6 +19,8 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         int templateId;
         String remoteFS;
         String sshUser;
+        Boolean assignPublicIP;
+        Boolean usePublicIP;
         String sshConnectTimeoutSeconds;
         String initScript;
         String startTimeoutSeconds;
@@ -86,6 +88,16 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
 
         public Builder subnetId(String subnetId) {
             this.subnetId = subnetId;
+            return this;
+        }
+
+        public Builder assignPublicIP(Boolean assignPublicIP) {
+            this.assignPublicIP = assignPublicIP;
+            return this;
+        }
+
+        public Builder usePublicIP(Boolean usePublicIP) {
+            this.usePublicIP = usePublicIP;
             return this;
         }
 
@@ -168,6 +180,8 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.description,
                 builder.remoteFS,
                 builder.sshUser,
+                builder.assignPublicIP,
+                builder.usePublicIP,
                 builder.numExecutors,
                 builder.mode,
                 builder.labelString,

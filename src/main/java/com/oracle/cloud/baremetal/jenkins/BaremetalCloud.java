@@ -234,7 +234,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
             TimeoutHelper timeoutHelper = new TimeoutHelper(getClock(), template.getStartTimeoutNanos(), START_POLL_SLEEP_MILLIS);
             try{
                 client.waitForInstanceProvisioningToComplete(instance.getId());
-                Ip = client.getInstancePublicIp(template, instance.getId());
+                Ip = client.getInstanceIp(template, instance.getId());
                 LOGGER.info("Provisioned instance " + instanceName + " with ip " + Ip);
                 awaitInstanceSshAvailable(Ip, template.getSshConnectTimeoutMillis(), timeoutHelper);
                 template.resetFailureCount();
