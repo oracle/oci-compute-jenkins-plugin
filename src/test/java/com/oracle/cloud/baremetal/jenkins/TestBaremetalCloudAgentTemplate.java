@@ -33,6 +33,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         String shape;
         String sshPublickey;
         String sshPrivatekey;
+        private boolean encryptSshPrivateKey = true;
 
         public Builder description(String description) {
             this.description = description;
@@ -138,10 +139,17 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             return this;
         }
 
+        public Builder encryptSshPrivateKey(boolean encryptSshPrivateKey) {
+            this.encryptSshPrivateKey  = encryptSshPrivateKey;
+            return this;
+        }
+
         public TestBaremetalCloudAgentTemplate build() {
             return new TestBaremetalCloudAgentTemplate(this);
         }
     }
+
+    private boolean encryptSshPrivateKey;
 
     public TestBaremetalCloudAgentTemplate() {
         this(new Builder());
@@ -170,12 +178,17 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.startTimeoutSeconds,
                 builder.initScriptTimeoutSeconds);
 
-
+        this.encryptSshPrivateKey  = builder.encryptSshPrivateKey;
     }
 
     @Override
     Collection<LabelAtom> parseLabels(String strings) {
         return BaremetalCloudTestUtils.parseLabels(strings);
+    }
+
+    @Override
+    protected String getEncryptedValue(String str) {
+        return encryptSshPrivateKey ? super.getEncryptedValue(str) : str;
     }
 
     public static class TestDescriptor extends DescriptorImpl {

@@ -187,6 +187,17 @@ public class BaremetalCloudAgentTemplateUnitTest {
     }
 
     @Test
+    public void testGetPlanText() {
+        Assert.assertNull(BaremetalCloudAgentTemplate.getPlainText("abc"));
+    }
+
+    @Test
+    public void testGetSshNotEncryptedPrivateKey() {
+        Assert.assertNull(new TestBaremetalCloudAgentTemplate.Builder().encryptSshPrivateKey(false).build().getSshPrivatekey());
+        Assert.assertEquals("pk", new TestBaremetalCloudAgentTemplate.Builder().sshPrivatekey("pk").encryptSshPrivateKey(false).build().getSshPrivatekey());
+    }
+
+    @Test
     public void testGetInitScript() {
         Assert.assertNull(new TestBaremetalCloudAgentTemplate().getInitScript());
         Assert.assertEquals("is", new TestBaremetalCloudAgentTemplate.Builder().initScript("is").build().getInitScript());

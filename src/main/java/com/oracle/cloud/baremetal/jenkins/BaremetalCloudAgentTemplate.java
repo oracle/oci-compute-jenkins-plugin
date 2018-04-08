@@ -144,7 +144,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     }
 
     public String getSshPrivatekey() {
-        return getPlainText(sshPrivatekey);
+        String decryptedKey = getPlainText(sshPrivatekey);
+        // We stored the private key with clear text prior to release 1.0.1,
+        // which can not be decrypted, so return it directly.
+        return decryptedKey == null ? sshPrivatekey : decryptedKey;
     }
 
     public String getDisplayName() {
@@ -191,8 +194,13 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         return str == null ? null : Secret.fromString(str).getEncryptedValue();
     }
 
-    protected String getPlainText(String str) {
-        return str == null ? null : Secret.decrypt(str).getPlainText();
+    protected static String getPlainText(String str) {
+        if (str == null) {
+            return null;
+        }
+
+        Secret secret = Secret.decrypt(str);
+        return secret == null ? null : secret.getPlainText();
     }
 
     Collection<LabelAtom> parseLabels(String labels) {
