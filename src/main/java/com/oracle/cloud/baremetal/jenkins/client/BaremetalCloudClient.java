@@ -7,8 +7,9 @@ import com.oracle.bmc.core.model.Instance;
 import com.oracle.bmc.core.model.Shape;
 import com.oracle.bmc.core.model.Subnet;
 import com.oracle.bmc.core.model.Vcn;
+import com.oracle.bmc.core.responses.GetSubnetResponse;
+import com.oracle.bmc.identity.model.AvailabilityDomain;
 import com.oracle.bmc.identity.model.Compartment;
-import com.oracle.bmc.identity.responses.ListAvailabilityDomainsResponse;
 import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.BaremetalCloudAgentTemplate;
 
@@ -49,7 +50,7 @@ public interface BaremetalCloudClient extends AutoCloseable {
      */
     String getInstancePublicIp(BaremetalCloudAgentTemplate template, String instanceId) throws Exception;
 
-    /**
+     /**
      * Get the compartment list
      *
      * @param tenantId the tenant id
@@ -59,52 +60,61 @@ public interface BaremetalCloudClient extends AutoCloseable {
     List<Compartment> getCompartmentsList(String tenantId) throws Exception;
 
     /**
-     * Get the available domain response
+     * Get the available domain list
      *
-     * @param compartmentId the compartment id
+     * @param tenantId the tenant id
      * @return ad list
      * @throws Exception if an error occurs
      */
-    ListAvailabilityDomainsResponse getAvailabilityDomainsList(String compartmentId) throws Exception;
+    List<AvailabilityDomain> getAvailabilityDomainsList(String tenantId) throws Exception;
 
     /**
      * Get the available image list
      *
-     * @param compartmentId the compartment id
+     * @param tenantId the tenant id
      * @return image list
      * @throws Exception if an error occurs
      */
-    List<Image> getImagesList(String compartmentId) throws Exception;
+    List<Image> getImagesList(String tenantId) throws Exception;
 
     /**
      * Get the shape list
      *
-     * @param compartmentId the compartment id
+     * @param tenantId the tenant id
      * @param availableDomain available domain
      * @param imageId image id
      * @return shape list
      * @throws Exception if an error occurs
      */
-    List<Shape> getShapesList(String compartmentId, String availableDomain, String imageId) throws Exception;
+    List<Shape> getShapesList(String tenantId, String availableDomain, String imageId) throws Exception;
 
     /**
      * Get the Virtual Cloud Network list
      *
-     * @param compartmentId the compartment id
+     * @param tenantId the tenant id
      * @return vcn list
      * @throws Exception if an error occurs
      */
-    List<Vcn> getVcnList(String compartmentId) throws Exception;
+    List<Vcn> getVcnList(String tenantId) throws Exception;
 
     /**
      * Get the sub net list
      *
-     * @param compartmentId the compartment id
+     * @param tenantId the tenant id
      * @param vcnId vcn id
      * @return subnet list
      * @throws Exception if an error occurs
      */
-    List<Subnet> getSubNetList(String compartmentId, String vcnId) throws Exception;
+    List<Subnet> getSubNetList(String tenantId, String vcnId) throws Exception;
+
+    /**
+     * Get the sub net
+     *
+     * @param subnetId subnet id
+     * @return GetSubnetResponse
+     * @throws Exception if an error occurs
+     */
+    GetSubnetResponse getSubNet(String subnetId) throws Exception;
 
     /**
      * Terminate instance with the specified instance id

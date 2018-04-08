@@ -1,8 +1,10 @@
 package com.oracle.cloud.baremetal.jenkins.client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -10,6 +12,7 @@ import com.oracle.bmc.ClientRuntime;
 import com.oracle.bmc.auth.SimpleAuthenticationDetailsProvider;
 import com.oracle.bmc.core.ComputeClient;
 import com.oracle.bmc.core.ComputeWaiters;
+import com.oracle.bmc.core.VirtualNetworkAsyncClient;
 import com.oracle.bmc.core.VirtualNetworkClient;
 import com.oracle.bmc.core.model.Image;
 import com.oracle.bmc.core.model.Instance;
@@ -19,6 +22,7 @@ import com.oracle.bmc.core.model.Subnet;
 import com.oracle.bmc.core.model.Vcn;
 import com.oracle.bmc.core.model.VnicAttachment;
 import com.oracle.bmc.core.requests.GetInstanceRequest;
+import com.oracle.bmc.core.requests.GetSubnetRequest;
 import com.oracle.bmc.core.requests.GetVnicRequest;
 import com.oracle.bmc.core.requests.LaunchInstanceRequest;
 import com.oracle.bmc.core.requests.ListImagesRequest;
@@ -28,17 +32,19 @@ import com.oracle.bmc.core.requests.ListVcnsRequest;
 import com.oracle.bmc.core.requests.ListVnicAttachmentsRequest;
 import com.oracle.bmc.core.requests.TerminateInstanceRequest;
 import com.oracle.bmc.core.responses.GetInstanceResponse;
+import com.oracle.bmc.core.responses.GetSubnetResponse;
 import com.oracle.bmc.core.responses.GetVnicResponse;
 import com.oracle.bmc.core.responses.LaunchInstanceResponse;
+import com.oracle.bmc.core.responses.ListVcnsResponse;
 import com.oracle.bmc.core.responses.ListVnicAttachmentsResponse;
 import com.oracle.bmc.core.responses.TerminateInstanceResponse;
 import com.oracle.bmc.identity.Identity;
 import com.oracle.bmc.identity.IdentityClient;
+import com.oracle.bmc.identity.model.AvailabilityDomain;
 import com.oracle.bmc.identity.model.Compartment;
 import com.oracle.bmc.identity.requests.GetUserRequest;
 import com.oracle.bmc.identity.requests.ListAvailabilityDomainsRequest;
 import com.oracle.bmc.identity.requests.ListCompartmentsRequest;
-import com.oracle.bmc.identity.responses.ListAvailabilityDomainsResponse;
 import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.BaremetalCloudAgentTemplate;
 
@@ -111,6 +117,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                             .subnetId(subnetIdStr)
                             .build())
                     .build());
+
             instance = response.getInstance();
             return instance;
         }catch(Exception ex){
@@ -148,7 +155,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public String getInstancePublicIp(BaremetalCloudAgentTemplate template, String instanceId) throws Exception {
-        String publicIp = "";
+        String Ip = "";
         try (ComputeClient computeClient = new ComputeClient(provider);
             VirtualNetworkClient vcnClient = new VirtualNetworkClient(provider)) {
 
@@ -173,17 +180,24 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                 GetVnicResponse getVnicResponse =
                         vcnClient.getVnic(GetVnicRequest.builder().vnicId(vnicId).build());
 
-                // then check the vnic for a public IP
+                // then check the vnic for a public IP or private IP
                 String publicIpLocal = getVnicResponse.getVnic().getPublicIp();
-                if (publicIpLocal != null) {
+                boolean usePublicIP = true;
+                if (usePublicIP && publicIpLocal != null) {
                     LOGGER.info("Get public ip for instance " + instanceId + ": " + publicIpLocal);
-                    publicIp =  publicIpLocal;
+                    Ip =  publicIpLocal;
+                } else {
+                    String privateIpLocal = getVnicResponse.getVnic().getPrivateIp();
+                    if (privateIpLocal != null) {
+                        LOGGER.info("Get private ip for instance " + instanceId + ": " + privateIpLocal);
+                        Ip =  privateIpLocal;
+                    }
+
                 }
             }
         }
-        return publicIp;
+        return Ip;
     }
-
 
     @Override
     public List<Compartment> getCompartmentsList(String tenantId) throws Exception {
@@ -200,26 +214,50 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
 
     @Override
-    public ListAvailabilityDomainsResponse getAvailabilityDomainsList(String compartmentId) throws Exception {
+    public List<AvailabilityDomain> getAvailabilityDomainsList(String tenantId) throws Exception {
+        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+        List<AvailabilityDomain> listAvailabilityDomains = new ArrayList<>();
+
         try (Identity identityClient = new IdentityClient(provider);) {
+
         identityClient.setRegion(regionId);
-        ListAvailabilityDomainsResponse listAvailabilityDomainsResponse;
-        listAvailabilityDomainsResponse = identityClient.listAvailabilityDomains(ListAvailabilityDomainsRequest.builder()
-                .compartmentId(compartmentId).build());
-        return listAvailabilityDomainsResponse;
+
+        // Asynchronously list Domains in all available compartments
+        for (Compartment compartment : compartmentList) {
+            try {
+                listAvailabilityDomains.addAll(identityClient.listAvailabilityDomains(ListAvailabilityDomainsRequest.builder()
+                        .compartmentId(compartment.getId()).build()).getItems());
+            } catch (BmcException e) {
+                if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
+                    throw e;
+                }
+            }
+        }
+        return listAvailabilityDomains;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to get available domain", e);
+            LOGGER.log(Level.WARNING, "Failed to get available domain list", e);
             throw e;
         }
     }
 
 
     @Override
-    public List<Image> getImagesList(String compartmentId) throws Exception {
+    public List<Image> getImagesList(String tenantId) throws Exception {
+        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+        List<Image> listImage = new ArrayList<>();
         try (ComputeClient computeClient = new ComputeClient(provider)) {
             computeClient.setRegion(regionId);
-            List<Image> list = computeClient.listImages(ListImagesRequest.builder().compartmentId(compartmentId).build()).getItems();
-            return list;
+            // Asynchronously list image in all available compartments
+            for (Compartment compartment : compartmentList) {
+                try {
+                    listImage.addAll(computeClient.listImages(ListImagesRequest.builder().compartmentId(compartment.getId()).build()).getItems());
+                } catch (BmcException e) {
+                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
+                        throw e;
+                    }
+                }
+            }
+            return listImage;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get image list", e);
             throw e;
@@ -227,41 +265,96 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     @Override
-    public List<Shape> getShapesList(String compartmentId, String availableDomain, String imageId) throws Exception {
+    public List<Shape> getShapesList(String tenantId, String availableDomain, String imageId) throws Exception {
         try (ComputeClient computeClient = new ComputeClient(provider)) {
+            List<Shape> listShape = new ArrayList<>();
+            List<Compartment> compartmentList = getCompartmentsList(tenantId);
             computeClient.setRegion(regionId);
-            List<Shape> list = computeClient.listShapes(ListShapesRequest.builder().compartmentId(compartmentId).availabilityDomain(availableDomain).imageId(imageId).build()).getItems();
-            return list;
+         // The image and shape can be from different compartment
+            for (Compartment compartment : compartmentList) {
+                try {
+                     listShape.addAll(computeClient.listShapes(ListShapesRequest.builder().compartmentId(compartment.getId()).availabilityDomain(availableDomain).imageId(imageId).build()).getItems());
+              } catch (BmcException e) {
+                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
+                        throw e;
+                    }
+                }
+            }
+             return listShape;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to get image list", e);
+            LOGGER.log(Level.WARNING, "Failed to get Shape list", e);
             throw e;
         }
     }
 
     @Override
-    public List<Vcn> getVcnList(String compartmentId) throws Exception {
-        List<Vcn> list;
-        try (VirtualNetworkClient vnc = new VirtualNetworkClient(provider)) {
+    public List<Vcn> getVcnList(String tenantId) throws Exception {
+        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+        List<Vcn> vcnList = new ArrayList<>();
+
+        try (VirtualNetworkAsyncClient vnc = new VirtualNetworkAsyncClient(provider)) {
             vnc.setRegion(regionId);
-            list = vnc.listVcns(ListVcnsRequest.builder().compartmentId(compartmentId).build()).getItems();
+            List<Future<ListVcnsResponse>> futureList = new ArrayList<>();
+
+            // Asynchronously list VCNs in all available compartments
+            for (Compartment compartment : compartmentList) {
+                ListVcnsRequest request = ListVcnsRequest.builder().compartmentId(compartment.getId()).build();
+                futureList.add(vnc.listVcns(request, null));
+            }
+
+            for (Future<ListVcnsResponse> future : futureList) {
+                try {
+                    vcnList.addAll(future.get().getItems());
+                } catch (BmcException e) {
+                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
+                        throw e;
+                    }
+                }
+            }
+
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get VCN list", e);
             throw e;
         }
-        return list;
+        return vcnList;
     }
 
     @Override
-    public List<Subnet> getSubNetList(String compartmentId, String vcnId) throws Exception {
-        List<Subnet> list;
+    public List<Subnet> getSubNetList(String tenantId,String vcnId) throws Exception {
+        List<Subnet> listSubnet = new ArrayList<>();
+        List<Compartment> compartmentList = getCompartmentsList(tenantId);
         try (VirtualNetworkClient vnc = new VirtualNetworkClient(provider)) {
             vnc.setRegion(regionId);
-            list = vnc.listSubnets(ListSubnetsRequest.builder().compartmentId(compartmentId).vcnId(vcnId).build()).getItems();
+
+         // The VCN and subnet can be from different compartment
+
+            for (Compartment compartment : compartmentList) {
+                try {
+                    listSubnet.addAll(vnc.listSubnets(ListSubnetsRequest.builder().compartmentId(compartment.getId()).vcnId(vcnId).build()).getItems());
+                } catch (BmcException e) {
+                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
+                        throw e;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to get vcn list", e);
+            throw e;
+        }
+        return listSubnet;
+    }
+
+    @Override
+    public GetSubnetResponse getSubNet(String subnetId) throws Exception {
+        GetSubnetResponse subnetResponse;
+        try (VirtualNetworkClient vnc = new VirtualNetworkClient(provider)) {
+            vnc.setRegion(regionId);
+            subnetResponse = vnc.getSubnet(GetSubnetRequest.builder().subnetId(subnetId).build());
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get subnet list", e);
             throw e;
         }
-        return list;
+        return subnetResponse;
     }
 
     @Override
@@ -273,7 +366,6 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             return response.getOpcRequestId();
         }
     }
-
 
     @Override
     public Instance waitForInstanceTerminationToComplete(String instanceId) throws Exception {

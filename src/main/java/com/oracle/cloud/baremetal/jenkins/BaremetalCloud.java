@@ -229,15 +229,14 @@ public class BaremetalCloud extends AbstractCloudImpl{
         try {
             BaremetalCloudClient client = getClient();
             Instance instance = client.createInstance(instanceName, template);
-            String publicIp = "";
+            String Ip = "";
 
             TimeoutHelper timeoutHelper = new TimeoutHelper(getClock(), template.getStartTimeoutNanos(), START_POLL_SLEEP_MILLIS);
             try{
                 client.waitForInstanceProvisioningToComplete(instance.getId());
-                publicIp = client.getInstancePublicIp(template, instance.getId());
-                LOGGER.info("Provisioned instance " + instanceName + " with public ip " + publicIp);
-
-                awaitInstanceSshAvailable(publicIp, template.getSshConnectTimeoutMillis(), timeoutHelper);
+                Ip = client.getInstancePublicIp(template, instance.getId());
+                LOGGER.info("Provisioned instance " + instanceName + " with ip " + Ip);
+                awaitInstanceSshAvailable(Ip, template.getSshConnectTimeoutMillis(), timeoutHelper);
                 template.resetFailureCount();
             } catch(IOException | RuntimeException ex){
                 try{
@@ -248,7 +247,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
                 }
                 throw ex;
             }
-            return newBaremetalCloudAgent(name, template, this.name, instance.getId(), publicIp);
+            return newBaremetalCloudAgent(name, template, this.name, instance.getId(), Ip);
         } catch (IOException | RuntimeException e) {
             String message = e.getMessage();
             template.increaseFailureCount(message != null ? message : e.toString());

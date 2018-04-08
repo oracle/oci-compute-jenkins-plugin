@@ -5,7 +5,9 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -22,7 +24,6 @@ import com.oracle.bmc.core.model.Subnet;
 import com.oracle.bmc.core.model.Vcn;
 import com.oracle.bmc.identity.model.AvailabilityDomain;
 import com.oracle.bmc.identity.model.Compartment;
-import com.oracle.bmc.identity.responses.ListAvailabilityDomainsResponse;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClientFactory;
 import com.oracle.cloud.baremetal.jenkins.client.SDKBaremetalCloudClientFactory;
@@ -112,7 +113,6 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.startTimeoutSeconds = startTimeoutSeconds;
         this.initScriptTimeoutSeconds = initScriptTimeoutSeconds;
     }
-
 
 
     public String getcompartmentId() {
@@ -329,7 +329,6 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             return checkSshConnectTimeoutSeconds(value).getFormValidation();
         }
 
-
         private static boolean anyRequiredFieldEmpty(String... fields) {
             for (String field : fields) {
                 if (field == null || field.isEmpty()) {
@@ -368,7 +367,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             try{
                 List<Compartment> compartmentIds = client.getCompartmentsList(tenantId);
                 for (Compartment compartmentId : compartmentIds) {
-                    model.add(compartmentId.getName() + "(" + compartmentId.getDescription() + ")", compartmentId.getId());
+                    model.add(compartmentId.getName(), compartmentId.getId());
                 }
             }catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
@@ -383,19 +382,22 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String tenantId,
                 @QueryParameter @RelativePath("..") String userId,
-                @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter String compartmentId) {
+                @QueryParameter @RelativePath("..") String regionId) {
             ListBoxModel items = new ListBoxModel();
-            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, compartmentId)) {
+            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId)) {
                 return items;
             }
 
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId);
 
             try {
-                ListAvailabilityDomainsResponse listAvailabilityDomainsResponse = client.getAvailabilityDomainsList(compartmentId);
-                for (AvailabilityDomain goal : listAvailabilityDomainsResponse.getItems()) {
-                    items.add(goal.getName());
+                List<AvailabilityDomain> listDomains = client.getAvailabilityDomainsList(tenantId);
+                List<String>  lstDomain = new ArrayList<String>();
+                for (AvailabilityDomain domain : listDomains) {
+                    if (lstDomain.indexOf(domain.getName()) < 0) {
+                        items.add(domain.getName(), domain.getName());
+                        lstDomain.add(domain.getName());
+                    }
                 }
                 return items;
             } catch (Exception e) {
@@ -410,20 +412,34 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String tenantId,
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
-                @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter String compartmentId) throws IOException, ServletException {
+                @QueryParameter @RelativePath("..") String regionId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<Select an Image>", "");
-            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, compartmentId)) {
+            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId)) {
                 return model;
             }
 
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId);
 
             try {
-                List<Image> list = client.getImagesList(compartmentId);
+                List<Compartment> compartmentIds = client.getCompartmentsList(tenantId);
+
+                HashMap<String, String> mapcompartment = new HashMap<String, String>();
+                for (Compartment compartment : compartmentIds) {
+                    mapcompartment.put(compartment.getId(),compartment.getName());
+                }
+
+                List<String>  lstImage = new ArrayList<String>();
+                List<Image> list = client.getImagesList(tenantId);
                 for (Image imageId : list) {
-                    model.add(imageId.getDisplayName(), imageId.getId());
+                    if (lstImage.indexOf(imageId.getId()) < 0) {
+                        if (mapcompartment.get(imageId.getCompartmentId())  != null) {
+                            model.add(imageId.getDisplayName() + "(" + mapcompartment.get(imageId.getCompartmentId()) + ")", imageId.getId());
+                        } else {
+                            model.add(imageId.getDisplayName(), imageId.getId());
+                        }
+                        lstImage.add(imageId.getId());
+                    }
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get images list", e);
@@ -452,10 +468,15 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId);
 
             try {
-                List<Shape> list = client.getShapesList(compartmentId, availableDomain, imageId);
+                List<String>  lstShape = new ArrayList<String>();
+                List<Shape> list = client.getShapesList(tenantId, availableDomain, imageId);
                 for (Shape shape : list) {
-                    model.add(shape.getShape(), shape.getShape());
+                    if (lstShape.indexOf(shape.getShape()) < 0) {
+                        model.add(shape.getShape(), shape.getShape());
+                        lstShape.add(shape.getShape());
+                    }
                 }
+
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get shapes list", e);
             }
@@ -468,22 +489,35 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String tenantId,
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
-                @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter String compartmentId)
-                        throws IOException, ServletException {
+                @QueryParameter @RelativePath("..") String regionId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<Select a Virtual Cloud Network>", "");
 
-            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, compartmentId)) {
+            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId)) {
                 return model;
             }
 
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId);
 
             try {
-                List<Vcn> list = client.getVcnList(compartmentId);
+                List<Compartment> compartmentIds = client.getCompartmentsList(tenantId);
+                List<String> listVcnId = new ArrayList<String>();
+
+                HashMap<String, String> mapcompartment = new HashMap<String, String>();
+                for (Compartment compartment : compartmentIds) {
+                    mapcompartment.put(compartment.getId(),compartment.getName());
+                }
+
+                List<Vcn> list = client.getVcnList(tenantId);
                 for (Vcn vcnId : list) {
-                    model.add(vcnId.getDisplayName(), vcnId.getId());
+                    if (listVcnId.indexOf(vcnId.getId()) < 0) {
+                        if (mapcompartment.get(vcnId.getCompartmentId())  != null) {
+                            model.add(vcnId.getDisplayName() + "(" + mapcompartment.get(vcnId.getCompartmentId()) + ")", vcnId.getId());
+                        } else {
+                            model.add(vcnId.getDisplayName(), vcnId.getId());
+                        }
+                        listVcnId.add(vcnId.getId());
+                    }
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get VCN list", e);
@@ -511,8 +545,9 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId);
 
             try {
-                List<Subnet> list = client.getSubNetList(compartmentId, vcnId);
-                for (Subnet subnetId : list) {
+                List<Subnet> listSubnets = client.getSubNetList(tenantId, vcnId);
+
+                for (Subnet subnetId : listSubnets) {
                     model.add(subnetId.getDisplayName(), subnetId.getId());
                 }
             } catch (Exception e) {
