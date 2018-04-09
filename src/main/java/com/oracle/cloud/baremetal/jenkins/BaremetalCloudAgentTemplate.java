@@ -20,7 +20,6 @@ import org.kohsuke.stapler.QueryParameter;
 
 import com.oracle.bmc.core.model.Image;
 import com.oracle.bmc.core.model.Shape;
-import com.oracle.bmc.core.model.Subnet;
 import com.oracle.bmc.core.model.Vcn;
 import com.oracle.bmc.core.responses.GetSubnetResponse;
 import com.oracle.bmc.identity.model.AvailabilityDomain;
@@ -583,24 +582,23 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter String compartmentId,
+                @QueryParameter String availableDomain,
                 @QueryParameter String vcnId)
                         throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<First select 'Availablity Domain' and 'Virtual Cloud Network' above>", "");
 
-            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, compartmentId, vcnId)) {
+            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, availableDomain, vcnId)) {
                 return model;
             }
 
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId);
 
             try {
-                List<Subnet> listSubnets = client.getSubNetList(tenantId, vcnId);
-
-                for (Subnet subnetId : listSubnets) {
-                    model.add(subnetId.getDisplayName(), subnetId.getId());
-                }
+                client.getSubNetList(tenantId, vcnId)
+                        .stream()
+                        .filter(s -> s.getAvailabilityDomain().equals(availableDomain)) // selected AD only
+                        .forEach(s -> model.add(s.getDisplayName(), s.getId()));
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get subnet list", e);
             }
