@@ -1,79 +1,132 @@
 # Oracle Cloud Infrastructure Compute Plugin
-[![Buil d Status](https://travis-ci.org/oracle/oci-compute-jenkins-plugin.svg?branch=master)](https://travis-ci.org/oracle/oci-compute-jenkins-plugin)
-**Refer "old-code-base" branch for old codebase before Dec 21th, 2017**
 
-Oracle Cloud Infrastructure (OCI) Compute Plugin allow Jenkins to create compute instances on Oracle Cloud Infrastructure (OCI) Compute and start agents on them dynamically, according to the job workload. When jobs finish and agents are idle for specified time, compute instances would be terminated and related cloud resources, eg, volumes, ip, etc,  would be recycled.  
+**Oracle Cloud Infrastructure Compute Plugin** allows users to access and manage cloud resources on the Oracle Cloud Infrastructure (OCI) from Jenkins.
+A Jenkins master instance with Oracle Cloud Infrastructure Compute Plugin can spin up instances (slaves or agents) on demand within OCI, and remove the instances and free its resources automatically once the Job completes.
+
+## Table of Contents
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Compatibility](#compatibility)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Licensing](#licensing)
+- [Changelog](#changelog)
+- [Contributing](#contributing)
+
+## Features
+**Oracle Cloud Infrastructure Compute Plugin** provides functionality to dynamically allocate OCI resources for continuous integration tasks, and to bring up and down services or nodes as required to serve Jenkins Build Jobs.
+
+After installing the Oracle Cloud Infrastructure Compute Plugin, you can add an OCI Cloud(s) and Template(s) with the preferred instance configuration. The Template will have a Label that you can use in your Jenkins Job. Multiple Templates are supported. The Template options include Labels, Domains, Credentials, Shapes, Images, Virtual Cloud Network, etc.
+After your Jenkins Job completes the instance is cleanly removed and resources are released back to the OCI pool.
 
 ## Prerequisites
 
-1. You need to have a oracle cloud account, to sign up, try [Oracle Cloud](https://cloud.oracle.com/en_US/tryit)
-2. Your Jenkins server must be installed with JDK8 or higher version
+1. Oracle Cloud Account. To sign up, visit [Oracle Cloud](https://cloud.oracle.com/en_US/tryit).
+2. Jenkins installed with JDK 8 or higher.
 
 ## Compatibility
-1. Plugin is tested on minimum Jenkins version 1.625.3, they may not work with versions early than 1.554.
-2. For Jenkins versions between 1.554 and 1.625, please make sure plugin 'bouncycastle API Plugin' has been pre-installed. This could be checked at 'Manage Jenkins' -> 'Manage Plugins' -> 'Installed' list, and could be found and installed from 'Available' list. 
+1. Plugin is tested on minimum Jenkins version 1.625.3, it may not work with versions early than 1.554.
+2. For Jenkins versions between 1.554 and 1.625, pre-install 'bouncycastle API Plugin' plugin.
+
 
 ## Installation
-You can install or update the plugin through Jenkins update center or manually.
-To install or update the plugin through Jenkins update center: Go to your Jenkins console, click "Manage Jenkins" -> "Manage Plugins", search "Oracle Cloud Infrastructure Compute Plugin".
+The Oracle Cloud Infrastructure Compute Plugin is available via Jenkins Update Center or can be installed manually.
 
-Oracle Cloud Infrastructure (OCI) Compute Plugin depends on Oracle Cloud Infrastructure (OCI) Java SDK which has not been published to maven center, to compile and build the plugin from source code, you need to manually download Oracle Cloud Infrastructure Java SDK and install it to local maven repository first.
+To install the plugin through Jenkins Update Center navigate to Manage Jenkins > Manage Plugins > Available, and search "Oracle Cloud Infrastructure Compute Plugin"
 
-1. Install oci-java-sdk:
-   ```
+To build the plugin from repos, OCI Java SDK is required. OCI Java SDK is currently not published to Maven center. To compile and build the plugin, first install OCI Java SDK to the local Maven repository. Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/blob/master/LICENSE.txt).
+
+
+##### Installing OCI Java SDK (Github) 
     $ git clone https://github.com/oracle/oci-java-sdk
     $ cd oci-java-sdk
     $ mvn compile install
-   ```
-2. Git clone oci-compute-jenkins-plugin project, check the value of <oci-java-sdk.version> in pom.xml, update it to oci-java-sdk's version installed, and build with:
-   ```
-   mvn package
-   ```
-3. Go to your Jenkins console, click "Manage Jenkins" -> "Manage Plugins" -> "Advanced" -> "Upload Plugin" -> Select oracle-cloud-infrastructure-compute.hpi file in target folder under your project -> click "Upload"
+
+##### Manualy Building and Installing OCI Oracle Cloud Infrastructure Compute Plugin
+1. git clone repo 
+2. Update pom.xml with OCI Java SDK you have installed
+
+	```
+	<oci-java-sdk.version>1.2.34</oci-java-sdk.version>
+ 	```
+
+3. Compile and Install package
+
+	```
+	$ mvn package
+	```
+
+4. Install hpi:
+
+	- Manage Jenkins > Manage Plugins > Click the Advanced tab > Upload Plugin section, click Choose File > Click Upload
+**or**
+
+	- Copy the downloaded .hpi file into the JENKINS_HOME/plugins directory on the Jenkins master
 
 
 ## Configuration 
 
 ### Add New Cloud
-1. From Jenkins server console, click "Manage Jenkins" -> "Configure System"
-2. Click "Add a new cloud" and select "Oracle Cloud Infrastructure Compute"
-3. Enter credentials for Oracle Cloud Infrastructure (OCI) compute account (Note you can repeat step 3 multiple times to add multiple Oracle Cloud Infrastructure accounts)
-   - Name: an identifier from Jenkins' perspective on this account, enter anything you want.
-   - API Key: you can use the OpenSSL commands to generate the key pair in the required PEM format. Here API Key is the generated private key, and Oracle will use the public key to verify the authenticity of the request. You must upload the public key to the IAM Service. See the How to Generate an API Signing Key documentation for additional information.
-   - Fingerprint: you can get the key's fingerprint with OpenSSL command such like "opensslrsa -pubout -outform DER -in ~/.oci/oci_api_key.pem | openssl md5 -c". And also when you upload the public key in the Console, the fingerprint is also automatically displayed there. The fingerprint would be found under identity/users
-   - User Id: could find this as OCID shown as above.
-   - Tenant Id: when you sign up for Oracle Cloud Infrastructure Services, Oracle creates a tenancy for your account, which is a secure and isolated partition within Oracle Cloud Infrastructure Services where you can create, organize, and administer your cloud resources.
-   - Region: A localized geographic area, is composed of several Availability Domains. Most oracle cloud infrastructure resources are either region-specific, such as a Virtual Cloud Network, or Availability Domain-specific, such as a compute instance. See the Regions and Availability Domains documentation for additional information.
-4. Click "Test Connection" to verify that Jenkins can successfully talk to Oracle Cloud Infrastructure Service with the account/credential you entered
-5. Click "Advanced" and fill the number in "Instance Cap" field to limit the maximum number of compute instances that are allowed to be created using above account
+1. From Jenkins Server console, click Manage Jenkins > Configure System
+2. In Cloud section, click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**
+3. Enter credentials to access your OCI account. You can create multiple Clouds.
+   - **Name**  - Provide a name for this OCI Compute Cloud.
+   - **Fingerprint** - Enter the Fingerprint from your OCI API Signing Key. If you do not have one, it can be left blank. For more information see [Security Credentials](https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/credentials.htm).
+   - **API Key** - Enter the OCI API Signing Private Key. For more information see [Security Credentials](https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/credentials.htm).
+   - **User Id** - Enter your User OCID.
+   - **Tenant Id** - Enter your Tenant OCID.
+   - **Region** - Enter Region, for example, us-phoenix-1. 
+4. Click **Test Connection** to verify that Jenkins can successfully connect to the Oracle Cloud Infrastructure Service.
+5. Click **Advanced** and if required, enter a number in the **Instance Cap** field to limit the maximum number of instances that can be created for this Cloud configuration.
 
 ### Add New Template
-1. Click "Add" in "Instance Templates" section to add one resource configuration set for desired compute instances, you can click "Add" multiple times if you need different compute instance configurations.
+1. Click **Add** in **Instance Templates** section to add the OCI configuration. You can add multiple Templates to a Cloud configuration.
 
 2. Input or select values in the 'Instance Template' section:
-   - Description: help other users/colleagues to understand what this template is used for.
-   - Usage: it's recommended that you select "Only build jobs with label expressions matching this node" for now.
-   - Labels: unique identifier which allows Jenkins to pick the right instance template to start.
-   - Compartment: a compartment is a collection of related resources (such as instances, virtual cloud networks, block volumes) that can be accessed only by certain groups that have been given permission by an administrator. You can select a compartment where to create an instance.
-   - Available Domain, Shape, Image, Virtual Cloud Network, Subnet: specify desired requirement on Domain, CPU, Image, Network *[Important : Make sure Java is installed in selected image or refer "Init Script" in Step 10 to install Java on the newly launched compute instances]*
-   - SSH Public Key Name: here user can paste ssh public key
-   - SSH Private Key: here user need to paste corresponding private key that allows jenkins connect to the compute instance provisioned using above selected public key.
+   - **Description** - Provide a description for this Template.
+   - **Usage** - It's recommended that you select "Only build jobs with label expressions matching this node" for now.
+   - **Labels** - Enter a unique identifier which allows Jenkins to pick the right instance template to run Job.
+   - **Compartment** - Select a compartment where the instance will be created.
+   - **Availability Domain** - Select the Availability Domain for your instance.
+   - **Shape** - Select the Shape for your instance.
+   - **Image** - Select the Image the instance will use. The Drop Down values are in the format - Image(Compartment). **Note:** Java should be installed on the image as a Jenkins requirement. Alternatively refer to "Init Script" in Step 10 to install Java on the newly launched instances.
+   - **Virtual Cloud Network** - Select the Virtual Cloud Network for your instance.
+   - **Subnet** - Select Subnet of your Virtual Cloud Network.
+   - **Assign Public IP Address** - By default, the plugin will assign a public IP to an instance, provided the subnet has an available public IP range. If this Option is unchecked, only the private IP is assigned. 
+   - **Connect Agent using Public IP**	- By default the Plugin will connect to the public IP of the instance (agent). If this Option is unchecked, the Plugin will connect to the private IP of the instance. 
+   - **SSH Public Key Name** - Enter ssh public key for your instance. For more information see [Security Credentials](https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/credentials.htm).
+   - **SSH Private Key** - Enter ssh private key for your instance. For more information see [Security Credentials](https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/credentials.htm).
+   
+    
 
-4. Click "Verify SSH Key Pair" to verify the public key and private key are matched or not as blew.
+4. Click **Verify SSH Key Pair** to verify the public key and private key entered are a match.
 
-5. Click "Advanced" for more configuration options:
-   - Remote FS root, Remote SSH user: dedicated directory for Jenkins agent in agent node and the ssh user used for Jenkins master to access Jenkins agent, make sure the SSH user has written permission on Remote FS root directory.
-   - Instance Creation Timeout: number of seconds to wait for new compute instance to reach state "ready", default value is 300. 
-   - Instance SSH Connection Timeout: number of seconds to wait for new compute instance from state "ready" to be SSH connectable from Jenkins master, default value is 60.
-   - Idle Termination Minutes: number of minutes for Jenkins to wait before deleting an idle agent, which means completely removal of the created compute instance. A value of 0 (or an empty string) indicates that idle agents should never be stopped/deleted. As an example, let's say an agent was started at 11:00 and Idle Termination Minutes was set 5. The agent executed several Jenkins jobs from 11:00 to 11:20, and has been idle since then. At 11:25 Jenkins finds the idle timeout of above agent has reached and the agent will be deleted. 
-   - Number of Executors: this controls the number of concurrent builds that Jenkins can perform. So the value affects the overall system load Jenkins may incur. A good value to start with would be the number of processors on your system.
-Increasing this value beyond that would cause each build to take longer, but it could increase the overall throughput, because it allows CPU to build one project while another build is waiting for I/O.
-When using Jenkins in the master/agent mode, setting this value to 0 would prevent the master from doing any building on its own. Agents may not have zero executors, but may be temporarily disabled using the button on the agent's status page.
-   - Init Script: user can define several lines of shell based commands to configure the provisioned compute instances (One-time) before the first Jenkins job starts to build; for example, if the image user selected does not have Java pre-installed, user can input Java installation command like "sudo yum -y install java"
-   - Init Script Timeout: Number of seconds to wait for the completion of Init Script. Default value is 120 seconds.
+5. Click **Advanced** for more configuration options:
+   - **Remote FS root** - Dedicated directory for Jenkins agent in instance.
+   - **Remote SSH user** - ssh user used for Jenkins master to access instance. The ssh user should have written permission on Remote FS root directory.
+   - **Instance Creation Timeout** - Number of seconds to wait for instance to reach state "ready", default value is 300. 
+   - **Instance SSH Connection Timeout** - Number of seconds to wait for instance from state "ready" to be able to ssh connect from Jenkins master. Default value is 60.
+   - **Idle Termination Minutes** - Number of minutes for Jenkins to wait before deleting and completely removing an idle instance. A value of 0 (or an empty string) indicates that instance should never be stopped/deleted. 
+   - **Number of Executors** - Number of concurrent builds that Jenkins can perform. Value should be at least 1.
+   - **Init Script** - You can define several lines of shell based commands to configure the instance (one-time) before the Jenkins Job runs. For example, if the image selected does not have Java pre-installed, you can add command "sudo yum -y install java"
+   - **Init Script Timeout** - Number of seconds to wait for the completion of Init Script. Default value is 120 seconds.
 
-6. Click "Save" or "Apply"
+6. Click **Save** or **Apply**
 
-### Job configuration
-We have added an instance template with a specific label string, to restrict projects can be run with this kind of template, user can simply input the same label string in "Label Expression"  field of  the Jenkins job configuration page.
+## Licensing
+Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
 
+This plugin is licensed under the Universal Permissive License 1.0
+
+This software is dual-licensed to you under the Universal Permissive License (UPL) and Apache License 2.0. 
+
+See LICENSE.txt for more details.
+
+## Changelog
+
+For Changlog please refer to CHANGELOG.md.
+
+## Contributing
+Oracle Cloud Infrastructure Compute Plugin is an open source project. See CONTRIBUTING.md for more details.
+
+Oracle gratefully acknowledges the contributions to Oracle Cloud Infrastructure Compute Plugin that have been made by the community.
