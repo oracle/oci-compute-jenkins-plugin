@@ -177,25 +177,26 @@ public class BaremetalCloud extends AbstractCloudImpl{
     }
 
     @Override
-    public Collection<PlannedNode> provision(Label label, int excessWorkload) {
-        final BaremetalCloudAgentTemplate t = getTemplate(label);
-        if (t == null) {
+    public synchronized Collection<PlannedNode> provision(Label label, int excessWorkload) {
+        final BaremetalCloudAgentTemplate template = getTemplate(label);
+        if (template == null) {
             return Collections.emptyList();
         }
 
         int numAgents = countCurrentBaremetalCloudAgents();
+        List<PlannedNode> plannedNodes = new ArrayList<>();
 
-        List<PlannedNode> r = new ArrayList<>();
         for (; excessWorkload > 0 && numAgents < getInstanceCap(); numAgents++) {
-            Provisioner provisioner = new Provisioner(t);
+            Provisioner provisioner = new Provisioner(template);
             String displayName = provisioner.getPlannedNodeDisplayName();
             Future<Node> future = getThreadPoolForRemoting().submit(provisioner);
 
             int numExecutors = provisioner.numExecutors;
-            r.add(newPlannedNode(displayName, future, numExecutors, t));
+            plannedNodes.add(newPlannedNode(displayName, future, numExecutors, template));
             excessWorkload -= numExecutors;
         }
-        return r;
+
+        return plannedNodes;
     }
 
     private class Provisioner implements Callable<Node> {
