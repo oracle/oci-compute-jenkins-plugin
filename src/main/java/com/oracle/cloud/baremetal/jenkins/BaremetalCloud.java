@@ -183,7 +183,6 @@ public class BaremetalCloud extends AbstractCloudImpl{
             return Collections.emptyList();
         }
 
-        // TODO: reuse existing nodes
         int numAgents = countCurrentBaremetalCloudAgents();
 
         List<PlannedNode> r = new ArrayList<>();
