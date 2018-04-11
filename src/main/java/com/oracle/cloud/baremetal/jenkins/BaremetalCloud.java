@@ -28,6 +28,7 @@ import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClientFactory;
 import com.oracle.cloud.baremetal.jenkins.client.SDKBaremetalCloudClientFactory;
+import com.oracle.cloud.baremetal.jenkins.retry.LinearRetry;
 import com.oracle.cloud.baremetal.jenkins.ssh.SshConnector;
 import com.trilead.ssh2.Connection;
 
@@ -278,7 +279,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
     public synchronized void recycleCloudResources(String instanceId) throws IOException {
         BaremetalCloudClient client = getClient();
         try{
-            client.terminateInstance(instanceId);
+            new LinearRetry<String>(() -> client.terminateInstance(instanceId)).run();
             client.waitForInstanceTerminationToComplete(instanceId);
         }catch(Exception e){
             throw new IOException(e);
