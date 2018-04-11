@@ -241,7 +241,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
         identityClient.setRegion(regionId);
 
-        // Asynchronously list Domains in all available compartments
+        // list Domains in all available compartments
         for (Compartment compartment : compartmentList) {
             try {
                 listAvailabilityDomains.addAll(identityClient.listAvailabilityDomains(ListAvailabilityDomainsRequest.builder()
@@ -266,7 +266,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         List<Image> listImage = new ArrayList<>();
         try (ComputeClient computeClient = new ComputeClient(provider)) {
             computeClient.setRegion(regionId);
-            // Asynchronously list image in all available compartments
+            // list image in all available compartments
             for (Compartment compartment : compartmentList) {
                 try {
                     listImage.addAll(computeClient.listImages(ListImagesRequest.builder().compartmentId(compartment.getId()).build()).getItems());
