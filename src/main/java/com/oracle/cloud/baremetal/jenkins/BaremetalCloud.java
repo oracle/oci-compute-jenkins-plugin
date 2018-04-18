@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +48,7 @@ import hudson.util.HttpResponses;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
 
+import static java.lang.Math.toIntExact;
 
 
 public class BaremetalCloud extends AbstractCloudImpl{
@@ -172,10 +174,6 @@ public class BaremetalCloud extends AbstractCloudImpl{
         return Computer.threadPoolForRemoting;
     }
 
-    PlannedNode newPlannedNode(String displayName, Future<Node> future, int numExecutors, BaremetalCloudAgentTemplate template) {
-        return new PlannedNode(displayName, future, numExecutors);
-    }
-
     @Override
     public synchronized Collection<PlannedNode> provision(Label label, int excessWorkload) {
         final BaremetalCloudAgentTemplate template = getTemplate(label);
@@ -183,16 +181,16 @@ public class BaremetalCloud extends AbstractCloudImpl{
             return Collections.emptyList();
         }
 
-        int numAgents = countCurrentBaremetalCloudAgents();
+        LOGGER.info("OCI cloud \"" + getCloudName() + "\" requested Agent provision excessWorkload: " + excessWorkload);
         List<PlannedNode> plannedNodes = new ArrayList<>();
 
-        for (; excessWorkload > 0 && numAgents < getInstanceCap(); numAgents++) {
+        while (excessWorkload > 0 && plannedNodes.size() + getNodeCount() < getInstanceCap()) {
             Provisioner provisioner = new Provisioner(template);
             String displayName = provisioner.getPlannedNodeDisplayName();
             Future<Node> future = getThreadPoolForRemoting().submit(provisioner);
 
             int numExecutors = provisioner.numExecutors;
-            plannedNodes.add(newPlannedNode(displayName, future, numExecutors, template));
+            plannedNodes.add(new BaremetalCloudPlannedNode(displayName, future, numExecutors, this.name));
             excessWorkload -= numExecutors;
         }
 
@@ -255,7 +253,24 @@ public class BaremetalCloud extends AbstractCloudImpl{
         }
     }
 
-    public void recycleCloudResources(String instanceId) throws IOException{
+    /**
+     * Used to distinguish BaremetalCloud PlannedNode scheduled in queue for provisioning
+     */
+    private class BaremetalCloudPlannedNode extends PlannedNode {
+
+        private final String cloudName;
+
+        public BaremetalCloudPlannedNode(String displayName, Future<Node> future, int numExecutors, String cloudName) {
+            super(displayName, future, numExecutors);
+            this.cloudName = cloudName;
+        }
+
+        public String getCloudName() {
+            return cloudName;
+        }
+    }
+
+    public synchronized void recycleCloudResources(String instanceId) throws IOException {
         BaremetalCloudClient client = getClient();
         try{
             client.terminateInstance(instanceId);
@@ -263,8 +278,6 @@ public class BaremetalCloud extends AbstractCloudImpl{
         }catch(Exception e){
             throw new IOException(e);
         }
-
-
     }
 
     Clock getClock() {
@@ -415,17 +428,35 @@ public class BaremetalCloud extends AbstractCloudImpl{
         return factory.createClient(fingerprint, getApikey(), getPassphrase(), tenantId, userId, regionId);
     }
 
-    public int countCurrentBaremetalCloudAgents() {
-        int r = 0;
-        for (Node n : getNodes()){
-	        	if(n instanceof BaremetalCloudAgent){
-	            BaremetalCloudAgent agent = (BaremetalCloudAgent)n;
-	            if (name.equals(agent.cloudName)) {
-	                r++;
-	            }
-        	}
-        }
-        return r;
+    private synchronized int getNodeCount() {
+        long count = 0;
+        Jenkins jenkins = JenkinsUtil.getJenkinsInstance();
+
+        // Provisioned nodes
+        count += jenkins.getNodes()
+            .stream()
+            .filter(n -> n instanceof BaremetalCloudAgent)
+            .filter(n -> ((BaremetalCloudAgent) n).cloudName.equals(name))
+            .peek(n -> LOGGER.info("Counting provisioned in \"" + name + "\": " + n.getNodeName()))
+            .count();
+
+        // Nodes waiting in provisioning queue
+        count += Stream.concat(
+                // Nodes provisioning for no label
+                jenkins.unlabeledNodeProvisioner.getPendingLaunches().stream(),
+                // Nodes provisioning for specific label
+                jenkins.getLabels().stream().flatMap(l -> l.nodeProvisioner.getPendingLaunches().stream())
+        )
+            .filter(pn -> pn instanceof BaremetalCloudPlannedNode)
+            .filter(pn -> ((BaremetalCloudPlannedNode) pn).getCloudName().equals(name))
+            .peek(pn -> LOGGER.info("Counting starting in \"" + name + "\": " + ((BaremetalCloudPlannedNode) pn).displayName))
+            .count();
+
+
+        LOGGER.info("OCI cloud \"" + getCloudName() + "\" initialization: Found " + count
+                + " provisioned or provisioning Nodes");
+
+        return toIntExact(count);
     }
 
     // make sure the instance if available before launch agent on it.
@@ -448,10 +479,6 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
     SshConnector getSshConnector() {
         return SshConnector.INSTANCE;
-    }
-
-    List<Node> getNodes() {
-        return JenkinsUtil.getJenkinsInstance().getNodes();
     }
 
     @Override
