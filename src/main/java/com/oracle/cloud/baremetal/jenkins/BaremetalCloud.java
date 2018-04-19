@@ -174,6 +174,10 @@ public class BaremetalCloud extends AbstractCloudImpl{
         return Computer.threadPoolForRemoting;
     }
 
+    private String fmtLogMsg(String msg) {
+        return "OCI cloud \"" + getCloudName() + "\": " + msg;
+    }
+
     @Override
     public synchronized Collection<PlannedNode> provision(Label label, int excessWorkload) {
         final BaremetalCloudAgentTemplate template = getTemplate(label);
@@ -181,7 +185,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
             return Collections.emptyList();
         }
 
-        LOGGER.info("OCI cloud \"" + getCloudName() + "\" requested Agent provision excessWorkload: " + excessWorkload);
+        LOGGER.info(fmtLogMsg("requested Agent provision excessWorkload: " + excessWorkload));
         List<PlannedNode> plannedNodes = new ArrayList<>();
 
         while (excessWorkload > 0 && plannedNodes.size() + getNodeCount() < getInstanceCap()) {
@@ -194,6 +198,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
             excessWorkload -= numExecutors;
         }
 
+        LOGGER.info(fmtLogMsg(plannedNodes.size() + " FutureNodes to be added to provisioning queue"));
         return plannedNodes;
     }
 
@@ -437,7 +442,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
             .stream()
             .filter(n -> n instanceof BaremetalCloudAgent)
             .filter(n -> ((BaremetalCloudAgent) n).cloudName.equals(name))
-            .peek(n -> LOGGER.info("Counting provisioned in \"" + name + "\": " + n.getNodeName()))
+            .peek(n -> LOGGER.info(fmtLogMsg("Peeking provisioned nodes: " + n.getNodeName())))
             .count();
 
         // Nodes waiting in provisioning queue
@@ -449,12 +454,10 @@ public class BaremetalCloud extends AbstractCloudImpl{
         )
             .filter(pn -> pn instanceof BaremetalCloudPlannedNode)
             .filter(pn -> ((BaremetalCloudPlannedNode) pn).getCloudName().equals(name))
-            .peek(pn -> LOGGER.info("Counting starting in \"" + name + "\": " + ((BaremetalCloudPlannedNode) pn).displayName))
+            .peek(pn -> LOGGER.info(fmtLogMsg("Peeking provisioning nodes: " + ((BaremetalCloudPlannedNode) pn).displayName)))
             .count();
 
-
-        LOGGER.info("OCI cloud \"" + getCloudName() + "\" initialization: Found " + count
-                + " provisioned or provisioning Nodes");
+        LOGGER.info(fmtLogMsg("Found " + count + " provisioned or provisioning Nodes"));
 
         return toIntExact(count);
     }
