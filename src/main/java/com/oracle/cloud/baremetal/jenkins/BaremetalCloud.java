@@ -442,7 +442,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
             .stream()
             .filter(n -> n instanceof BaremetalCloudAgent)
             .filter(n -> ((BaremetalCloudAgent) n).cloudName.equals(name))
-            .peek(n -> LOGGER.info(fmtLogMsg("Peeking provisioned nodes: " + n.getNodeName())))
+            .peek(n -> LOGGER.fine(fmtLogMsg("Peeking provisioned nodes: " + n.getNodeName())))
             .count();
 
         // Nodes waiting in provisioning queue
@@ -454,7 +454,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
         )
             .filter(pn -> pn instanceof BaremetalCloudPlannedNode)
             .filter(pn -> ((BaremetalCloudPlannedNode) pn).getCloudName().equals(name))
-            .peek(pn -> LOGGER.info(fmtLogMsg("Peeking provisioning nodes: " + ((BaremetalCloudPlannedNode) pn).displayName)))
+            .peek(pn -> LOGGER.fine(fmtLogMsg("Peeking provisioning nodes: " + ((BaremetalCloudPlannedNode) pn).displayName)))
             .count();
 
         LOGGER.info(fmtLogMsg("Found " + count + " provisioned or provisioning Nodes"));
