@@ -40,7 +40,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
         if (idleMinutes == 0) {
             return new RetentionStrategy.Always();
         }
-        return new CloudRetentionStrategy(idleMinutes);
+        return new BaremetalCloudRetentionStrategy(idleMinutes);
     }
 
     public final String cloudName;
