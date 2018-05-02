@@ -13,7 +13,6 @@ import com.oracle.bmc.core.model.Instance;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 
 import hudson.model.TaskListener;
-import hudson.slaves.CloudRetentionStrategy;
 import hudson.slaves.RetentionStrategy.Always;
 
 public class BaremetalCloudAgentUnitTest {
@@ -118,9 +117,9 @@ public class BaremetalCloudAgentUnitTest {
         Method method = BaremetalCloudAgent.class.getDeclaredMethod("createRetentionStrategy", String.class);
         method.setAccessible(true);
 
-        Assert.assertTrue(method.invoke(null, "42") instanceof CloudRetentionStrategy);
-        Assert.assertTrue(method.invoke(null, "1") instanceof CloudRetentionStrategy);
-        Assert.assertTrue(method.invoke(null, "-1") instanceof CloudRetentionStrategy);
+        Assert.assertTrue(method.invoke(null, "42") instanceof BaremetalCloudRetentionStrategy);
+        Assert.assertTrue(method.invoke(null, "1") instanceof BaremetalCloudRetentionStrategy);
+        Assert.assertTrue(method.invoke(null, "-1") instanceof BaremetalCloudRetentionStrategy);
         Assert.assertTrue(method.invoke(null, "") instanceof Always);
         Assert.assertTrue(method.invoke(null, "   ") instanceof Always);
         Assert.assertTrue(method.invoke(null, "0") instanceof Always);
