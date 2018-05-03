@@ -3,10 +3,12 @@ package com.oracle.cloud.baremetal.jenkins;
 import java.io.IOException;
 
 import hudson.model.Descriptor.FormException;
+import hudson.slaves.SlaveComputer;
 import jenkins.model.Jenkins;
 
 @SuppressWarnings("serial")
 public class TestBaremetalCloudAgent extends BaremetalCloudAgent {
+
     public static class Builder {
         private String numExecutors;
         private String cloudName;
@@ -83,5 +85,10 @@ public class TestBaremetalCloudAgent extends BaremetalCloudAgent {
     @Override
     public BaremetalCloud getCloud() {
         return cloud;
+    }
+
+    @Override
+    public SlaveComputer getComputer() {
+        return null;
     }
 }

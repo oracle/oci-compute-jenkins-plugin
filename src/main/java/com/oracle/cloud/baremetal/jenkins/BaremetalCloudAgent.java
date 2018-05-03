@@ -20,8 +20,8 @@ import hudson.model.TaskListener;
 import hudson.model.Descriptor.FormException;
 import hudson.slaves.AbstractCloudComputer;
 import hudson.slaves.AbstractCloudSlave;
-import hudson.slaves.CloudRetentionStrategy;
 import hudson.slaves.NodeProperty;
+import hudson.slaves.OfflineCause;
 import hudson.slaves.RetentionStrategy;
 import net.sf.json.JSONObject;
 
@@ -134,6 +134,13 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
 	@Override
 	protected void _terminate(TaskListener listener) throws IOException, InterruptedException {
 	    LOGGER.info("Terminating instance " + instanceId);
+
+        Computer computer = getComputer();
+        if (computer != null) {
+            computer.setTemporarilyOffline(true,
+                    OfflineCause.create(Messages._BaremetalCloud_termination_offlineCause()));
+        }
+
 	    BaremetalCloud cloud = getCloud();
         if (cloud == null) {
             LOGGER.log(Level.SEVERE, "Unable to stop or terminate {0} because the Oracle Compute Cloud {1} does not exist",
