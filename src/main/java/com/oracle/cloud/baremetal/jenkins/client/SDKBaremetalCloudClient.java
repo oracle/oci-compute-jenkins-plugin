@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.oracle.bmc.ClientRuntime;
 import com.oracle.bmc.auth.SimpleAuthenticationDetailsProvider;
+import com.oracle.bmc.core.ComputeAsyncClient;
 import com.oracle.bmc.core.ComputeClient;
 import com.oracle.bmc.core.ComputeWaiters;
 import com.oracle.bmc.core.VirtualNetworkAsyncClient;
@@ -36,16 +37,21 @@ import com.oracle.bmc.core.responses.GetInstanceResponse;
 import com.oracle.bmc.core.responses.GetSubnetResponse;
 import com.oracle.bmc.core.responses.GetVnicResponse;
 import com.oracle.bmc.core.responses.LaunchInstanceResponse;
+import com.oracle.bmc.core.responses.ListImagesResponse;
+import com.oracle.bmc.core.responses.ListShapesResponse;
+import com.oracle.bmc.core.responses.ListSubnetsResponse;
 import com.oracle.bmc.core.responses.ListVcnsResponse;
 import com.oracle.bmc.core.responses.ListVnicAttachmentsResponse;
 import com.oracle.bmc.core.responses.TerminateInstanceResponse;
 import com.oracle.bmc.identity.Identity;
+import com.oracle.bmc.identity.IdentityAsyncClient;
 import com.oracle.bmc.identity.IdentityClient;
 import com.oracle.bmc.identity.model.AvailabilityDomain;
 import com.oracle.bmc.identity.model.Compartment;
 import com.oracle.bmc.identity.requests.GetUserRequest;
 import com.oracle.bmc.identity.requests.ListAvailabilityDomainsRequest;
 import com.oracle.bmc.identity.requests.ListCompartmentsRequest;
+import com.oracle.bmc.identity.responses.ListAvailabilityDomainsResponse;
 import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.BaremetalCloudAgentTemplate;
 
@@ -66,14 +72,26 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         ClientRuntime.setClientUserAgent("Oracle-Jenkins/" + Jenkins.VERSION);
     }
 
-    private Identity getIdentityClient() {
-        Identity identityClient = new IdentityClient(provider, null, new HTTPProxyConfigurator());
+    private IdentityClient getIdentityClient() {
+        IdentityClient identityClient = new IdentityClient(provider, null, new HTTPProxyConfigurator());
+        identityClient.setRegion(regionId);
+        return identityClient;
+    }
+
+    private IdentityAsyncClient getIdentityAsyncClient() {
+        IdentityAsyncClient identityClient = new IdentityAsyncClient(provider, null, new HTTPProxyConfigurator());
         identityClient.setRegion(regionId);
         return identityClient;
     }
 
     private ComputeClient getComputeClient() {
         ComputeClient computeClient = new ComputeClient(provider, null, new HTTPProxyConfigurator());
+        computeClient.setRegion(regionId);
+        return computeClient;
+    }
+
+    private ComputeAsyncClient getComputeAsyncClient() {
+        ComputeAsyncClient computeClient = new ComputeAsyncClient(provider, null, new HTTPProxyConfigurator());
         computeClient.setRegion(regionId);
         return computeClient;
     }
@@ -252,72 +270,100 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     @Override
     public List<AvailabilityDomain> getAvailabilityDomainsList(String tenantId) throws Exception {
         List<Compartment> compartmentList = getCompartmentsList(tenantId);
-        List<AvailabilityDomain> listAvailabilityDomains = new ArrayList<>();
+        List<AvailabilityDomain> availabilityDomainsList = new ArrayList<>();
 
-        try (Identity identityClient = getIdentityClient()) {
-        // list Domains in all available compartments
-        for (Compartment compartment : compartmentList) {
-            try {
-                listAvailabilityDomains.addAll(identityClient.listAvailabilityDomains(ListAvailabilityDomainsRequest.builder()
-                        .compartmentId(compartment.getId()).build()).getItems());
-            } catch (BmcException e) {
-                if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
-                    throw e;
-                }
-            }
-        }
-        return listAvailabilityDomains;
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to get available domain list", e);
-            throw e;
-        }
-    }
+        try (IdentityAsyncClient identityAsyncClient = getIdentityAsyncClient()) {
+            List<Future<ListAvailabilityDomainsResponse>> futureList = new ArrayList<>();
 
-
-    @Override
-    public List<Image> getImagesList(String tenantId) throws Exception {
-        List<Compartment> compartmentList = getCompartmentsList(tenantId);
-        List<Image> listImage = new ArrayList<>();
-
-        try (ComputeClient computeClient = getComputeClient()) {
-            // list image in all available compartments
+            // Asynchronously list Domains in all available compartments
             for (Compartment compartment : compartmentList) {
+                ListAvailabilityDomainsRequest request = ListAvailabilityDomainsRequest.builder()
+                        .compartmentId(compartment.getId())
+                        .build();
+                futureList.add(identityAsyncClient.listAvailabilityDomains(request, null));
+            }
+
+            for (Future<ListAvailabilityDomainsResponse> future : futureList) {
                 try {
-                    listImage.addAll(computeClient.listImages(ListImagesRequest.builder().compartmentId(compartment.getId()).build()).getItems());
+                    availabilityDomainsList.addAll(future.get().getItems());
                 } catch (BmcException e) {
                     if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
                         throw e;
                     }
                 }
             }
-            return listImage;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to get image list", e);
+            LOGGER.log(Level.WARNING, "Failed to get Availability Domain list", e);
             throw e;
         }
+        return availabilityDomainsList;
     }
 
-    @Override
-    public List<Shape> getShapesList(String tenantId, String availableDomain, String imageId) throws Exception {
-        try (ComputeClient computeClient = getComputeClient()) {
-            List<Shape> listShape = new ArrayList<>();
-            List<Compartment> compartmentList = getCompartmentsList(tenantId);
 
-            // The image and shape can be from different compartment
+    @Override
+    public List<Image> getImagesList(String tenantId) throws Exception {
+        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+        List<Image> imageList = new ArrayList<>();
+
+        try (ComputeAsyncClient computeAsyncClient = getComputeAsyncClient()) {
+            List<Future<ListImagesResponse>> futureList = new ArrayList<>();
+
+            // Asynchronously list image in all available compartments
             for (Compartment compartment : compartmentList) {
+                ListImagesRequest request = ListImagesRequest.builder()
+                        .compartmentId(compartment.getId())
+                        .build();
+                futureList.add(computeAsyncClient.listImages(request, null));
+            }
+
+            for (Future<ListImagesResponse> future : futureList) {
                 try {
-                     listShape.addAll(computeClient.listShapes(ListShapesRequest.builder().compartmentId(compartment.getId()).availabilityDomain(availableDomain).imageId(imageId).build()).getItems());
-              } catch (BmcException e) {
+                    imageList.addAll(future.get().getItems());
+                } catch (BmcException e) {
                     if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
                         throw e;
                     }
                 }
             }
-             return listShape;
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to get Image list", e);
+            throw e;
+        }
+        return imageList;
+    }
+
+    @Override
+    public List<Shape> getShapesList(String tenantId, String availableDomain, String imageId) throws Exception {
+        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+        List<Shape> shapeList = new ArrayList<>();
+
+        try (ComputeAsyncClient computeAsyncClient = getComputeAsyncClient()) {
+            List<Future<ListShapesResponse>> futureList = new ArrayList<>();
+
+            // The image and shape can be from different compartment
+            for (Compartment compartment : compartmentList) {
+                ListShapesRequest request = ListShapesRequest.builder()
+                        .compartmentId(compartment.getId())
+                        .availabilityDomain(availableDomain)
+                        .imageId(imageId)
+                        .build();
+                futureList.add(computeAsyncClient.listShapes(request, null));
+            }
+
+            for (Future<ListShapesResponse> future : futureList) {
+                try {
+                    shapeList.addAll(future.get().getItems());
+                } catch (BmcException e) {
+                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
+                        throw e;
+                    }
+                }
+            }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get Shape list", e);
             throw e;
         }
+        return shapeList;
     }
 
     @Override
@@ -353,13 +399,24 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public List<Subnet> getSubNetList(String tenantId,String vcnId) throws Exception {
-        List<Subnet> listSubnet = new ArrayList<>();
         List<Compartment> compartmentList = getCompartmentsList(tenantId);
-        try (VirtualNetworkClient vnc = getVirtualNetworkClient()) {
+        List<Subnet> subnetList = new ArrayList<>();
+
+        try (VirtualNetworkAsyncClient vnc = getVirtualNetworkAsyncClient()) {
+            List<Future<ListSubnetsResponse>> futureList = new ArrayList<>();
+
             // The VCN and subnet can be from different compartment
             for (Compartment compartment : compartmentList) {
+                ListSubnetsRequest request = ListSubnetsRequest.builder()
+                        .compartmentId(compartment.getId())
+                        .vcnId(vcnId)
+                        .build();
+                futureList.add(vnc.listSubnets(request, null));
+            }
+
+            for (Future<ListSubnetsResponse> future : futureList) {
                 try {
-                    listSubnet.addAll(vnc.listSubnets(ListSubnetsRequest.builder().compartmentId(compartment.getId()).vcnId(vcnId).build()).getItems());
+                    subnetList.addAll(future.get().getItems());
                 } catch (BmcException e) {
                     if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
                         throw e;
@@ -367,10 +424,10 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to get vcn list", e);
+            LOGGER.log(Level.WARNING, "Failed to get Subnet list", e);
             throw e;
         }
-        return listSubnet;
+        return subnetList;
     }
 
     @Override
