@@ -20,9 +20,11 @@ import hudson.model.TaskListener;
 import hudson.model.Descriptor.FormException;
 import hudson.slaves.AbstractCloudComputer;
 import hudson.slaves.AbstractCloudSlave;
+import hudson.slaves.ComputerLauncher;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.OfflineCause;
 import hudson.slaves.RetentionStrategy;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 public class BaremetalCloudAgent extends AbstractCloudSlave{
@@ -112,7 +114,25 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
         this.initScript = initScript;
     }
 
-
+    private BaremetalCloudAgent(final String name,
+            final String description,
+            final String remoteFS,
+            final int numExecutors,
+            final Mode mode,
+            final String labelString,
+            final List<? extends NodeProperty<?>> nodeProperties,
+            final String cloudName,
+            final String instanceId,
+            final String initScript,
+            final ComputerLauncher computerLauncher,
+            final RetentionStrategy retentionStrategy) throws IOException,
+            FormException {
+        super(name, description, remoteFS, numExecutors, mode, labelString, computerLauncher, retentionStrategy,
+                nodeProperties);
+        this.cloudName = cloudName;
+        this.instanceId = instanceId;
+        this.initScript = initScript;
+    }
 
     public String getInstanceId() {
 		return instanceId;
@@ -175,6 +195,38 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
     public Node reconfigure(final StaplerRequest req, JSONObject form) {
         if (form == null) {
             return null;
+        }
+
+        String newName = name;
+        try {
+            newName = form.getString("name");
+        } catch (JSONException e) {
+            // Pass
+        }
+
+        int newNumExecutors = getNumExecutors();
+        try {
+            newNumExecutors = form.getInt("numExecutors");
+        } catch (JSONException e) {
+            // Pass
+        }
+
+        try {
+            return new BaremetalCloudAgent(
+                    newName,
+                    getNodeDescription(),
+                    getRemoteFS(),
+                    newNumExecutors,
+                    getMode(),
+                    getLabelString(),
+                    getNodeProperties(),
+                    cloudName,
+                    instanceId,
+                    initScript,
+                    getLauncher(),
+                    getRetentionStrategy());
+        } catch (FormException | IOException e) {
+            LOGGER.warning("Failed to reconfigure BareMetalAgent: " + name);
         }
 
         return this;
