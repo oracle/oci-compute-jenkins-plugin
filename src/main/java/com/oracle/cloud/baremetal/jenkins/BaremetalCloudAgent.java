@@ -171,14 +171,13 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
 		return false;
 	}
 
-	@Override
+    @Override
     public Node reconfigure(final StaplerRequest req, JSONObject form) {
         if (form == null) {
             return null;
         }
 
-        //TODO
-        return null;
+        return this;
     }
 
 	@Extension
