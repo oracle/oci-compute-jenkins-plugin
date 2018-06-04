@@ -471,24 +471,19 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
     // make sure the instance if available before launch agent on it.
     private void awaitInstanceSshAvailable(String host, int connectTimeoutMillis, TimeoutHelper timeoutHelper) throws IOException, InterruptedException {
-        SshConnector sshConnector = getSshConnector();
         do {
-            Connection conn = sshConnector.createConnection(host);
+            Connection connnection = SshConnector.createConnection(host, 22);
             try {
-                sshConnector.connect(conn, connectTimeoutMillis);
+                SshConnector.connect(connnection, connectTimeoutMillis);
                 return;
             } catch (IOException e) {
                 LOGGER.log(Level.FINER, "Ignoring exception connecting to SSH during privision", e);
             } finally {
-                conn.close();
+                connnection.close();
             }
         } while (timeoutHelper.sleep());
 
         throw new IOException("Timed out connecting to SSH");
-    }
-
-    SshConnector getSshConnector() {
-        return SshConnector.INSTANCE;
     }
 
     @Override

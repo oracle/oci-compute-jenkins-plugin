@@ -5,16 +5,12 @@ import com.trilead.ssh2.Connection;
 import com.trilead.ssh2.ServerHostKeyVerifier;
 
 public class SshConnector {
-
-    public static final SshConnector INSTANCE = new SshConnector();
-
-    private static final int PORT = 22;
-
-    public Connection createConnection(String host) throws IOException, InterruptedException {
-        return new Connection(host, PORT);
+    public static Connection createConnection(String host, int port) throws IOException, InterruptedException {
+        return new Connection(host, port);
     }
 
-    public void connect(Connection conn, int timeoutMillis) throws IOException {
+    public static void connect(Connection conn, int timeoutMillis) throws IOException {
+        conn.setTCPNoDelay(true);
         conn.connect(new SshServerHostKeyVerifier(), timeoutMillis, timeoutMillis);
     }
 
