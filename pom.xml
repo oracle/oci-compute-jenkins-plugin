@@ -26,7 +26,7 @@
          ~ hpi-plugin.version: The HPI Maven Plugin version used by the plugin..
          ~ stapler-plugin.version: The Stapler Maven plugin version required by the plugin.
     -->
-    <oci-java-sdk.version>1.2.34</oci-java-sdk.version>
+    <oci-java-sdk.version>1.2.39</oci-java-sdk.version>
   </properties>
 
   <name>Oracle Cloud Infrastructure Compute Plugin</name>
