@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+
+## 1.0.2 - June 2018
+### Fixed
+- Instance cap can no longer be exceeded
+- Fix error on Node Configuration Screen
+
+### Changed
+- Subnets now filtering by Availability Domain
+- Use Jenkins HTTP proxy configuration for OCI API calls
+- Prevent termination of temporarily offline Agents
+
+### Added
+- Faster loading of Cloud and Template configuration options in Jenkins Configure screen
+- Better error description for remote machine with no Java installed
+- "Name" and "Number of Executors" reconfiguration options in the Nodes > Configure Screen
+
 ## 1.0.1 - April 2018
 ### Fixed
 
