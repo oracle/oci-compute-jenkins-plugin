@@ -47,7 +47,7 @@ To build the plugin from repos, OCI Java SDK is required. OCI Java SDK is curren
 2. Update pom.xml with OCI Java SDK you have installed
 
 	```
-	<oci-java-sdk.version>1.2.34</oci-java-sdk.version>
+	<oci-java-sdk.version>1.2.39</oci-java-sdk.version>
  	```
 
 3. Compile and Install package
