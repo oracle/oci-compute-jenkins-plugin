@@ -157,6 +157,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
 
         Computer computer = getComputer();
         if (computer != null) {
+            computer.disconnect(null);
             computer.setTemporarilyOffline(true,
                     OfflineCause.create(Messages._BaremetalCloud_termination_offlineCause()));
         }
