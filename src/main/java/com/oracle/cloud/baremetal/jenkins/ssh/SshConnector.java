@@ -2,6 +2,7 @@ package com.oracle.cloud.baremetal.jenkins.ssh;
 
 import java.io.IOException;
 import com.trilead.ssh2.Connection;
+import com.trilead.ssh2.ConnectionInfo;
 import com.trilead.ssh2.ServerHostKeyVerifier;
 
 public class SshConnector {
@@ -9,9 +10,9 @@ public class SshConnector {
         return new Connection(host, port);
     }
 
-    public static void connect(Connection conn, int timeoutMillis) throws IOException {
+    public static ConnectionInfo connect(Connection conn, int timeoutMillis) throws IOException {
         conn.setTCPNoDelay(true);
-        conn.connect(new SshServerHostKeyVerifier(), timeoutMillis, timeoutMillis);
+        return conn.connect(new SshServerHostKeyVerifier(), timeoutMillis, timeoutMillis);
     }
 
     static class SshServerHostKeyVerifier implements ServerHostKeyVerifier {

@@ -7,8 +7,10 @@ import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 
 import com.oracle.cloud.baremetal.jenkins.JenkinsUtil;
+import com.oracle.cloud.baremetal.jenkins.retry.LinearRetry;
 import com.trilead.ssh2.ChannelCondition;
 import com.trilead.ssh2.Connection;
+import com.trilead.ssh2.ConnectionInfo;
 import com.trilead.ssh2.SCPClient;
 import com.trilead.ssh2.Session;
 
@@ -91,14 +93,14 @@ public class SshComputerLauncher extends ComputerLauncher {
 
         listener.getLogger().println("Connecting to ssh: " + uri);
         try {
-            // TODO Retrying
             Connection connection = SshConnector.createConnection(host, sshPort);
-            SshConnector.connect(connection, connectTimeoutMillis);
+            new LinearRetry<ConnectionInfo>(() ->
+                SshConnector.connect(connection, connectTimeoutMillis)).run();
 
             return connection;
-        } catch (IOException e) {
+        } catch (Exception e) {
             listener.fatalError("Failed to connect to ssh: " + uri);
-            throw e;
+            throw new IOException(e);
         }
     }
 
