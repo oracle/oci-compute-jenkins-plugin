@@ -2,8 +2,10 @@ package com.oracle.cloud.baremetal.jenkins;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
 
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
+import com.oracle.cloud.baremetal.jenkins.retry.Retry;
 
 public class TestBaremetalCloud extends BaremetalCloud{
     public static class Builder {
@@ -119,5 +121,10 @@ public class TestBaremetalCloud extends BaremetalCloud{
     @Override
     public String getPlainText(String str) {
         return str;
+    }
+
+    @Override
+    public Retry<String> getTerminationRetry(Callable<String> task) {
+        return new TestRetry<String>(task);
     }
 }
