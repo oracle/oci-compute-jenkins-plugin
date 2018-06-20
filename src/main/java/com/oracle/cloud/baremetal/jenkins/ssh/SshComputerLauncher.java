@@ -73,12 +73,11 @@ public class SshComputerLauncher extends ComputerLauncher {
             connection = connect(listener);
             authenticate(connection, listener);
 
-            ensureJavaInstalled(connection, listener);
             String workingDirectory = getRemoteWorkingDirectory(computer);
-
             createRemoteDirectory(connection, workingDirectory, listener);
             runInitScript(connection, workingDirectory, listener);
 
+            ensureJavaInstalled(connection, listener);
             copyAgentJar(connection, workingDirectory, listener);
             launchAgent(connection, workingDirectory, computer, listener);
         } catch (IOException | InterruptedException e) {
