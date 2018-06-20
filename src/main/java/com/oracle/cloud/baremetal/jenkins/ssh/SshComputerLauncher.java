@@ -150,12 +150,14 @@ public class SshComputerLauncher extends ComputerLauncher {
     private void runInitScript(Connection connection, String remoteDirectory, final TaskListener listener)
             throws InterruptedException,
             IOException {
-        if (initScript != null && initScript.trim().length() <= 0) {
+        final String initIndicationFile = "~/.hudson-run-init";
+
+        if (initScript == null || initScript.trim().length() <= 0) {
             listener.getLogger().println("No init script to copy to remote agent");
             return;
-        } else if (connection.exec("test -e ~/.hudson-run-init", listener.getLogger()) != 0) {
-            listener.getLogger().println(
-                    "Init script previously executed on remote agent (\"~/.hudson-run-init\" exists) - skipping");
+        }
+        if (connection.exec("test -e \"" + initIndicationFile + "\"", listener.getLogger()) == 0) {
+            listener.getLogger().println("Init script previously executed on remote agent (\"" + initIndicationFile + "\" exists) - skipping");
             return;
         }
 
@@ -173,7 +175,7 @@ public class SshComputerLauncher extends ComputerLauncher {
         try {
             initSession = connection.openSession();
             initSession.requestDumbPTY();
-            initSession.execCommand("/bin/bash" + " " + remoteDirectory + "/init.sh");
+            initSession.execCommand("/bin/bash " + remoteDirectory + "/init.sh");
 
             initSession.getStdin().close();
             initSession.getStderr().close();
@@ -198,7 +200,7 @@ public class SshComputerLauncher extends ComputerLauncher {
         try {
             touchSession = connection.openSession();
             touchSession.requestDumbPTY();
-            touchSession.execCommand("/bin/bash touch ~/.hudson-run-init");
+            touchSession.execCommand("touch \"" + initIndicationFile + "\"");
         } finally {
             if (touchSession != null) {
                 touchSession.close();
