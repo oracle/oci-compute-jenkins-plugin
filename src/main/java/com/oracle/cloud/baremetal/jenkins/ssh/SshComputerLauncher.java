@@ -239,7 +239,6 @@ public class SshComputerLauncher extends ComputerLauncher {
             computer.setChannel(session.getStdout(), session.getStdin(), listener.getLogger(), new Listener() {
                         @Override
                         public void onClosed(Channel channel, IOException cause) {
-                            computer.disconnect(null);
                             tearDownSession(session, listener);
                             tearDownConnection(connection, listener);
                         }
