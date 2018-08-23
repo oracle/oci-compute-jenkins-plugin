@@ -11,7 +11,7 @@ public class SDKBaremetalCloudClientFactory implements BaremetalCloudClientFacto
     private SDKBaremetalCloudClientFactory() {}
 
     @Override
-    public BaremetalCloudClient createClient(String fingerprint, String apikey, String passphrase, String tenantId, String userId, String regionId) {
+    public BaremetalCloudClient createClient(String fingerprint, String apikey, String passphrase, String tenantId, String userId, String regionId, int maxAsyncThreads) {
         SimpleAuthenticationDetailsProvider provider =
                 SimpleAuthenticationDetailsProvider.builder()
                 .fingerprint(fingerprint)
@@ -20,6 +20,6 @@ public class SDKBaremetalCloudClientFactory implements BaremetalCloudClientFacto
                 .tenantId(tenantId)
                 .userId(userId)
                 .build();
-        return new SDKBaremetalCloudClient(provider, regionId);
+        return new SDKBaremetalCloudClient(provider, regionId, maxAsyncThreads);
     }
 }

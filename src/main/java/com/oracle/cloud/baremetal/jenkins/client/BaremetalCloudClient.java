@@ -60,33 +60,33 @@ public interface BaremetalCloudClient extends AutoCloseable {
     List<Compartment> getCompartmentsList(String tenantId) throws Exception;
 
     /**
-     * Get the available domain list
+     * Get the available domain response
      *
-     * @param tenantId the tenant id
+     * @param compartmentId the compartment id
      * @return ad list
      * @throws Exception if an error occurs
      */
-    List<AvailabilityDomain> getAvailabilityDomainsList(String tenantId) throws Exception;
+    List<AvailabilityDomain> getAvailabilityDomainsList(String compartmentId) throws Exception;
 
     /**
      * Get the available image list
      *
-     * @param tenantId the tenant id
+     * @param compartmentId the compartment id
      * @return image list
      * @throws Exception if an error occurs
      */
-    List<Image> getImagesList(String tenantId) throws Exception;
+    List<Image> getImagesList(String compartmentId) throws Exception;
 
     /**
      * Get the shape list
      *
-     * @param tenantId the tenant id
+     * @param compartmentId the compartment id
      * @param availableDomain available domain
      * @param imageId image id
      * @return shape list
      * @throws Exception if an error occurs
      */
-    List<Shape> getShapesList(String tenantId, String availableDomain, String imageId) throws Exception;
+    List<Shape> getShapesList(String compartmentId, String availableDomain, String imageId) throws Exception;
 
     /**
      * Get the Virtual Cloud Network list

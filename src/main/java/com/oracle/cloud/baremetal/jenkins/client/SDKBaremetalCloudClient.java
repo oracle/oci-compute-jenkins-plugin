@@ -1,5 +1,7 @@
 package com.oracle.cloud.baremetal.jenkins.client;
 
+import com.oracle.bmc.ClientConfiguration;
+import com.oracle.bmc.ClientConfiguration.ClientConfigurationBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,10 +67,12 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     private SimpleAuthenticationDetailsProvider provider;
     private String regionId;
+    private int maxAsyncThreads;
 
-    public SDKBaremetalCloudClient(SimpleAuthenticationDetailsProvider provider, String regionId) {
+    public SDKBaremetalCloudClient(SimpleAuthenticationDetailsProvider provider, String regionId, int maxAsyncThreads) {
         this.provider = provider;
         this.regionId = regionId;
+        this.maxAsyncThreads = maxAsyncThreads;
         ClientRuntime.setClientUserAgent("Oracle-Jenkins/" + Jenkins.VERSION);
     }
 
@@ -79,7 +83,8 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     private IdentityAsyncClient getIdentityAsyncClient() {
-        IdentityAsyncClient identityClient = new IdentityAsyncClient(provider, null, new HTTPProxyConfigurator());
+        ClientConfiguration clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
+        IdentityAsyncClient identityClient = new IdentityAsyncClient(provider, clientConfig, new HTTPProxyConfigurator());
         identityClient.setRegion(regionId);
         return identityClient;
     }
@@ -91,7 +96,8 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     private ComputeAsyncClient getComputeAsyncClient() {
-        ComputeAsyncClient computeClient = new ComputeAsyncClient(provider, null, new HTTPProxyConfigurator());
+        ClientConfiguration clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
+        ComputeAsyncClient computeClient = new ComputeAsyncClient(provider, clientConfig, new HTTPProxyConfigurator());
         computeClient.setRegion(regionId);
         return computeClient;
     }
@@ -103,7 +109,8 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     private VirtualNetworkAsyncClient getVirtualNetworkAsyncClient() {
-        VirtualNetworkAsyncClient networkClient = new VirtualNetworkAsyncClient(provider, null, new HTTPProxyConfigurator());
+        ClientConfiguration clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
+        VirtualNetworkAsyncClient networkClient = new VirtualNetworkAsyncClient(provider, clientConfig, new HTTPProxyConfigurator());
         networkClient.setRegion(regionId);
         return networkClient;
     }
@@ -268,30 +275,14 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
 
     @Override
-    public List<AvailabilityDomain> getAvailabilityDomainsList(String tenantId) throws Exception {
-        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+    public List<AvailabilityDomain> getAvailabilityDomainsList(String compartmentId) throws Exception {
         List<AvailabilityDomain> availabilityDomainsList = new ArrayList<>();
 
         try (IdentityAsyncClient identityAsyncClient = getIdentityAsyncClient()) {
-            List<Future<ListAvailabilityDomainsResponse>> futureList = new ArrayList<>();
-
-            // Asynchronously list Domains in all available compartments
-            for (Compartment compartment : compartmentList) {
-                ListAvailabilityDomainsRequest request = ListAvailabilityDomainsRequest.builder()
-                        .compartmentId(compartment.getId())
-                        .build();
-                futureList.add(identityAsyncClient.listAvailabilityDomains(request, null));
-            }
-
-            for (Future<ListAvailabilityDomainsResponse> future : futureList) {
-                try {
-                    availabilityDomainsList.addAll(future.get().getItems());
-                } catch (BmcException e) {
-                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
-                        throw e;
-                    }
-                }
-            }
+            ListAvailabilityDomainsRequest request = ListAvailabilityDomainsRequest.builder()
+                    .compartmentId(compartmentId)
+                    .build();
+            availabilityDomainsList.addAll(identityAsyncClient.listAvailabilityDomains(request, null).get().getItems());
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get Availability Domain list", e);
             throw e;
@@ -301,30 +292,14 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
 
     @Override
-    public List<Image> getImagesList(String tenantId) throws Exception {
-        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+    public List<Image> getImagesList(String compartmentId) throws Exception {
         List<Image> imageList = new ArrayList<>();
 
         try (ComputeAsyncClient computeAsyncClient = getComputeAsyncClient()) {
-            List<Future<ListImagesResponse>> futureList = new ArrayList<>();
-
-            // Asynchronously list image in all available compartments
-            for (Compartment compartment : compartmentList) {
-                ListImagesRequest request = ListImagesRequest.builder()
-                        .compartmentId(compartment.getId())
-                        .build();
-                futureList.add(computeAsyncClient.listImages(request, null));
-            }
-
-            for (Future<ListImagesResponse> future : futureList) {
-                try {
-                    imageList.addAll(future.get().getItems());
-                } catch (BmcException e) {
-                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
-                        throw e;
-                    }
-                }
-            }
+            ListImagesRequest request = ListImagesRequest.builder()
+                    .compartmentId(compartmentId)
+                    .build();
+            imageList.addAll(computeAsyncClient.listImages(request, null).get().getItems());
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get Image list", e);
             throw e;
@@ -333,32 +308,16 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     @Override
-    public List<Shape> getShapesList(String tenantId, String availableDomain, String imageId) throws Exception {
-        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+    public List<Shape> getShapesList(String compartmentId, String availableDomain, String imageId) throws Exception {
         List<Shape> shapeList = new ArrayList<>();
 
         try (ComputeAsyncClient computeAsyncClient = getComputeAsyncClient()) {
-            List<Future<ListShapesResponse>> futureList = new ArrayList<>();
-
-            // The image and shape can be from different compartment
-            for (Compartment compartment : compartmentList) {
-                ListShapesRequest request = ListShapesRequest.builder()
-                        .compartmentId(compartment.getId())
-                        .availabilityDomain(availableDomain)
-                        .imageId(imageId)
-                        .build();
-                futureList.add(computeAsyncClient.listShapes(request, null));
-            }
-
-            for (Future<ListShapesResponse> future : futureList) {
-                try {
-                    shapeList.addAll(future.get().getItems());
-                } catch (BmcException e) {
-                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
-                        throw e;
-                    }
-                }
-            }
+            ListShapesRequest request = ListShapesRequest.builder()
+                    .compartmentId(compartmentId)
+                    .availabilityDomain(availableDomain)
+                    .imageId(imageId)
+                    .build();
+            shapeList.addAll(computeAsyncClient.listShapes(request, null).get().getItems());
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get Shape list", e);
             throw e;

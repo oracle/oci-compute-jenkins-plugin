@@ -364,7 +364,7 @@ public class BaremetalCloudAgentTemplateUnitTest {
         final BaremetalCloudClientFactory factory = mockery.mock(BaremetalCloudClientFactory.class);
         final BaremetalCloudClient client = mockery.mock(BaremetalCloudClient.class);
         mockery.checking(new Expectations() {{
-            allowing(factory).createClient(FINGERPRINT, API_KEY, "", TENANT_ID, USER_ID, "us-phoenix-1"); will(returnValue(client));
+            allowing(factory).createClient(FINGERPRINT, API_KEY, "", TENANT_ID, USER_ID, "us-phoenix-1", 50); will(returnValue(client));
         }});
 
     }

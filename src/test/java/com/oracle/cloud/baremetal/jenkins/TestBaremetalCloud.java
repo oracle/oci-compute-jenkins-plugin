@@ -17,6 +17,7 @@ public class TestBaremetalCloud extends BaremetalCloud{
         String userId;
         String regionId;
         String instanceCapStr;
+        String maxAsyncThreads;
         int nextTemplateId;
         List<? extends BaremetalCloudAgentTemplate> templates;
         BaremetalCloudClient client;
@@ -61,7 +62,10 @@ public class TestBaremetalCloud extends BaremetalCloud{
             this.instanceCapStr = instanceCapStr;
             return this;
         }
-
+        public Builder maxAsyncThreads(String maxAsyncThreads) {
+            this.maxAsyncThreads = maxAsyncThreads;
+            return this;
+        }
         public Builder nextTemplateId(int nextTemplateId) {
             this.nextTemplateId = nextTemplateId;
             return this;
@@ -103,6 +107,7 @@ public class TestBaremetalCloud extends BaremetalCloud{
                 builder.userId,
                 builder.regionId,
                 builder.instanceCapStr,
+                builder.maxAsyncThreads,
                 builder.nextTemplateId,
                 builder.templates);
         this.client = builder.client;

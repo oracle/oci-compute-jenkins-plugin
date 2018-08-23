@@ -32,6 +32,9 @@
     <f:entry title="${%instanceCapStr}" field="instanceCapStr">
       <f:textbox />
     </f:entry>
+    <f:entry title="${%maxAsyncThreads}" field="maxAsyncThreads">
+      <f:textbox default="50"/>
+    </f:entry>
   </f:advanced>
   
   <f:entry title="${%templates}" description="${%templates.desc}" help="${descriptor.getHelpFile('templates')}">

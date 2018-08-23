@@ -92,6 +92,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
     private final String tenantId;
     private final String userId;
     private final String regionId;
+    private final String maxAsyncThreads;
     private final int nextTemplateId;
     private final List<? extends BaremetalCloudAgentTemplate> templates;
 
@@ -105,6 +106,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
             String userId,
             String regionId,
             String instanceCapStr,
+            String maxAsyncThreads,
             int nextTemplateId,
             List<? extends BaremetalCloudAgentTemplate> templates) {
         super(cloudNameToName(cloudName), instanceCapStr);
@@ -115,6 +117,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
         this.tenantId = tenantId;
         this.userId = userId;
         this.regionId = regionId;
+        this.maxAsyncThreads = maxAsyncThreads;
         this.nextTemplateId = nextTemplateId;
         if (templates == null) {
             this.templates = Collections.emptyList();
@@ -155,7 +158,9 @@ public class BaremetalCloud extends AbstractCloudImpl{
     public String getRegionId() {
         return regionId;
     }
-
+    public String getMaxAsyncThreads() {
+        return maxAsyncThreads;
+    }
     public int getNextTemplateId() {
         return nextTemplateId;
     }
@@ -437,7 +442,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
     public BaremetalCloudClient getClient(){
         BaremetalCloudClientFactory factory = SDKBaremetalCloudClientFactory.INSTANCE;
-        return factory.createClient(fingerprint, getApikey(), getPassphrase(), tenantId, userId, regionId);
+        return factory.createClient(fingerprint, getApikey(), getPassphrase(), tenantId, userId, regionId, Integer.parseInt(maxAsyncThreads));
     }
 
     private synchronized int getNodeCount() {
@@ -544,6 +549,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
          * @param tenantId tenant id
          * @param userId User credentials
          * @param regionId region Id
+         * @param maxAsyncThreads maxAsyncThreads
          * @return FormValidation
          */
         public FormValidation doTestConnection(
@@ -552,10 +558,11 @@ public class BaremetalCloud extends AbstractCloudImpl{
                 @QueryParameter String passphrase,
                 @QueryParameter String tenantId,
                 @QueryParameter String userId,
-                @QueryParameter String regionId) {
+                @QueryParameter String regionId,
+                @QueryParameter String maxAsyncThreads) {
 
             BaremetalCloudClientFactory factory = SDKBaremetalCloudClientFactory.INSTANCE;
-            BaremetalCloudClient client = factory.createClient(fingerprint, apikey, passphrase, tenantId, userId, regionId);
+            BaremetalCloudClient client = factory.createClient(fingerprint, apikey, passphrase, tenantId, userId, regionId, Integer.parseInt(maxAsyncThreads));
             try{
                 client.authenticate();
                 return FormValidation.ok(Messages.BaremetalCloud_testConnection_success());
