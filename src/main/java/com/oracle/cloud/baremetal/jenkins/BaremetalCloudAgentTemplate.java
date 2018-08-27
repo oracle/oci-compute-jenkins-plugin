@@ -350,7 +350,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter @RelativePath("..") int maxAsyncThreads,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String compartmentId,
                 @QueryParameter String subnetId,
                 @QueryParameter Boolean assignPublicIP) {
@@ -393,9 +393,9 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             return JenkinsUtil.getDescriptorOrDie(BaremetalCloud.class, BaremetalCloud.DescriptorImpl.class);
         }
 
-        private static BaremetalCloudClient getClient(String fingerprint, String apikey, String passphrase, String tenantId, String userId, String regionId, int maxAsyncThreads){
+        private static BaremetalCloudClient getClient(String fingerprint, String apikey, String passphrase, String tenantId, String userId, String regionId, String maxAsyncThreads){
             BaremetalCloudClientFactory factory = SDKBaremetalCloudClientFactory.INSTANCE;
-            return factory.createClient(fingerprint, apikey, passphrase, tenantId, userId, regionId, maxAsyncThreads);
+            return factory.createClient(fingerprint, apikey, passphrase, tenantId, userId, regionId, Integer.parseInt(maxAsyncThreads));
         }
 
         public ListBoxModel doFillCompartmentIdItems(
@@ -405,7 +405,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter @RelativePath("..") int maxAsyncThreads)
+                @QueryParameter @RelativePath("..") String maxAsyncThreads)
                         throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<Select a compartmentId>", "");
@@ -435,7 +435,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String tenantId,
                 @QueryParameter @RelativePath("..") String userId,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter @RelativePath("..") int maxAsyncThreads,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String compartmentId) {
             ListBoxModel items = new ListBoxModel();
             if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, compartmentId)) {
@@ -467,7 +467,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter @RelativePath("..") int maxAsyncThreads,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String compartmentId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<Select an Image>", "");
@@ -510,7 +510,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter @RelativePath("..") int maxAsyncThreads,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String compartmentId,
                 @QueryParameter String availableDomain,
                 @QueryParameter String imageId)
@@ -547,7 +547,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter @RelativePath("..") int maxAsyncThreads) throws IOException, ServletException {
+                @QueryParameter @RelativePath("..") String maxAsyncThreads) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<Select a Virtual Cloud Network>", "");
 
@@ -590,7 +590,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter @RelativePath("..") int maxAsyncThreads,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String availableDomain,
                 @QueryParameter String vcnId)
                         throws IOException, ServletException {

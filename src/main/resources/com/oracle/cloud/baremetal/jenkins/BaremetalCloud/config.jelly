@@ -26,8 +26,7 @@
   <f:entry title="${%regionId}" field="regionId">
     <f:textbox clazz="required" default="us-phoenix-1"/>
   </f:entry>
-  <f:validateButton title="${%testConnection}" progress="${%testConnection.progress}" method="testConnection" with="fingerprint,apikey,passphrase,tenantId,userId,regionId" />
-
+  
   <f:advanced>
     <f:entry title="${%instanceCapStr}" field="instanceCapStr">
       <f:textbox />
@@ -36,6 +35,8 @@
       <f:textbox default="50"/>
     </f:entry>
   </f:advanced>
+  
+  <f:validateButton title="${%testConnection}" progress="${%testConnection.progress}" method="testConnection" with="fingerprint,apikey,passphrase,tenantId,userId,regionId,maxAsyncThreads" />
   
   <f:entry title="${%templates}" description="${%templates.desc}" help="${descriptor.getHelpFile('templates')}">
     <x:idRepeatable field="templates" header="${%templates.header}" add="${%templates.add}" nextIdField="nextTemplateId" idField="templateId">
