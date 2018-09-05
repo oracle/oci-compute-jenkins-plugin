@@ -1,7 +1,6 @@
 package com.oracle.cloud.baremetal.jenkins.client;
 
 import com.oracle.bmc.ClientConfiguration;
-import com.oracle.bmc.ClientConfiguration.ClientConfigurationBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +38,6 @@ import com.oracle.bmc.core.responses.GetInstanceResponse;
 import com.oracle.bmc.core.responses.GetSubnetResponse;
 import com.oracle.bmc.core.responses.GetVnicResponse;
 import com.oracle.bmc.core.responses.LaunchInstanceResponse;
-import com.oracle.bmc.core.responses.ListImagesResponse;
-import com.oracle.bmc.core.responses.ListShapesResponse;
 import com.oracle.bmc.core.responses.ListSubnetsResponse;
 import com.oracle.bmc.core.responses.ListVcnsResponse;
 import com.oracle.bmc.core.responses.ListVnicAttachmentsResponse;
@@ -53,7 +50,6 @@ import com.oracle.bmc.identity.model.Compartment;
 import com.oracle.bmc.identity.requests.GetUserRequest;
 import com.oracle.bmc.identity.requests.ListAvailabilityDomainsRequest;
 import com.oracle.bmc.identity.requests.ListCompartmentsRequest;
-import com.oracle.bmc.identity.responses.ListAvailabilityDomainsResponse;
 import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.BaremetalCloudAgentTemplate;
 
@@ -68,11 +64,13 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     private SimpleAuthenticationDetailsProvider provider;
     private String regionId;
     private int maxAsyncThreads;
+    private ClientConfiguration clientConfig;
 
     public SDKBaremetalCloudClient(SimpleAuthenticationDetailsProvider provider, String regionId, int maxAsyncThreads) {
         this.provider = provider;
         this.regionId = regionId;
         this.maxAsyncThreads = maxAsyncThreads;
+        this.clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
         ClientRuntime.setClientUserAgent("Oracle-Jenkins/" + Jenkins.VERSION);
     }
 
@@ -83,7 +81,6 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     private IdentityAsyncClient getIdentityAsyncClient() {
-        ClientConfiguration clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
         IdentityAsyncClient identityClient = new IdentityAsyncClient(provider, clientConfig, new HTTPProxyConfigurator());
         identityClient.setRegion(regionId);
         return identityClient;
@@ -96,7 +93,6 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     private ComputeAsyncClient getComputeAsyncClient() {
-        ClientConfiguration clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
         ComputeAsyncClient computeClient = new ComputeAsyncClient(provider, clientConfig, new HTTPProxyConfigurator());
         computeClient.setRegion(regionId);
         return computeClient;
@@ -109,7 +105,6 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     private VirtualNetworkAsyncClient getVirtualNetworkAsyncClient() {
-        ClientConfiguration clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
         VirtualNetworkAsyncClient networkClient = new VirtualNetworkAsyncClient(provider, clientConfig, new HTTPProxyConfigurator());
         networkClient.setRegion(regionId);
         return networkClient;

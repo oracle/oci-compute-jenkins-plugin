@@ -478,22 +478,11 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId, maxAsyncThreads);
 
             try {
-                //List<Compartment> compartmentIds = client.getCompartmentsList(tenantId);
-
-                //HashMap<String, String> mapcompartment = new HashMap<String, String>();
-                //for (Compartment compartment : compartmentIds) {
-                //    mapcompartment.put(compartment.getId(),compartment.getName());
-                //}
-
                 List<String>  lstImage = new ArrayList<String>();
                 List<Image> list = client.getImagesList(compartmentId);
                 for (Image imageId : list) {
                     if (lstImage.indexOf(imageId.getId()) < 0) {
-                        //if (mapcompartment.get(imageId.getCompartmentId())  != null) {
-                        //    model.add(imageId.getDisplayName() + "(" + mapcompartment.get(imageId.getCompartmentId()) + ")", imageId.getId());
-                        //} else {
-                            model.add(imageId.getDisplayName(), imageId.getId());
-                        //}
+                        model.add(imageId.getDisplayName(), imageId.getId());
                         lstImage.add(imageId.getId());
                     }
                 }
