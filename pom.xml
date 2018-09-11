@@ -30,7 +30,7 @@
   </properties>
 
   <name>Oracle Cloud Infrastructure Compute Plugin</name>
-  <description> Provision/Recycle agents on Oracle Cloud Infrastructure Compute dynamically, for tutorial, license and 3rd party library usage, refer </description>
+  <description>Jenkins plugin to run dynamic slaves in the Oracle Cloud Infrastructure (OCI) Compute environment</description>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/Oracle+Cloud+Infrastructure+Compute+Plugin</url>
 
   <licenses>
