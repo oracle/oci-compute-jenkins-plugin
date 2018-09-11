@@ -31,6 +31,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         String availableDomain;
         String vcnId;
         String subnetId;
+        String imageCompartmentId;
         String imageId;
         String shape;
         String sshPublickey;
@@ -98,6 +99,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
 
         public Builder usePublicIP(Boolean usePublicIP) {
             this.usePublicIP = usePublicIP;
+            return this;
+        }
+
+        public Builder imageCompartmentId(String imageCompartmentId) {
+            this.imageCompartmentId = imageCompartmentId;
             return this;
         }
 
@@ -173,6 +179,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.availableDomain,
                 builder.vcnId,
                 builder.subnetId,
+                builder.imageCompartmentId,
                 builder.imageId,
                 builder.shape,
                 builder.sshPublickey,

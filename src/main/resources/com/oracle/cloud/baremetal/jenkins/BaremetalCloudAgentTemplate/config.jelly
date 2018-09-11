@@ -30,6 +30,10 @@
 	    <f:select />
 	  </f:entry>
 	
+          <f:entry title="${%imageCompartmentId}" field="imageCompartmentId">
+            <f:select />
+          </f:entry>
+
 	  <f:entry title="${%imageId}" field="imageId">
 	    <f:select />
 	  </f:entry>

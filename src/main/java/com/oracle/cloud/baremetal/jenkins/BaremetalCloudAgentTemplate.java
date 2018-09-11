@@ -48,6 +48,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String availableDomain;
     public final String vcnId;
     public final String subnetId;
+    public final String imageCompartmentId;
     public final String imageId;
     public final String shape;
     public final String sshPublickey;
@@ -78,6 +79,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String availableDomain,
             final String vcnId,
             final String subnetId,
+            final String imageCompartmentId,
             final String imageId,
             final String shape,
             final String sshPublickey,
@@ -100,6 +102,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.availableDomain = availableDomain;
         this.vcnId = vcnId;
         this.subnetId = subnetId;
+        this.imageCompartmentId = imageCompartmentId;
         this.imageId = imageId;
         this.shape = shape;
         this.sshPublickey = sshPublickey;
@@ -135,6 +138,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getSubnet() {
         return subnetId;
+    }
+
+    public String getImageCompartmentId() {
+        return imageCompartmentId;
     }
 
     public String getImage() {
@@ -460,6 +467,36 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             }
         }
 
+        public ListBoxModel doFillImageCompartmentIdItems(
+                @QueryParameter @RelativePath("..") String userId,
+                @QueryParameter @RelativePath("..") String fingerprint,
+                @QueryParameter @RelativePath("..") String tenantId,
+                @QueryParameter @RelativePath("..") String apikey,
+                @QueryParameter @RelativePath("..") String passphrase,
+                @QueryParameter @RelativePath("..") String regionId,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads)
+                        throws IOException, ServletException {
+            ListBoxModel model = new ListBoxModel();
+            model.add("<Select image compartmentId>", "");
+
+            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId)) {
+                return model;
+            }
+
+            BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId, maxAsyncThreads);
+
+            try{
+                List<Compartment> compartmentIds = client.getCompartmentsList(tenantId);
+                for (Compartment compartmentId : compartmentIds) {
+                    model.add(compartmentId.getName(), compartmentId.getId());
+                }
+            }catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
+            }
+
+            return model;
+        }
+
         public ListBoxModel doFillImageIdItems(
                 @QueryParameter @RelativePath("..") String userId,
                 @QueryParameter @RelativePath("..") String fingerprint,
@@ -468,7 +505,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
                 @QueryParameter @RelativePath("..") String maxAsyncThreads,
-                @QueryParameter String compartmentId) throws IOException, ServletException {
+                @QueryParameter String compartmentId,
+                @QueryParameter String imageCompartmentId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<Select an Image>", "");
             if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, compartmentId)) {
@@ -479,7 +517,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
             try {
                 List<String>  lstImage = new ArrayList<String>();
-                List<Image> list = client.getImagesList(compartmentId);
+                List<Image> list = client.getImagesList(imageCompartmentId);
                 for (Image imageId : list) {
                     if (lstImage.indexOf(imageId.getId()) < 0) {
                         model.add(imageId.getDisplayName(), imageId.getId());
