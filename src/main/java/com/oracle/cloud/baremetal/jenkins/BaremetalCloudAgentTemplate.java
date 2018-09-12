@@ -474,10 +474,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter @RelativePath("..") String maxAsyncThreads)
-                        throws IOException, ServletException {
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
+                @QueryParameter String compartmentId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
-            model.add("<Select image compartmentId>", "");
+            model.add("Default", compartmentId);
 
             if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId)) {
                 return model;
@@ -487,8 +487,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
             try{
                 List<Compartment> compartmentIds = client.getCompartmentsList(tenantId);
-                for (Compartment compartmentId : compartmentIds) {
-                    model.add(compartmentId.getName(), compartmentId.getId());
+                for (Compartment compartment : compartmentIds) {
+                    model.add(compartment.getName(), compartment.getId());
                 }
             }catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
@@ -511,6 +511,9 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             model.add("<Select an Image>", "");
             if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, compartmentId)) {
                 return model;
+            }
+            if (anyRequiredFieldEmpty(imageCompartmentId)) {
+                imageCompartmentId = compartmentId;
             }
 
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId, maxAsyncThreads);
