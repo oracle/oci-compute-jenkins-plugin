@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-  Please refer to <a href="https://wiki.jenkins-ci.org/display/JENKINS/Oracle+Cloud+Infrastructure+Compute+Plugin">Oracle Cloud Infrastructure Compute Plugin</a> for tutorial and license info.
+This plugin allows you to run dynamic slaves in the Oracle Cloud Infrastructure(OCI) Compute environment.
 </div>
