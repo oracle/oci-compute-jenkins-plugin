@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.3 - October 2018
+### Fixed
+- Fix "I/O error in channel oci-compute" java.io.EOFException severe messages in Jenkins log. 
+- Fix issue where some values fail due to OCI API limit being exceeded with large number of Templates.
+
+### Changed
+- Plugin Description seen in Plugin's Available screen.
+
+### Added
+- "Max number of async threads" Field in Cloud configuration. Allows user to specify the max number of async threads to use when loading Templates configuration.
+- "Image Compartment" Field in Template configuration for images in separate compartments. **Note:** if upgrading from v1.0.2 (or earlier) and Image is in a separate compartment than Default Compartment, you may have to update the values in your existing Template configuration.
+
 
 ## 1.0.2 - June 2018
 ### Fixed
@@ -22,7 +34,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## 1.0.1 - April 2018
 ### Fixed
 
-- Idle Termination Minutes. 0 now working as expected and Instance will not Terminate,
+- Idle Termination Minutes. 0 now working as expected and Instance will not Terminate.
 
 - Fixed broken links in Plugin Help options.
 
