@@ -69,6 +69,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String startTimeoutSeconds;
     public final String sshConnectTimeoutSeconds;
     public final String initScriptTimeoutSeconds;
+    public final String instanceCap;
 
     private transient int failureCount;
     private transient String disableCause;
@@ -97,7 +98,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String initScript,
             final String sshConnectTimeoutSeconds,
             final String startTimeoutSeconds,
-            final String initScriptTimeoutSeconds){
+            final String initScriptTimeoutSeconds,
+            final String instanceCap){
     	this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
         this.vcnId = vcnId;
@@ -121,6 +123,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.sshConnectTimeoutSeconds = sshConnectTimeoutSeconds;
         this.startTimeoutSeconds = startTimeoutSeconds;
         this.initScriptTimeoutSeconds = initScriptTimeoutSeconds;
+        this.instanceCap = instanceCap;
     }
 
 
@@ -275,6 +278,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public int getInitScriptTimeoutSeconds() {
         return (int)TimeUnit.SECONDS.toSeconds(checkInitScriptTimeoutSeconds(initScriptTimeoutSeconds).getValue());
+    }
+    
+    public String getInstanceCap() {
+        return instanceCap;
     }
 
     private static FormValidationValue<Integer> checkInitScriptTimeoutSeconds(String value){
@@ -732,6 +739,13 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
         public FormValidation doCheckStartTimeoutSeconds(@QueryParameter String value) {
             return checkStartTimeoutSeconds(value).getFormValidation();
+        }
+        
+        public FormValidation doCheckInstanceCap(@QueryParameter String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return FormValidation.ok();
+            }
+            return FormValidation.validateNonNegativeInteger(value);
         }
     }
 }

@@ -104,6 +104,10 @@
 		  <f:entry title="${%initScriptTimeoutSeconds}" field="initScriptTimeoutSeconds">
 		    <f:textbox default="120" />
 		  </f:entry>
+                  
+                  <f:entry title="${%instanceCap}" field="instanceCap">
+		    <f:textbox />
+		  </f:entry>
 	  </f:advanced>
 	  
 	  

@@ -188,14 +188,20 @@ public class BaremetalCloud extends AbstractCloudImpl{
     @Override
     public synchronized Collection<PlannedNode> provision(Label label, int excessWorkload) {
         final BaremetalCloudAgentTemplate template = getTemplate(label);
+        int instanceCap = getInstanceCap();
+        
         if (template == null) {
             return Collections.emptyList();
         }
-
+        
         LOGGER.info(fmtLogMsg("requested Agent provision excessWorkload: " + excessWorkload));
         List<PlannedNode> plannedNodes = new ArrayList<>();
 
-        while (excessWorkload > 0 && plannedNodes.size() + getNodeCount() < getInstanceCap()) {
+        if (!template.getInstanceCap().isEmpty()) {
+            instanceCap = Integer.parseInt(template.getInstanceCap());
+        }
+        
+        while (excessWorkload > 0 && plannedNodes.size() + getNodeCount() < instanceCap) {
             Provisioner provisioner = new Provisioner(template);
             String displayName = provisioner.getPlannedNodeDisplayName();
             Future<Node> future = getThreadPoolForRemoting().submit(provisioner);
@@ -327,7 +333,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
         }
         return null;
     }
-
+    
     static final String PROVISION_ATTR_AGENT_NAME = BaremetalCloud.class.getName() + ".name";
     static final String PROVISION_ATTR_NUM_EXECUTORS = BaremetalCloud.class.getName() + ".numExecutors";
 

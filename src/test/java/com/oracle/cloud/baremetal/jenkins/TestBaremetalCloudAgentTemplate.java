@@ -25,6 +25,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         String initScript;
         String startTimeoutSeconds;
         String initScriptTimeoutSeconds;
+        String instanceCap;
 
 
         String compartmentId;
@@ -131,6 +132,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             this.initScriptTimeoutSeconds = initScriptTimeoutSeconds;
             return this;
         }
+        
+        public Builder instanceCap(String instanceCap) {
+            this.instanceCap = instanceCap;
+            return this;
+        }
 
         public Builder remoteFS(String remoteFS) {
             this.remoteFS = remoteFS;
@@ -197,7 +203,8 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.initScript,
                 builder.sshConnectTimeoutSeconds,
                 builder.startTimeoutSeconds,
-                builder.initScriptTimeoutSeconds);
+                builder.initScriptTimeoutSeconds,
+                builder.instanceCap);
 
         this.encryptSshPrivateKey  = builder.encryptSshPrivateKey;
     }
