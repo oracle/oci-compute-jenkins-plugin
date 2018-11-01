@@ -197,7 +197,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
         LOGGER.info(fmtLogMsg("requested Agent provision excessWorkload: " + excessWorkload));
         List<PlannedNode> plannedNodes = new ArrayList<>();
 
-        if (!template.getInstanceCap().isEmpty()) {
+        if (!template.getInstanceCap().isEmpty() && Integer.parseInt(template.getInstanceCap()) < instanceCap) {
             instanceCap = Integer.parseInt(template.getInstanceCap());
         }
         
