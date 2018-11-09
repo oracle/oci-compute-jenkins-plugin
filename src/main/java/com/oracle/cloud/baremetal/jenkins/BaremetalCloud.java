@@ -188,7 +188,6 @@ public class BaremetalCloud extends AbstractCloudImpl{
     @Override
     public synchronized Collection<PlannedNode> provision(Label label, int excessWorkload) {
         final BaremetalCloudAgentTemplate template = getTemplate(label);
-        int instanceCap = getInstanceCap();
         
         if (template == null) {
             return Collections.emptyList();
@@ -196,18 +195,24 @@ public class BaremetalCloud extends AbstractCloudImpl{
         
         LOGGER.info(fmtLogMsg("requested Agent provision excessWorkload: " + excessWorkload));
         List<PlannedNode> plannedNodes = new ArrayList<>();
-
-        if (!template.getInstanceCap().isEmpty() && Integer.parseInt(template.getInstanceCap()) < instanceCap) {
-            instanceCap = Integer.parseInt(template.getInstanceCap());
+        
+        boolean templateInstanceCapInvalid = false;
+        
+        if (template.getInstanceCap().isEmpty()) {
+            templateInstanceCapInvalid = true;
+        } else if (Integer.parseInt(template.getInstanceCap()) >= getInstanceCap()) {
+            templateInstanceCapInvalid = true;
         }
         
-        while (excessWorkload > 0 && plannedNodes.size() + getNodeCount() < instanceCap) {
+        while (excessWorkload > 0 
+                && (plannedNodes.size() + getNodeCount() < getInstanceCap() 
+                    && (templateInstanceCapInvalid || plannedNodes.size() + getTemplateNodeCount(template.getTemplateId()) < Integer.parseInt(template.getInstanceCap())))) {
             Provisioner provisioner = new Provisioner(template);
             String displayName = provisioner.getPlannedNodeDisplayName();
             Future<Node> future = getThreadPoolForRemoting().submit(provisioner);
 
             int numExecutors = provisioner.numExecutors;
-            plannedNodes.add(new BaremetalCloudPlannedNode(displayName, future, numExecutors, this.name));
+            plannedNodes.add(new BaremetalCloudPlannedNode(displayName, future, numExecutors, this.name, template.getTemplateId()));
             excessWorkload -= numExecutors;
         }
 
@@ -277,14 +282,20 @@ public class BaremetalCloud extends AbstractCloudImpl{
     private class BaremetalCloudPlannedNode extends PlannedNode {
 
         private final String cloudName;
+        private final int templateId;
 
-        public BaremetalCloudPlannedNode(String displayName, Future<Node> future, int numExecutors, String cloudName) {
+        public BaremetalCloudPlannedNode(String displayName, Future<Node> future, int numExecutors, String cloudName, int templateId) {
             super(displayName, future, numExecutors);
             this.cloudName = cloudName;
+            this.templateId = templateId;
         }
 
         public String getCloudName() {
             return cloudName;
+        }
+        
+        public int getTemplateId() {
+            return templateId;
         }
     }
 
@@ -479,7 +490,37 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
         return toIntExact(count);
     }
+    
+    private synchronized int getTemplateNodeCount(int templateId) {
+        long count = 0;
+        Jenkins jenkins = JenkinsUtil.getJenkinsInstance();
 
+        // Provisioned nodes
+        count += jenkins.getNodes()
+            .stream()
+            .filter(n -> n instanceof BaremetalCloudAgent)
+            .filter(n -> ((BaremetalCloudAgent) n).cloudName.equals(name))
+            .filter(n -> ((BaremetalCloudAgent) n).templateId == templateId)
+            .peek(n -> LOGGER.fine(fmtLogMsg("Peeking provisioned nodes: " + n.getNodeName())))
+            .count();
+
+        // Nodes waiting in provisioning queue
+        count += Stream.concat(
+                // Nodes provisioning for no label
+                jenkins.unlabeledNodeProvisioner.getPendingLaunches().stream(),
+                // Nodes provisioning for specific label
+                jenkins.getLabels().stream().flatMap(l -> l.nodeProvisioner.getPendingLaunches().stream())
+        )
+            .filter(pn -> pn instanceof BaremetalCloudPlannedNode)
+            .filter(pn -> ((BaremetalCloudPlannedNode) pn).getCloudName().equals(name))
+            .filter(pn -> ((BaremetalCloudPlannedNode) pn).getTemplateId() == templateId)
+            .peek(pn -> LOGGER.fine(fmtLogMsg("Peeking provisioning nodes: " + ((BaremetalCloudPlannedNode) pn).displayName)))
+            .count();
+
+        LOGGER.info(fmtLogMsg("Found " + count + " provisioned or provisioning Nodes for the template " + templateId));
+
+        return toIntExact(count);
+    }
     // make sure the instance if available before launch agent on it.
     private void awaitInstanceSshAvailable(String host, int connectTimeoutMillis, TimeoutHelper timeoutHelper) throws IOException, InterruptedException {
         do {

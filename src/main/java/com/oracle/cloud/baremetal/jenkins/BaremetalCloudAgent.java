@@ -48,6 +48,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
     public final String cloudName;
     private final String instanceId;
     public final String initScript;
+    public final int templateId;
 
     public BaremetalCloudAgent(final String name,
             final BaremetalCloudAgentTemplate template,
@@ -72,7 +73,8 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                 template.getInitScript(),
                 template.getInitScriptTimeoutSeconds(),
                 host,
-                template.getSshPrivatekey());
+                template.getSshPrivatekey(),
+                template.getTemplateId());
     }
 
     @DataBoundConstructor
@@ -93,7 +95,8 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             final String initScript,
             final int initScriptTimeoutSeconds,
             final String host,
-            final String sskPrivatekey) throws IOException, FormException{
+            final String sskPrivatekey,
+            final int templateId) throws IOException, FormException{
     	super(name,
                 description,
                 remoteFS,
@@ -112,6 +115,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
     	this.cloudName = cloudName;
         this.instanceId = instanceId;
         this.initScript = initScript;
+        this.templateId = templateId;
     }
 
     private BaremetalCloudAgent(final String name,
@@ -125,13 +129,15 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             final String instanceId,
             final String initScript,
             final ComputerLauncher computerLauncher,
-            final RetentionStrategy retentionStrategy) throws IOException,
+            final RetentionStrategy retentionStrategy,
+            final int templateId) throws IOException,
             FormException {
         super(name, description, remoteFS, numExecutors, mode, labelString, computerLauncher, retentionStrategy,
                 nodeProperties);
         this.cloudName = cloudName;
         this.instanceId = instanceId;
         this.initScript = initScript;
+        this.templateId = templateId;
     }
 
     public String getInstanceId() {
@@ -225,7 +231,8 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                     instanceId,
                     initScript,
                     getLauncher(),
-                    getRetentionStrategy());
+                    getRetentionStrategy(),
+                    templateId);
         } catch (FormException | IOException e) {
             LOGGER.warning("Failed to reconfigure BareMetalAgent: " + name);
         }
