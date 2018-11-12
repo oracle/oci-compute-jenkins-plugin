@@ -188,24 +188,24 @@ public class BaremetalCloud extends AbstractCloudImpl{
     @Override
     public synchronized Collection<PlannedNode> provision(Label label, int excessWorkload) {
         final BaremetalCloudAgentTemplate template = getTemplate(label);
-        
+
         if (template == null) {
             return Collections.emptyList();
         }
-        
+
         LOGGER.info(fmtLogMsg("requested Agent provision excessWorkload: " + excessWorkload));
         List<PlannedNode> plannedNodes = new ArrayList<>();
-        
+
         boolean templateInstanceCapInvalid = false;
-        
+
         if (template.getInstanceCap().isEmpty()) {
             templateInstanceCapInvalid = true;
         } else if (Integer.parseInt(template.getInstanceCap()) >= getInstanceCap()) {
             templateInstanceCapInvalid = true;
         }
-        
-        while (excessWorkload > 0 
-                && (plannedNodes.size() + getNodeCount() < getInstanceCap() 
+
+        while (excessWorkload > 0
+                && (plannedNodes.size() + getNodeCount() < getInstanceCap()
                     && (templateInstanceCapInvalid || plannedNodes.size() + getTemplateNodeCount(template.getTemplateId()) < Integer.parseInt(template.getInstanceCap())))) {
             Provisioner provisioner = new Provisioner(template);
             String displayName = provisioner.getPlannedNodeDisplayName();
@@ -344,7 +344,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
         }
         return null;
     }
-    
+
     static final String PROVISION_ATTR_AGENT_NAME = BaremetalCloud.class.getName() + ".name";
     static final String PROVISION_ATTR_NUM_EXECUTORS = BaremetalCloud.class.getName() + ".numExecutors";
 
@@ -490,7 +490,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
         return toIntExact(count);
     }
-    
+
     private synchronized int getTemplateNodeCount(int templateId) {
         long count = 0;
         Jenkins jenkins = JenkinsUtil.getJenkinsInstance();

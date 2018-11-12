@@ -279,7 +279,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public int getInitScriptTimeoutSeconds() {
         return (int)TimeUnit.SECONDS.toSeconds(checkInitScriptTimeoutSeconds(initScriptTimeoutSeconds).getValue());
     }
-    
+
     public String getInstanceCap() {
         return instanceCap;
     }
@@ -740,7 +740,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         public FormValidation doCheckStartTimeoutSeconds(@QueryParameter String value) {
             return checkStartTimeoutSeconds(value).getFormValidation();
         }
-        
+
         public FormValidation doCheckInstanceCap(@QueryParameter String value) {
             if (value == null || value.trim().isEmpty()) {
                 return FormValidation.ok();

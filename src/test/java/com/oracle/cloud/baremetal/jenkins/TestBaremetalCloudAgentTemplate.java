@@ -132,7 +132,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             this.initScriptTimeoutSeconds = initScriptTimeoutSeconds;
             return this;
         }
-        
+
         public Builder instanceCap(String instanceCap) {
             this.instanceCap = instanceCap;
             return this;
