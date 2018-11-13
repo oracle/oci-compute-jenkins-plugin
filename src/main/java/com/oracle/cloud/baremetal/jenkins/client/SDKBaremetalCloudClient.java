@@ -260,7 +260,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     public List<Compartment> getCompartmentsList(String tenantId) throws Exception {
         try (Identity identityClient = getIdentityClient()) {
             List<Compartment> compartmentIds;
-            compartmentIds = identityClient.listCompartments(ListCompartmentsRequest.builder().compartmentId(tenantId).build()).getItems();
+            compartmentIds = identityClient.listCompartments(ListCompartmentsRequest.builder().compartmentId(tenantId).compartmentIdInSubtree(Boolean.TRUE).build()).getItems();
             return compartmentIds;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
