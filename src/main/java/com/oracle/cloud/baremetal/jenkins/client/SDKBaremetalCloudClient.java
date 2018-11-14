@@ -50,6 +50,7 @@ import com.oracle.bmc.identity.model.Compartment;
 import com.oracle.bmc.identity.requests.GetUserRequest;
 import com.oracle.bmc.identity.requests.ListAvailabilityDomainsRequest;
 import com.oracle.bmc.identity.requests.ListCompartmentsRequest;
+import com.oracle.bmc.identity.responses.ListCompartmentsResponse;
 import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.BaremetalCloudAgentTemplate;
 
@@ -259,8 +260,15 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     @Override
     public List<Compartment> getCompartmentsList(String tenantId) throws Exception {
         try (Identity identityClient = getIdentityClient()) {
-            List<Compartment> compartmentIds;
-            compartmentIds = identityClient.listCompartments(ListCompartmentsRequest.builder().compartmentId(tenantId).compartmentIdInSubtree(Boolean.TRUE).build()).getItems();
+            List<Compartment> compartmentIds = new ArrayList<>();
+            ListCompartmentsRequest.Builder builder = ListCompartmentsRequest.builder().compartmentId(tenantId).compartmentIdInSubtree(Boolean.TRUE);
+            String nextPageToken = null;
+            do {
+                builder.page(nextPageToken);
+                ListCompartmentsResponse listResponse = identityClient.listCompartments(builder.build());
+                compartmentIds.addAll(listResponse.getItems());
+                nextPageToken = listResponse.getOpcNextPage();
+            } while (nextPageToken != null);
             return compartmentIds;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
