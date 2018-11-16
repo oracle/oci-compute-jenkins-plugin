@@ -38,6 +38,8 @@ import com.oracle.bmc.core.responses.GetInstanceResponse;
 import com.oracle.bmc.core.responses.GetSubnetResponse;
 import com.oracle.bmc.core.responses.GetVnicResponse;
 import com.oracle.bmc.core.responses.LaunchInstanceResponse;
+import com.oracle.bmc.core.responses.ListImagesResponse;
+import com.oracle.bmc.core.responses.ListShapesResponse;
 import com.oracle.bmc.core.responses.ListSubnetsResponse;
 import com.oracle.bmc.core.responses.ListVcnsResponse;
 import com.oracle.bmc.core.responses.ListVnicAttachmentsResponse;
@@ -299,10 +301,14 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         List<Image> imageList = new ArrayList<>();
 
         try (ComputeAsyncClient computeAsyncClient = getComputeAsyncClient()) {
-            ListImagesRequest request = ListImagesRequest.builder()
-                    .compartmentId(compartmentId)
-                    .build();
-            imageList.addAll(computeAsyncClient.listImages(request, null).get().getItems());
+            ListImagesRequest.Builder builder = ListImagesRequest.builder().compartmentId(compartmentId);
+            String nextPageToken = null;
+            do {
+                builder.page(nextPageToken);
+                Future<ListImagesResponse> response  = computeAsyncClient.listImages(builder.build(), null);
+                imageList.addAll(response.get().getItems());
+                nextPageToken = response.get().getOpcNextPage();
+            } while (nextPageToken != null);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get Image list", e);
             throw e;
@@ -315,12 +321,17 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         List<Shape> shapeList = new ArrayList<>();
 
         try (ComputeAsyncClient computeAsyncClient = getComputeAsyncClient()) {
-            ListShapesRequest request = ListShapesRequest.builder()
+            ListShapesRequest.Builder  builder = ListShapesRequest.builder()
                     .compartmentId(compartmentId)
                     .availabilityDomain(availableDomain)
-                    .imageId(imageId)
-                    .build();
-            shapeList.addAll(computeAsyncClient.listShapes(request, null).get().getItems());
+                    .imageId(imageId);
+            String nextPageToken = null;
+            do {
+                builder.page(nextPageToken);
+                Future<ListShapesResponse> response  = computeAsyncClient.listShapes(builder.build(), null);
+                shapeList.addAll(response.get().getItems());
+                nextPageToken = response.get().getOpcNextPage();
+            } while (nextPageToken != null);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get Shape list", e);
             throw e;
@@ -334,24 +345,24 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         List<Vcn> vcnList = new ArrayList<>();
 
         try (VirtualNetworkAsyncClient vnc = getVirtualNetworkAsyncClient()) {
-            List<Future<ListVcnsResponse>> futureList = new ArrayList<>();
 
             // Asynchronously list VCNs in all available compartments
             for (Compartment compartment : compartmentList) {
-                ListVcnsRequest request = ListVcnsRequest.builder().compartmentId(compartment.getId()).build();
-                futureList.add(vnc.listVcns(request, null));
-            }
-
-            for (Future<ListVcnsResponse> future : futureList) {
+                ListVcnsRequest.Builder builder = ListVcnsRequest.builder().compartmentId(compartment.getId());
+                String nextPageToken = null;
                 try {
-                    vcnList.addAll(future.get().getItems());
+                    do {
+                        builder.page(nextPageToken);
+                        Future<ListVcnsResponse> response = vnc.listVcns(builder.build(), null);
+                        vcnList.addAll(response.get().getItems());
+                        nextPageToken = response.get().getOpcNextPage();
+                    } while (nextPageToken != null);
                 } catch (BmcException e) {
                     if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
                         throw e;
                     }
                 }
             }
-
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get VCN list", e);
             throw e;
@@ -365,24 +376,24 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         List<Subnet> subnetList = new ArrayList<>();
 
         try (VirtualNetworkAsyncClient vnc = getVirtualNetworkAsyncClient()) {
-            List<Future<ListSubnetsResponse>> futureList = new ArrayList<>();
 
             // The VCN and subnet can be from different compartment
             for (Compartment compartment : compartmentList) {
-                ListSubnetsRequest request = ListSubnetsRequest.builder()
+                ListSubnetsRequest.Builder builder = ListSubnetsRequest.builder()
                         .compartmentId(compartment.getId())
-                        .vcnId(vcnId)
-                        .build();
-                futureList.add(vnc.listSubnets(request, null));
-            }
-
-            for (Future<ListSubnetsResponse> future : futureList) {
+                        .vcnId(vcnId);
+                String nextPageToken = null;
                 try {
-                    subnetList.addAll(future.get().getItems());
+                    do {
+                        builder.page(nextPageToken);
+                        Future<ListSubnetsResponse> response = vnc.listSubnets(builder.build(), null);
+                        subnetList.addAll(response.get().getItems());
+                        nextPageToken = response.get().getOpcNextPage();
+                    } while (nextPageToken != null);
                 } catch (BmcException e) {
-                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
-                        throw e;
-                    }
+                        if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
+                            throw e;
+                        }
                 }
             }
         } catch (Exception e) {
