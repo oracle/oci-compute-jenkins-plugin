@@ -41,8 +41,12 @@
 	  <f:entry title="${%shape}" field="shape">
 	    <f:select />
 	  </f:entry>
-	
-	  <f:entry title="${%vcnId}" field="vcnId">
+
+          <f:entry title="${%vcnCompartmentId}" field="vcnCompartmentId">
+            <f:select />
+          </f:entry>
+
+          <f:entry title="${%vcnId}" field="vcnId">
 	    <f:select />
 	  </f:entry>
 	

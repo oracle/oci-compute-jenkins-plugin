@@ -261,21 +261,22 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public List<Compartment> getCompartmentsList(String tenantId) throws Exception {
-        try (Identity identityClient = getIdentityClient()) {
-            List<Compartment> compartmentIds = new ArrayList<>();
+        List<Compartment> compartmentIds = new ArrayList<>();
+        try (IdentityAsyncClient identityAsyncClient = getIdentityAsyncClient()) {
+
             ListCompartmentsRequest.Builder builder = ListCompartmentsRequest.builder().compartmentId(tenantId).compartmentIdInSubtree(Boolean.TRUE);
             String nextPageToken = null;
             do {
                 builder.page(nextPageToken);
-                ListCompartmentsResponse listResponse = identityClient.listCompartments(builder.build());
-                compartmentIds.addAll(listResponse.getItems());
-                nextPageToken = listResponse.getOpcNextPage();
+                Future<ListCompartmentsResponse> listResponse = identityAsyncClient.listCompartments(builder.build(), null);
+                compartmentIds.addAll(listResponse.get().getItems());
+                nextPageToken = listResponse.get().getOpcNextPage();
             } while (nextPageToken != null);
-            return compartmentIds;
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
             throw e;
         }
+        return compartmentIds;
     }
 
 
@@ -340,29 +341,18 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     @Override
-    public List<Vcn> getVcnList(String tenantId) throws Exception {
-        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+    public List<Vcn> getVcnList(String compartmentId) throws Exception {        
         List<Vcn> vcnList = new ArrayList<>();
 
         try (VirtualNetworkAsyncClient vnc = getVirtualNetworkAsyncClient()) {
-
-            // Asynchronously list VCNs in all available compartments
-            for (Compartment compartment : compartmentList) {
-                ListVcnsRequest.Builder builder = ListVcnsRequest.builder().compartmentId(compartment.getId());
-                String nextPageToken = null;
-                try {
-                    do {
-                        builder.page(nextPageToken);
-                        Future<ListVcnsResponse> response = vnc.listVcns(builder.build(), null);
-                        vcnList.addAll(response.get().getItems());
-                        nextPageToken = response.get().getOpcNextPage();
-                    } while (nextPageToken != null);
-                } catch (BmcException e) {
-                    if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
-                        throw e;
-                    }
-                }
-            }
+            ListVcnsRequest.Builder builder = ListVcnsRequest.builder().compartmentId(compartmentId);
+            String nextPageToken = null;
+            do {
+                builder.page(nextPageToken);
+                Future<ListVcnsResponse> response = vnc.listVcns(builder.build(), null);
+                vcnList.addAll(response.get().getItems());
+                nextPageToken = response.get().getOpcNextPage();
+            } while (nextPageToken != null);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get VCN list", e);
             throw e;
@@ -371,31 +361,20 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     @Override
-    public List<Subnet> getSubNetList(String tenantId,String vcnId) throws Exception {
-        List<Compartment> compartmentList = getCompartmentsList(tenantId);
+    public List<Subnet> getSubNetList(String compartmentId,String vcnId) throws Exception {
         List<Subnet> subnetList = new ArrayList<>();
 
         try (VirtualNetworkAsyncClient vnc = getVirtualNetworkAsyncClient()) {
-
-            // The VCN and subnet can be from different compartment
-            for (Compartment compartment : compartmentList) {
-                ListSubnetsRequest.Builder builder = ListSubnetsRequest.builder()
-                        .compartmentId(compartment.getId())
-                        .vcnId(vcnId);
-                String nextPageToken = null;
-                try {
-                    do {
-                        builder.page(nextPageToken);
-                        Future<ListSubnetsResponse> response = vnc.listSubnets(builder.build(), null);
-                        subnetList.addAll(response.get().getItems());
-                        nextPageToken = response.get().getOpcNextPage();
-                    } while (nextPageToken != null);
-                } catch (BmcException e) {
-                        if (e.getStatusCode() != 404) { // NotAuthorizedOrNotFound
-                            throw e;
-                        }
-                }
-            }
+            ListSubnetsRequest.Builder builder = ListSubnetsRequest.builder()
+                    .compartmentId(compartmentId)
+                    .vcnId(vcnId);
+            String nextPageToken = null;
+            do {
+                builder.page(nextPageToken);
+                Future<ListSubnetsResponse> response = vnc.listSubnets(builder.build(), null);
+                subnetList.addAll(response.get().getItems());
+                nextPageToken = response.get().getOpcNextPage();
+            } while (nextPageToken != null);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get Subnet list", e);
             throw e;

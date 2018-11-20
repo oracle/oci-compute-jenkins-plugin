@@ -20,6 +20,7 @@ import org.kohsuke.stapler.QueryParameter;
 
 import com.oracle.bmc.core.model.Image;
 import com.oracle.bmc.core.model.Shape;
+import com.oracle.bmc.core.model.Subnet;
 import com.oracle.bmc.core.model.Vcn;
 import com.oracle.bmc.core.responses.GetSubnetResponse;
 import com.oracle.bmc.identity.model.AvailabilityDomain;
@@ -46,6 +47,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public final String compartmentId;
     public final String availableDomain;
+    public final String vcnCompartmentId;
     public final String vcnId;
     public final String subnetId;
     public final String imageCompartmentId;
@@ -78,6 +80,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public BaremetalCloudAgentTemplate(
             final String compartmentId,
             final String availableDomain,
+            final String vcnCompartmentId,
             final String vcnId,
             final String subnetId,
             final String imageCompartmentId,
@@ -102,6 +105,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String instanceCap){
     	this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
+        this.vcnCompartmentId = vcnCompartmentId;
         this.vcnId = vcnId;
         this.subnetId = subnetId;
         this.imageCompartmentId = imageCompartmentId;
@@ -135,6 +139,9 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         return availableDomain;
     }
 
+    public String getVcnCompartmentId() {
+        return vcnCompartmentId;
+    }
     public String getVcn() {
         return vcnId;
     }
@@ -577,16 +584,17 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             return model;
         }
 
-        public ListBoxModel doFillVcnIdItems(
+        public ListBoxModel doFillVcnCompartmentIdItems(
                 @QueryParameter @RelativePath("..") String userId,
                 @QueryParameter @RelativePath("..") String fingerprint,
                 @QueryParameter @RelativePath("..") String tenantId,
                 @QueryParameter @RelativePath("..") String apikey,
                 @QueryParameter @RelativePath("..") String passphrase,
                 @QueryParameter @RelativePath("..") String regionId,
-                @QueryParameter @RelativePath("..") String maxAsyncThreads) throws IOException, ServletException {
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
+                @QueryParameter String compartmentId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
-            model.add("<Select a Virtual Cloud Network>", "");
+            model.add("Default", compartmentId);
 
             if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId)) {
                 return model;
@@ -594,25 +602,42 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId, maxAsyncThreads);
 
-            try {
-                List<Compartment> compartmentIds = client.getCompartmentsList(tenantId);
-                List<String> listVcnId = new ArrayList<String>();
-
-                HashMap<String, String> mapcompartment = new HashMap<String, String>();
-                for (Compartment compartment : compartmentIds) {
-                    mapcompartment.put(compartment.getId(),compartment.getName());
+            try{
+                for (Compartment compartment : client.getCompartmentsList(tenantId)) {
+                    model.add(compartment.getName(), compartment.getId());
                 }
+            }catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
+            }
 
-                List<Vcn> list = client.getVcnList(tenantId);
-                for (Vcn vcnId : list) {
-                    if (listVcnId.indexOf(vcnId.getId()) < 0) {
-                        if (mapcompartment.get(vcnId.getCompartmentId())  != null) {
-                            model.add(vcnId.getDisplayName() + "(" + mapcompartment.get(vcnId.getCompartmentId()) + ")", vcnId.getId());
-                        } else {
-                            model.add(vcnId.getDisplayName(), vcnId.getId());
-                        }
-                        listVcnId.add(vcnId.getId());
-                    }
+            return model;
+        }
+        public ListBoxModel doFillVcnIdItems(
+                @QueryParameter @RelativePath("..") String userId,
+                @QueryParameter @RelativePath("..") String fingerprint,
+                @QueryParameter @RelativePath("..") String tenantId,
+                @QueryParameter @RelativePath("..") String apikey,
+                @QueryParameter @RelativePath("..") String passphrase,
+                @QueryParameter @RelativePath("..") String regionId,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
+                @QueryParameter String compartmentId,
+                @QueryParameter String vcnCompartmentId) throws IOException, ServletException {
+            ListBoxModel model = new ListBoxModel();
+            model.add("<Select a Virtual Cloud Network>", "");
+
+            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, compartmentId)) {
+                return model;
+            }
+
+            if (anyRequiredFieldEmpty(vcnCompartmentId)) {
+                vcnCompartmentId = compartmentId;
+            }
+
+            BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId, maxAsyncThreads);
+
+            try {
+                for (Vcn vcnId : client.getVcnList(vcnCompartmentId)) {
+                    model.add(vcnId.getDisplayName(), vcnId.getId());
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get VCN list", e);
@@ -629,22 +654,28 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String regionId,
                 @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String availableDomain,
-                @QueryParameter String vcnId)
-                        throws IOException, ServletException {
+                @QueryParameter String vcnId,
+                @QueryParameter String compartmentId,
+                @QueryParameter String vcnCompartmentId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<First select 'Availablity Domain' and 'Virtual Cloud Network' above>", "");
 
-            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, availableDomain, vcnId)) {
+            if (anyRequiredFieldEmpty(userId, fingerprint, tenantId, apikey, regionId, availableDomain, vcnId, compartmentId)) {
                 return model;
+            }
+
+            if (anyRequiredFieldEmpty(vcnCompartmentId)) {
+                vcnCompartmentId = compartmentId;
             }
 
             BaremetalCloudClient client = getClient(fingerprint, apikey, passphrase, tenantId, userId, regionId, maxAsyncThreads);
 
             try {
-                client.getSubNetList(tenantId, vcnId)
-                        .stream()
-                        .filter(s -> s.getAvailabilityDomain().equals(availableDomain)) // selected AD only
-                        .forEach(s -> model.add(s.getDisplayName(), s.getId()));
+                for (Subnet subnet : client.getSubNetList(vcnCompartmentId, vcnId)) {
+                    if (subnet.getAvailabilityDomain().equals(availableDomain)) {
+                        model.add(subnet.getDisplayName(), subnet.getId());
+                    }
+                }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get subnet list", e);
             }
