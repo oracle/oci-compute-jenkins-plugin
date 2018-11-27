@@ -40,7 +40,7 @@ There are a number of ways to install the Oracle Cloud Infrastructure Compute Pl
 2. Using the Jenkins CLI install-plugin command.
 3. Copying the .hpi file to the JENKINS_HOME/plugins directory.
 
-#####Using the "Plugin Manager" in the web UI
+##### Using the "Plugin Manager" in the web UI
 The simplest and most common way of installing plugins is through the Manage Jenkins > Manage Plugins view, available to administrators of a Jenkins environment.
 
 To install the Plugin in Jenkins: 
@@ -52,7 +52,7 @@ To install the Plugin in Jenkins:
 5. Click **Install**
 6. Restart Jenkins
 
-#####Using the Jenkins CLI install-plugin command
+##### Using the Jenkins CLI install-plugin command
 
 Administrators may also use the [Jenkins CLI](https://jenkins.io/doc/book/managing/cli/) which provides a command to install plugins.
 
@@ -75,7 +75,7 @@ Administrators may also use the [Jenkins CLI](https://jenkins.io/doc/book/managi
 Link to latest .hpi version can be found [here](https://updates.jenkins.io/latest/oracle-cloud-infrastructure-compute.hpi).
 
 
-#####Copying the .hpi file to the JENKINS_HOME/plugins directory
+##### Copying the .hpi file to the JENKINS_HOME/plugins directory
 Using the .hpi file that has been explicitly downloaded by a systems administrator, the administrator can manually copy the downloaded .hpi file into the JENKINS_HOME/plugins directory on the Jenkins master.
 Link to latest .hpi version can be found [here](https://updates.jenkins.io/latest/oracle-cloud-infrastructure-compute.hpi).
 
