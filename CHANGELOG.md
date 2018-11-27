@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.4 - November 2018
+### Fixed
+- Compartments listed are no longer limited to 25 values.
+- Child Compartments are now visible in Compartments.
+
+### Added
+- Template Instance Cap functionality. Instance Cap can now be placed at Template level.
+- "Virtual Cloud Network Compartment" Drop Down in Template configuration to access Network resources in separate compartments. Improves Template loading performance. **Note:** if upgrading from v1.0.3 (or earlier) and the Networks resources is in a separate compartment than the default Compartment, you may have to update the values in your existing Template configuration.
+
 ## 1.0.3 - October 2018
 ### Fixed
 - Fix "I/O error in channel oci-compute" java.io.EOFException severe messages in Jenkins log. 
@@ -13,7 +22,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 - "Max number of async threads" Field in Cloud configuration. Allows user to specify the max number of async threads to use when loading Templates configuration.
-- "Image Compartment" Field in Template configuration for images in separate compartments. **Note:** if upgrading from v1.0.2 (or earlier) and Image is in a separate compartment than Default Compartment, you may have to update the values in your existing Template configuration.
+- "Image Compartment" Drop Down in Template configuration for images in separate compartments. **Note:** if upgrading from v1.0.2 (or earlier) and the Images are in a separate compartment than the default Compartment, you may have to update the values in your existing Template configuration.
 
 
 ## 1.0.2 - June 2018
