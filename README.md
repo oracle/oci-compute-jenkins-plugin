@@ -29,7 +29,7 @@ View Oracle Cloud Infrastructure Compute Plugin page on the [plugins.jenkins.io]
 2. Jenkins installed with JDK 8 or higher.
 
 ## Compatibility
-1. Plugin is tested on minimum Jenkins version 1.625.3, it may not work with versions early than 1.554.
+1. Plugin is tested on minimum Jenkins version 1.625.3, it may not work with versions earlier than 1.554.
 2. For Jenkins versions between 1.554 and 1.625, pre-install 'bouncycastle API Plugin' plugin.
 
 
