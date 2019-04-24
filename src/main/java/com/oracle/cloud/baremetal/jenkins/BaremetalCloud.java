@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import java.net.InetAddress;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -85,6 +86,9 @@ public class BaremetalCloud extends AbstractCloudImpl{
      * The prefix to add to the names of created instances.
      */
     public static final String INSTANCE_NAME_PREFIX = "jenkins-";
+
+    /** The prefix with Jenkins Master IP to add to the names of created instances. */
+    private static final String JENKINS_IP = getJenkinsIp();
 
     private final String fingerprint;
     private final String apikey;
@@ -185,6 +189,14 @@ public class BaremetalCloud extends AbstractCloudImpl{
         return "OCI cloud \"" + getCloudName() + "\": " + msg;
     }
 
+    private static String getJenkinsIp() {
+        String IP = "";
+        try {
+            IP = InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e){}
+        return IP;
+    }
+
     @Override
     public synchronized Collection<PlannedNode> provision(Label label, int excessWorkload) {
         final BaremetalCloudAgentTemplate template = getTemplate(label);
@@ -232,7 +244,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
             UUID uuid = UUID.randomUUID();
             this.name = BaremetalCloud.NAME_PREFIX + uuid;
-            this.instanceName = INSTANCE_NAME_PREFIX + uuid;
+            this.instanceName = INSTANCE_NAME_PREFIX + JENKINS_IP + "-" + uuid;
         }
 
         public String getPlannedNodeDisplayName() {
