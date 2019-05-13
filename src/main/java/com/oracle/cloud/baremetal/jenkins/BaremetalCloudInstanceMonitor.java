@@ -47,7 +47,7 @@ public class BaremetalCloudInstanceMonitor extends AsyncPeriodicWork {
 					}
 				} catch (IOException | InterruptedException | RuntimeException e){
 					LOGGER.info("Failed to terminate node : " + agent.getDisplayName());
-					removeNode(agent);
+                                        LOGGER.info("ERROR : " + e.getMessage());
 				}
 			}
 		}

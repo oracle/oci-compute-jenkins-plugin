@@ -73,6 +73,6 @@ public class BaremetalCloudInstanceMonitorUnitTest {
         TestBaremetalCloudAgent agent = new TestBaremetalCloudAgent.Builder().build();
         TestBaremetalCloudInstanceMonitor monitor = new TestBaremetalCloudInstanceMonitor(agent);
         monitor.execute(null);
-        Assert.assertTrue(monitor.removed);
+        Assert.assertFalse(monitor.removed);
     }
 }
