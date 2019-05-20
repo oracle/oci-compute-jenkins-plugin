@@ -86,11 +86,11 @@
 		  </f:entry>
       
 		  <f:entry title="${%startTimeoutSeconds}" field="startTimeoutSeconds">
-        	<f:textbox default="${descriptor.defaultStartTimeoutSeconds}" />
+        	<f:textbox default="900" />
       	  </f:entry>
 
       	  <f:entry title="${%sshConnectTimeoutSeconds}" field="sshConnectTimeoutSeconds">
-            <f:textbox default="${descriptor.defaultSshConnectTimeoutSeconds}" />
+            <f:textbox default="900" />
           </f:entry>
 		
 		  <f:entry title="${%idleTerminationMinutes}" field="idleTerminationMinutes">
