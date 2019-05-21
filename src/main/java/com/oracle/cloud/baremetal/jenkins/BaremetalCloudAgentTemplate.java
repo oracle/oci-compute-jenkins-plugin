@@ -268,7 +268,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     }
 
     private static FormValidationValue<Integer> checkStartTimeoutSeconds(String value) {
-        return FormValidationValue.validateNonNegativeInteger(value, (int)TimeUnit.MINUTES.toSeconds(5));
+        return FormValidationValue.validateNonNegativeInteger(value, (int)TimeUnit.MINUTES.toSeconds(15));
     }
 
     public long getStartTimeoutNanos() {
@@ -346,14 +346,6 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
         public static int getDefaultNumExecutors() {
             return checkNumExecutors(null).getValue();
-        }
-
-        public static int getDefaultSshConnectTimeoutSeconds() {
-            return checkSshConnectTimeoutSeconds(null).getValue();
-        }
-
-        public static int getDefaultStartTimeoutSeconds() {
-            return checkStartTimeoutSeconds(null).getValue();
         }
 
         public FormValidation doCheckNumExecutors(@QueryParameter String value) {

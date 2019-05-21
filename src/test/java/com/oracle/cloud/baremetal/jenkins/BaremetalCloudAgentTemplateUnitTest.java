@@ -164,17 +164,6 @@ public class BaremetalCloudAgentTemplateUnitTest {
     }
 
     @Test
-    public void testGetSshConnectTimeoutNanos() {
-        long defaultMillis = TimeUnit.SECONDS.toMillis(BaremetalCloudAgentTemplate.DescriptorImpl.getDefaultSshConnectTimeoutSeconds());
-        Assert.assertEquals(defaultMillis, new TestBaremetalCloudAgentTemplate().getSshConnectTimeoutMillis());
-        Assert.assertEquals(defaultMillis, new TestBaremetalCloudAgentTemplate.Builder().sshConnectTimeoutSeconds("").build().getSshConnectTimeoutMillis());
-        Assert.assertEquals(defaultMillis, new TestBaremetalCloudAgentTemplate.Builder().sshConnectTimeoutSeconds("x").build().getSshConnectTimeoutMillis());
-        Assert.assertEquals(defaultMillis, new TestBaremetalCloudAgentTemplate.Builder().sshConnectTimeoutSeconds("-1").build().getSshConnectTimeoutMillis());
-        Assert.assertEquals(0, new TestBaremetalCloudAgentTemplate.Builder().sshConnectTimeoutSeconds("0").build().getSshConnectTimeoutMillis());
-        Assert.assertEquals(TimeUnit.SECONDS.toMillis(1), new TestBaremetalCloudAgentTemplate.Builder().sshConnectTimeoutSeconds("1").build().getSshConnectTimeoutMillis());
-    }
-
-    @Test
     public void testGetSshPublickey() {
         Assert.assertNull(new TestBaremetalCloudAgentTemplate().getSshPublickey());
         Assert.assertEquals("skn", new TestBaremetalCloudAgentTemplate.Builder().sshPublickey("skn").build().getSshPublickey());
@@ -215,7 +204,7 @@ public class BaremetalCloudAgentTemplateUnitTest {
 
     @Test
     public void testGetStartTimeoutNanos() {
-        long defaultNanos = TimeUnit.SECONDS.toNanos(BaremetalCloudAgentTemplate.DescriptorImpl.getDefaultStartTimeoutSeconds());
+        long defaultNanos = TimeUnit.SECONDS.toNanos(900);
         Assert.assertEquals(defaultNanos, new TestBaremetalCloudAgentTemplate().getStartTimeoutNanos());
         Assert.assertEquals(defaultNanos, new TestBaremetalCloudAgentTemplate.Builder().startTimeoutSeconds("").build().getStartTimeoutNanos());
         Assert.assertEquals(defaultNanos, new TestBaremetalCloudAgentTemplate.Builder().startTimeoutSeconds("x").build().getStartTimeoutNanos());
@@ -272,11 +261,6 @@ public class BaremetalCloudAgentTemplateUnitTest {
         Assert.assertEquals(FormValidation.Kind.OK, new BaremetalCloudAgentTemplate.DescriptorImpl().doCheckIdleTerminationMinutes("0").kind);
         Assert.assertEquals(FormValidation.Kind.ERROR, new BaremetalCloudAgentTemplate.DescriptorImpl().doCheckIdleTerminationMinutes("-1").kind);
         Assert.assertEquals(FormValidation.Kind.ERROR, new BaremetalCloudAgentTemplate.DescriptorImpl().doCheckIdleTerminationMinutes("x").kind);
-    }
-
-    @Test
-    public void testGetDefaultSshConnectTimeoutSeconds() {
-        Assert.assertEquals(30, BaremetalCloudAgentTemplate.DescriptorImpl.getDefaultSshConnectTimeoutSeconds());
     }
 
     @Test
@@ -367,12 +351,6 @@ public class BaremetalCloudAgentTemplateUnitTest {
             allowing(factory).createClient(FINGERPRINT, API_KEY, "", TENANT_ID, USER_ID, "us-phoenix-1", 50); will(returnValue(client));
         }});
 
-    }
-
-
-    @Test
-    public void testGetDefaultStartTimeoutSeconds() {
-        Assert.assertEquals(TimeUnit.MINUTES.toSeconds(5), BaremetalCloudAgentTemplate.DescriptorImpl.getDefaultStartTimeoutSeconds());
     }
 
     @Test
