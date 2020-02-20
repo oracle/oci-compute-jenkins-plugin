@@ -1,0 +1,4 @@
+<?jelly escape-by-default='true'?>
+<div>
+This plugin allows you to run dynamic slaves in the Oracle Cloud Infrastructure(OCI) Compute environment.
+</div>

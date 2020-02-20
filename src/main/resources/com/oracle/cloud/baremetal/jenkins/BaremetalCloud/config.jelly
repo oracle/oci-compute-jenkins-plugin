@@ -1,0 +1,36 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core"
+         xmlns:st="jelly:stapler"
+         xmlns:d="jelly:define"
+         xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson"
+         xmlns:f="/lib/form"
+         xmlns:x="/com/oracle/cloud/baremetal/jenkins/lib"
+         xmlns:c="/lib/credentials">
+  <f:block>
+    <div class="section-header">
+     This plugin allows you to run dynamic slaves in the Oracle Cloud Infrastructure(OCI) Compute environment.
+    </div>
+  </f:block>
+  <f:entry title="${%name}" field="cloudName">
+    <f:textbox clazz="required"/>
+  </f:entry>
+  <f:entry title="${%credentials}" field="credentialsId" >
+    <c:select expressionAllowed="false"/>
+  </f:entry>
+  <f:advanced>
+    <f:entry title="${%instanceCapStr}" field="instanceCapStr">
+      <f:textbox />
+    </f:entry>
+    <f:entry title="${%maxAsyncThreads}" field="maxAsyncThreads">
+      <f:textbox default="50"/>
+    </f:entry>
+  </f:advanced>
+  
+  <f:entry title="${%templates}" description="${%templates.desc}" help="${descriptor.getHelpFile('templates')}">
+    <x:idRepeatable field="templates" header="${%templates.header}" add="${%templates.add}" nextIdField="nextTemplateId" idField="templateId">
+      <st:include page="config.jelly" class="${descriptor.clazz}" />
+    </x:idRepeatable>
+  </f:entry>
+
+</j:jelly>
