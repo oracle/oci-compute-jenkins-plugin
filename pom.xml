@@ -10,7 +10,7 @@
     <relativePath />
   </parent>
   <artifactId>oracle-cloud-infrastructure-compute</artifactId>
-  <version>1.0.7-SNAPSHOT</version>
+  <version>1.0.8-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <properties>
