@@ -1,5 +1,3 @@
-Oracle Cloud Infrastructure Compute Plugin
-
 [**Oracle Cloud Infrastructure Compute Plugin**](https://updates.jenkins.io/latest/oracle-cloud-infrastructure-compute.hpi) allows users to access and manage cloud resources on the Oracle Cloud Infrastructure (OCI) from Jenkins.
 A Jenkins master instance with Oracle Cloud Infrastructure Compute Plugin can spin up OCI Instances (slaves or agents) on demand within OCI, and remove the Instances and free its resources automatically once the Job completes.
 
@@ -37,12 +35,12 @@ View Oracle Cloud Infrastructure Compute Plugin page on the [plugins.jenkins.io]
 
 2. Jenkins installed with JDK 8 or higher.
 
-3. Required Plugins: [bouncycastle API](https://plugins.jenkins.io/bouncycastle-api)  and [Credentials](https://plugins.jenkins.io/credentials).
+3. Required Plugins: [bouncycastle API](https://plugins.jenkins.io/bouncycastle-api), [SSH Credentials](https://plugins.jenkins.io/ssh-credentials/), and [Credentials](https://plugins.jenkins.io/credentials)
 
    
 
 ## Compatibility
-Minimum Jenkins requirement: 2.138.4
+Minimum Jenkins requirement: *2.164.x*
 
 
 
@@ -118,7 +116,7 @@ Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/bl
 2. If you want to use the latest version of OCI Java SDK, update pom.xml
 
    ```
-   <oci-java-sdk.version>1.7.0</oci-java-sdk.version>
+   <oci-java-sdk.version>1.17.4</oci-java-sdk.version>
    ```
 
    Compile and Install package:
