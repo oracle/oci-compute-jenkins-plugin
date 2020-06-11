@@ -469,7 +469,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                     GetInstanceRequest.builder()
                     .instanceId(instanceId)
                     .build(),
-                    Instance.LifecycleState.Terminated).execute();
+                    Instance.LifecycleState.Terminating).execute();
             return response.getInstance();
         }
     }
