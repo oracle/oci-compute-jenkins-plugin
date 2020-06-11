@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import com.oracle.bmc.waiter.BmcGenericWaiter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.QueryParameter;
@@ -237,7 +238,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
                 LOGGER.info("Provisioned instance " + instanceName + " with ip " + Ip);
                 awaitInstanceSshAvailable(Ip, template.getSshConnectTimeoutMillis(), timeoutHelper);
                 template.resetFailureCount();
-            } catch(IOException | RuntimeException ex){
+            } catch( BmcGenericWaiter.WaitConditionFailedException | IOException | RuntimeException ex){
                 try{
                     recycleCloudResources(instance.getId());
                     LOGGER.log(Level.WARNING, "Provision node: " + instanceName + " failed, and created resources have been recycled.", ex);
