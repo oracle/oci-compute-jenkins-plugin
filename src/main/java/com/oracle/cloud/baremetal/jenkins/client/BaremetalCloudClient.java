@@ -94,6 +94,18 @@ public interface BaremetalCloudClient extends AutoCloseable {
     List<Shape> getShapesList(String compartmentId, String availableDomain, String imageId) throws Exception;
 
     /**
+     * Get the OCPUs options
+     *
+     * @param compartmentId the compartment id
+     * @param availableDomain available domain
+     * @param imageId image id
+     * @param shape shape name
+     * @return an array with min (array[0]) and max (array[1])
+     * @throws Exception if an error occurs
+     */
+    Integer[] getMinMaxOcpus(String compartmentId, String availableDomain, String imageId, String shape) throws Exception;
+
+    /**
      * Get the Virtual Cloud Network list
      *
      * @param tenantId the tenant id

@@ -17,14 +17,7 @@ import com.oracle.bmc.core.ComputeClient;
 import com.oracle.bmc.core.ComputeWaiters;
 import com.oracle.bmc.core.VirtualNetworkAsyncClient;
 import com.oracle.bmc.core.VirtualNetworkClient;
-import com.oracle.bmc.core.model.CreateVnicDetails;
-import com.oracle.bmc.core.model.Image;
-import com.oracle.bmc.core.model.Instance;
-import com.oracle.bmc.core.model.LaunchInstanceDetails;
-import com.oracle.bmc.core.model.Shape;
-import com.oracle.bmc.core.model.Subnet;
-import com.oracle.bmc.core.model.Vcn;
-import com.oracle.bmc.core.model.VnicAttachment;
+import com.oracle.bmc.core.model.*;
 import com.oracle.bmc.core.requests.GetInstanceRequest;
 import com.oracle.bmc.core.requests.GetSubnetRequest;
 import com.oracle.bmc.core.requests.GetVnicRequest;
@@ -207,7 +200,10 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             if(subnetResponse.getSubnet().getProhibitPublicIpOnVnic()) {
                 assignPublicIP=false;
             }
-
+            LaunchInstanceShapeConfigDetails shapeConfig = null;
+            if (!template.getNumberOfOcpus().isEmpty()) {
+                shapeConfig = LaunchInstanceShapeConfigDetails.builder().ocpus(Float.parseFloat(template.getNumberOfOcpus())).build();
+            }
             LaunchInstanceResponse response = computeClient.launchInstance(LaunchInstanceRequest
                     .builder()
                     .launchInstanceDetails(
@@ -224,6 +220,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                             .imageId(imageIdStr)
                             .metadata(metadata)
                             .shape(shape)
+                            .shapeConfig(shapeConfig)
                             .subnetId(subnetIdStr)
                             .build())
                     .build());
@@ -396,6 +393,20 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             throw e;
         }
         return shapeList;
+    }
+
+    public Integer[] getMinMaxOcpus(String compartmentId, String availableDomain, String imageId, String shape) throws Exception {
+        Integer[] ocpuOptions = new Integer[2];
+
+        getShapesList(compartmentId, availableDomain, imageId).stream()
+                .parallel()
+                .filter(n -> n.getShape().equals(shape))
+                .forEach(n -> {
+                    ocpuOptions[0] = n.getOcpuOptions().getMin().intValue();
+                    ocpuOptions[1] = n.getOcpuOptions().getMax().intValue();
+                });
+
+        return ocpuOptions;
     }
 
     @Override

@@ -43,6 +43,8 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import java.util.Collections;
+import java.util.stream.IntStream;
+
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.AncestorInPath;
 
@@ -74,6 +76,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String sshConnectTimeoutSeconds;
     public final String initScriptTimeoutSeconds;
     public final String instanceCap;
+    public final String numberOfOcpus;
 
     private transient int failureCount;
     private transient String disableCause;
@@ -102,7 +105,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String sshConnectTimeoutSeconds,
             final String startTimeoutSeconds,
             final String initScriptTimeoutSeconds,
-            final String instanceCap){
+            final String instanceCap,
+            final String numberOfOcpus){
     	this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
         this.vcnCompartmentId = vcnCompartmentId;
@@ -126,6 +130,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.startTimeoutSeconds = startTimeoutSeconds;
         this.initScriptTimeoutSeconds = initScriptTimeoutSeconds;
         this.instanceCap = instanceCap;
+        this.numberOfOcpus = numberOfOcpus;
     }
 
     public String getcompartmentId() {
@@ -263,6 +268,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getInstanceCap() {
         return instanceCap;
+    }
+
+    public String getNumberOfOcpus() {
+        return numberOfOcpus;
     }
 
     public String getPublicKey() throws IOException {
@@ -512,6 +521,39 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                     }
                 }
 
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to get shapes list", e);
+            }
+            return model;
+        }
+
+        public ListBoxModel doFillNumberOfOcpusItems(
+                @QueryParameter @RelativePath("..") String credentialsId,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
+                @QueryParameter String compartmentId,
+                @QueryParameter String availableDomain,
+                @QueryParameter String imageId,
+                @QueryParameter String shape)
+                throws IOException, ServletException {
+            ListBoxModel model = new ListBoxModel();
+
+            if (anyRequiredFieldEmpty(credentialsId, compartmentId, availableDomain, imageId, shape)) {
+                model.clear();
+                model.add("<First select 'Availablity Domain' and 'Image' and 'Shape' above>","");
+                return model;
+            }
+
+            if (!shape.contains("Flex")) {
+                model.clear();
+                model.add("<This field only takes effect for flexible shape if selected>","");
+                return model;
+            }
+
+            try {
+                model.clear();
+                BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
+                Integer[] ocpuOptions = client.getMinMaxOcpus(compartmentId, availableDomain, imageId, shape);
+                IntStream.range(ocpuOptions[0], ocpuOptions[1]+1).forEach(n -> model.add(Integer.toString(n)));
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get shapes list", e);
             }

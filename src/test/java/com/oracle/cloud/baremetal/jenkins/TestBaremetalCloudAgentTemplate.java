@@ -1,20 +1,11 @@
 package com.oracle.cloud.baremetal.jenkins;
 
-import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserPrivateKey;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
-import java.io.IOException;
-import java.security.UnrecoverableKeyException;
 import java.util.Collection;
 import java.util.Objects;
 
 import hudson.model.Node;
 import hudson.model.labels.LabelAtom;
-import hudson.security.ACL;
-import java.util.Collections;
-import jenkins.bouncycastle.api.PEMEncodable;
-import jenkins.model.Jenkins;
+
 
 public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate {
     public static class Builder {
@@ -41,8 +32,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         String imageId;
         String shape;
         String sshCredentialsId;
-
-        //SSHUserPrivateKey sshCredentials;
+        String ocpu;
 
         public Builder description(String description) {
             this.description = description;
@@ -138,6 +128,10 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             return this;
         }
 
+        public Builder ocpu(String ocpu) {
+            this.ocpu = ocpu;
+            return this;
+        }
         public Builder remoteFS(String remoteFS) {
             this.remoteFS = remoteFS;
             return this;
@@ -157,18 +151,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             this.startTimeoutSeconds = startTimeoutSeconds;
             return this;
         }
-
-        //public Builder sshCredentials(SSHUserPrivateKey sshCredentials) {
-        //    this.sshCredentials  = sshCredentials;
-        //    return this;
-        //}
         
         public TestBaremetalCloudAgentTemplate build() {
             return new TestBaremetalCloudAgentTemplate(this);
         }
     }
-
-    //private boolean encryptSshPrivateKey;
 
     public TestBaremetalCloudAgentTemplate() {
         this(new Builder());
@@ -198,10 +185,9 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.sshConnectTimeoutSeconds,
                 builder.startTimeoutSeconds,
                 builder.initScriptTimeoutSeconds,
-                builder.instanceCap);
+                builder.instanceCap,
+                builder.ocpu);
 
-        //this.encryptSshPrivateKey  = builder.encryptSshPrivateKey;
-        //this.sshCredentials = builder.sshCredentials;
     }
 
     @Override
@@ -209,37 +195,21 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         return BaremetalCloudTestUtils.parseLabels(strings);
     }
 
-    //@Override
-    //protected String getEncryptedValue(String str) {
-    //    return encryptSshPrivateKey ? super.getEncryptedValue(str) : str;
-    //}
-
     public static class TestDescriptor extends BaremetalCloudAgentTemplate.DescriptorImpl {
         public static class Builder {
             BaremetalCloud.DescriptorImpl cloudDescriptor;
-            //PEMDecoder pemDecoder;
 
             public Builder cloudDescriptor(BaremetalCloud.DescriptorImpl cloudDescriptor) {
                 this.cloudDescriptor = cloudDescriptor;
                 return this;
             }
 
-            //public Builder pemDecoder(PEMDecoder pemDecoder) {
-            //    this.pemDecoder = pemDecoder;
-            //    return this;
-           // }
-
             public TestDescriptor build() {
                 return new TestDescriptor(this);
             }
         }
 
-        //public interface PEMDecoder {
-        //    PEMEncodable decode(String pem) throws UnrecoverableKeyException, IOException;
-        //}
-
         private final BaremetalCloud.DescriptorImpl cloudDescriptor;
-        //private final PEMDecoder pemDecoder;
 
         public TestDescriptor(Builder builder) {
             this.cloudDescriptor = builder.cloudDescriptor;
@@ -250,11 +220,6 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         BaremetalCloud.DescriptorImpl getBaremetalCloudDescriptor() {
             return Objects.requireNonNull(cloudDescriptor, "cloudDescriptor");
         }
-
-        //@Override
-        //PEMEncodable decodePEM(String pem) throws UnrecoverableKeyException, IOException {
-        //    return pemDecoder == null ? super.decodePEM(pem) : pemDecoder.decode(pem);
-        //}
 
     }
 }
