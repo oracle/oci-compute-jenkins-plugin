@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.8 - July 2020
+
+### Added
+
+- OCI Java SDK 1.19.2
+- Support for E3/Flex Compute Shapes. 
+- Improvements in Instance Termination behavior.
+
+### Fixed
+
+- Fix in Exception handling to avoid dangling instances.
+
 ## 1.0.7 - June 2020
 
 ### Added

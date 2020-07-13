@@ -116,7 +116,7 @@ Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/bl
 2. If you want to use the latest version of OCI Java SDK, update pom.xml
 
    ```
-   <oci-java-sdk.version>1.17.4</oci-java-sdk.version>
+   <oci-java-sdk.version>1.19.2</oci-java-sdk.version>
    ```
 
    Compile and Install package:
@@ -208,6 +208,7 @@ Click **Verify Credentials** that you can connect successfully to your Oracle Cl
    - **Image Compartment** -  The compartment from which to select the Instance's image. 
    - **Image** - Select the Image the instance will use. **Note:** Java should be installed on the image as a Jenkins requirement. Alternatively refer to **Init Script** in Advanced section below to install Java on the newly launched Linux instances. **Note:** Windows images also need to be preconfigured and to be able to authenticate with SSH.
    - **Shape** - The Shape for your instance.
+   - **Number of OCPUs** - You can customize the number of OCPUs that are allocated to a flexible  shape. This field only takes effect if you select a flexible shape. The other resources are scaled proportionately. For more, please  see [Compute Shapes](https://docs.cloud.oracle.com/en-us/iaas/Content/Compute/References/computeshapes.htm#flexible).
    - **Virtual Cloud Network Compartment** -  The compartment from which to select the Virtual Cloud Network and Subnet. 
    - **Virtual Cloud Network** - The Virtual Cloud Network for your instance.
    - **Subnet** - Subnet of your Virtual Cloud Network.
