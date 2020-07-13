@@ -3,7 +3,7 @@ jdk:
   - oraclejdk8
 sudo: false
 before_install:
-  - curl -OL https://github.com/oracle/oci-java-sdk/archive/v1.17.4.tar.gz
-  - tar -xvf v1.17.4.tar.gz
-  - pushd oci-java-sdk-1.17.4/ && mvn clean install && popd
+  - curl -OL https://github.com/oracle/oci-java-sdk/archive/v1.19.2.tar.gz
+  - tar -xvf v1.19.2.tar.gz
+  - pushd oci-java-sdk-1.19.2/ && mvn clean install && popd
 script: mvn clean compile
