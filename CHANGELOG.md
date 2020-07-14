@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - OCI Java SDK 1.19.2
-- Support for E3/Flex Compute Shapes. 
+- Support for E3/Flex Compute Shapes. **Note:** After upgrade please check all OCI Cloud values are OK in Manage Jenkins > Manage Nodes and Clouds > Configure Clouds. Then Click **Save**.
 - Improvements in Instance Termination behavior.
 
 ### Fixed

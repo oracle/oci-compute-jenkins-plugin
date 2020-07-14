@@ -146,7 +146,9 @@ The master will need to be restarted before the plugin is loaded and made availa
 ## Upgrade
 Updates are listed in the Updates tab of the **Manage Plugins** page and can be installed by checking the checkbox of the Oracle Cloud Infrastructure Compute plugin updates and clicking the **Download now and install after restart** button.
 
-**Note**:  Upgrading the Plugin may require you to update your already created OCI Cloud and Templates Configuration. After upgrade please check all OCI Cloud values are OK in Manage Jenkins > Configure System. For example, a new method of adding OCI Credentials was added in v106 of the Plugin. Previously these OCI Credentials were added in the OCI Cloud Configuration. If upgrading to v106 from an earlier version, then you may have to update the values in your existing Cloud configuration.
+**Note**:  Upgrading the Plugin may require you to update your already created OCI Cloud and Templates Configuration. After upgrade please check all OCI Cloud values are OK in Manage Jenkins > Manage Nodes and Clouds > Configure Clouds. Then Click **Save**.
+
+For example, a new method of adding OCI Credentials was added in v106 of the Plugin. Previously these OCI Credentials were added in the OCI Cloud Configuration. If upgrading from a version earlier than v106, then you may have to update the values in your existing Cloud configuration.
 
 **Note**: A plugin version with new functionality may only take effect on Slaves built with that new version. You may need to remove older Slaves.
 
@@ -162,7 +164,7 @@ You can add these OCI Credentials by navigating to the Jenkins Server console, C
 
 *or*
 
-by navigating to the Jenkins Server console, click Manage Jenkins, and Configure System. In Cloud section, click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**. In **Credentials**, click **Add**.
+by navigating to the Jenkins Server console, click Manage Jenkins, then Manage Nodes and Clouds, and  Configure Clouds. Click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**. In **Credentials**, click **Add**.
 
 Once in the New Credentials Screen, select **Oracle Cloud Infrastructure Credentials** from the **Kind** Drop-Down.
 
@@ -183,8 +185,8 @@ Click **Verify Credentials** that you can connect successfully to your Oracle Cl
 
 #### Add OCI Cloud
 
-1. From Jenkins Server console, click Manage Jenkins, and Configure System
-2. In Cloud section, click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**
+1. In Jenkins, click Manage Jenkins > Manage Nodes and Clouds > Configure Clouds.
+2. Click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**
 3. Enter credentials to access your OCI account. You can create multiple Clouds.
    - **Name**  - A name for this OCI Compute Cloud.
    - **Credentials** - The OCI credentials required to connect to your Oracle Cloud Infrastructure.
