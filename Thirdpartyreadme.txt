@@ -1,4 +1,4 @@
-Jenkins Bouncy Castle API Plugin 1.648.3
+Jenkins Bouncy Castle API Plugin 2.16.0
 
 The MIT License
 
@@ -29,7 +29,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 =========================================================================
 
-Jenkins 1.648
+Jenkins 2.164
 
 MIT License
 
@@ -43,12 +43,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 =========================================================================
 
-Jenkins Unit Test Harness 2.13
+Jenkins Unit Test Harness 2.64
 
-The MIT License
+MIT License
 
-Copyright (c) 2004-2010, Sun Microsystems, Inc., Kohsuke Kawaguchi,
-Daniel Dyer, Erik Ramfelt, Stephen Connolly, Tom Huybrechts, Alan Harder
+Copyright (c) 2004-2019, Sun Microsystems, Inc., Kohsuke Kawaguchi, and other Jenkins contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -57,16 +56,16 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 =========================================================================
 
@@ -376,7 +375,7 @@ Generally, placement in the documentation is preferred to ensure that all inform
 
 =========================================================================
 
-localizer 1.23
+localizer 1.26
 
 The MIT License
 
@@ -403,9 +402,11 @@ THE SOFTWARE.
 
 =========================================================================
 
-Hamcrest 1.3
+Hamcrest 2.2
 
-Copyright (c) 2000-2006, www.hamcrest.org
+BSD License
+
+Copyright (c) 2000-2015 www.hamcrest.org
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -433,7 +434,7 @@ DAMAGE.
 
 =========================================================================
 
-HtmlUnit 2.18-1
+HtmlUnit 2.36.0-1
 
 Copyright (c) 2002-2015 Gargoyle Software Inc.
 
@@ -505,7 +506,7 @@ END OF TERMS AND CONDITIONS
 
 =========================================================================
 
-Commons Codec 1.8
+Commons Codec 1.13
 
 1.  Include the following verbatim in the documentation:
 
@@ -600,7 +601,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 =========================================================================
 
-Stapler 1.237
+Stapler 1.258
 
 Copyright (c) 2009-, Kohsuke Kawaguchi and other contributors
 All rights reserved.
