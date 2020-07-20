@@ -381,9 +381,9 @@ public class BaremetalCloud extends AbstractCloudImpl{
             String displayName = getPlannedNodeDisplayName();
             try {
                 addNode(super.call());
-                LOGGER.log(Level.INFO, "{0} provisioning successfully completed", displayName);
+                LOGGER.log(Level.INFO, "{0} provisioning successfully completed via Nodes screen", displayName);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Provisioned slave " + displayName + " failed!", e);
+                LOGGER.log(Level.WARNING, displayName + " provisioning via Nodes screen failed!", e);
             }
 
             // doProvision does not use the Future.
