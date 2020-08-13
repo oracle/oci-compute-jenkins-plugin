@@ -77,6 +77,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String initScriptTimeoutSeconds;
     public final String instanceCap;
     public final String numberOfOcpus;
+    public final Boolean autoImageUpdate;
 
     private transient int failureCount;
     private transient String disableCause;
@@ -106,7 +107,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String startTimeoutSeconds,
             final String initScriptTimeoutSeconds,
             final String instanceCap,
-            final String numberOfOcpus){
+            final String numberOfOcpus,
+            Boolean autoImageUpdate){
     	this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
         this.vcnCompartmentId = vcnCompartmentId;
@@ -131,6 +133,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.initScriptTimeoutSeconds = initScriptTimeoutSeconds;
         this.instanceCap = instanceCap;
         this.numberOfOcpus = numberOfOcpus;
+        this.autoImageUpdate = autoImageUpdate;
     }
 
     public String getcompartmentId() {
@@ -160,6 +163,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public String getImage() {
         return imageId;
     }
+
+    public Boolean getAutoImageUpdate() { return autoImageUpdate; }
 
     public String getShape() {
         return shape;

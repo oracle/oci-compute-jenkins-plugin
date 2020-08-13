@@ -108,6 +108,10 @@
       <f:entry title="${%instanceCap}" field="instanceCap">
 	    <f:textbox />
 	  </f:entry>
+
+	  <f:entry title="${%autoImageUpdate}" field="autoImageUpdate">
+        <f:checkbox/>
+      </f:entry>
     </f:advanced>
 
     <f:entry title="">

@@ -33,6 +33,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         String shape;
         String sshCredentialsId;
         String ocpu;
+        Boolean autoImageUpdate;
 
         public Builder description(String description) {
             this.description = description;
@@ -132,6 +133,12 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             this.ocpu = ocpu;
             return this;
         }
+
+        public Builder autoImageUpdate(Boolean autoImageUpdate) {
+            this.autoImageUpdate = autoImageUpdate;
+            return this;
+        }
+
         public Builder remoteFS(String remoteFS) {
             this.remoteFS = remoteFS;
             return this;
@@ -186,7 +193,8 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.startTimeoutSeconds,
                 builder.initScriptTimeoutSeconds,
                 builder.instanceCap,
-                builder.ocpu);
+                builder.ocpu,
+                builder.autoImageUpdate);
 
     }
 
