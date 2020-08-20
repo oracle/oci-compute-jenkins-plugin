@@ -1,6 +1,7 @@
 language: java
 jdk:
   - oraclejdk8
+dist: trusty
 sudo: false
 before_install:
   - curl -OL https://github.com/oracle/oci-java-sdk/archive/v1.19.2.tar.gz
