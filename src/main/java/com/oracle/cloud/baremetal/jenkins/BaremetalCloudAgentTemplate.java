@@ -54,6 +54,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String availableDomain;
     public final String vcnCompartmentId;
     public final String vcnId;
+    public final String subnetCompartmentId;
     public final String subnetId;
     public final List<BaremetalCloudNsgTemplate> nsgIds;
     public final String imageCompartmentId;
@@ -87,6 +88,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String availableDomain,
             final String vcnCompartmentId,
             final String vcnId,
+            final String subnetCompartmentId,
             final String subnetId,
             final List<BaremetalCloudNsgTemplate> nsgIds,
             final String imageCompartmentId,
@@ -113,6 +115,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.availableDomain = availableDomain;
         this.vcnCompartmentId = vcnCompartmentId;
         this.vcnId = vcnId;
+        this.subnetCompartmentId = subnetCompartmentId;
         this.subnetId = subnetId;
         this.nsgIds = nsgIds;
         this.imageCompartmentId = imageCompartmentId;
@@ -151,6 +154,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getVcn() {
         return vcnId;
+    }
+
+    public String getSubnetCompartmentId() {
+        return subnetCompartmentId;
     }
 
     public String getSubnet() {
@@ -601,6 +608,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
             return model;
         }
+
         public ListBoxModel doFillVcnIdItems(
                 @QueryParameter @RelativePath("..") String credentialsId,
                 @QueryParameter @RelativePath("..") String maxAsyncThreads,
@@ -628,13 +636,38 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             return model;
         }
 
+        public ListBoxModel doFillSubnetCompartmentIdItems(
+                @QueryParameter @RelativePath("..") String credentialsId,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
+                @QueryParameter String vcnCompartmentId) throws IOException, ServletException {
+            ListBoxModel model = new ListBoxModel();
+            model.add("", vcnCompartmentId);
+
+            if (anyRequiredFieldEmpty(credentialsId)) {
+                return model;
+            }
+
+            try{
+                BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
+
+                for (Compartment compartment : client.getCompartmentsList()) {
+                    model.add(compartment.getName(), compartment.getId());
+                }
+            }catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
+            }
+
+            return model;
+        }
+
         public ListBoxModel doFillSubnetIdItems(
                 @QueryParameter @RelativePath("..") String credentialsId,
                 @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String availableDomain,
                 @QueryParameter String vcnId,
                 @QueryParameter String compartmentId,
-                @QueryParameter String vcnCompartmentId) throws IOException, ServletException {
+                @QueryParameter String vcnCompartmentId,
+                @QueryParameter String subnetCompartmentId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<First select 'Availablity Domain' and 'Virtual Cloud Network' above>", "");
 
@@ -642,13 +675,13 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 return model;
             }
 
-            if (anyRequiredFieldEmpty(vcnCompartmentId)) {
-                vcnCompartmentId = compartmentId;
+            if (anyRequiredFieldEmpty(subnetCompartmentId)) {
+                subnetCompartmentId = vcnCompartmentId;
             }
 
             try {
                 BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
-                for (Subnet subnet : client.getSubNetList(vcnCompartmentId, vcnId)) {
+                for (Subnet subnet : client.getSubNetList(subnetCompartmentId, vcnId)) {
                     if (null == subnet.getAvailabilityDomain() || subnet.getAvailabilityDomain().equals(availableDomain)) {
                         model.add(subnet.getDisplayName(), subnet.getId());
                     }

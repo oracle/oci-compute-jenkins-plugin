@@ -60,6 +60,10 @@
       <f:select />
     </f:entry>
 
+    <f:entry title="${%subnetCompartmentId}" field="subnetCompartmentId">
+      <f:select />
+    </f:entry>
+
     <f:entry title="${%subnetId}" field="subnetId">
       <f:select />
     </f:entry>

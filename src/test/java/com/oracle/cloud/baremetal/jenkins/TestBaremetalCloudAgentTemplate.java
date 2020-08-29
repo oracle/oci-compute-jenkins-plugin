@@ -28,6 +28,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         String availableDomain;
         String vcnCompartmentId;
         String vcnId;
+        String subnetCompartmentId;
         String subnetId;
         List<BaremetalCloudNsgTemplate> nsgIds;
         String imageCompartmentId;
@@ -88,6 +89,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
 
         public Builder vcnId(String vcnId) {
             this.vcnId = vcnId;
+            return this;
+        }
+
+        public Builder subnetCompartmentId(String subnetCompartmentId) {
+            this.subnetCompartmentId = subnetCompartmentId;
             return this;
         }
 
@@ -181,6 +187,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.availableDomain,
                 builder.vcnCompartmentId,
                 builder.vcnId,
+                builder.subnetCompartmentId,
                 builder.subnetId,
                 builder.nsgIds,
                 builder.imageCompartmentId,

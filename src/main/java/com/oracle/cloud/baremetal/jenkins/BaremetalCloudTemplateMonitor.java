@@ -102,6 +102,7 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 oldTemplate.availableDomain,
                 oldTemplate.vcnCompartmentId,
                 oldTemplate.vcnId,
+                oldTemplate.subnetCompartmentId,
                 oldTemplate.subnetId,
                 oldTemplate.nsgIds,
                 oldTemplate.imageCompartmentId,
