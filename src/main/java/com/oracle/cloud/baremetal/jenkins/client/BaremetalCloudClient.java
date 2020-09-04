@@ -2,11 +2,7 @@ package com.oracle.cloud.baremetal.jenkins.client;
 
 import java.util.List;
 
-import com.oracle.bmc.core.model.Image;
-import com.oracle.bmc.core.model.Instance;
-import com.oracle.bmc.core.model.Shape;
-import com.oracle.bmc.core.model.Subnet;
-import com.oracle.bmc.core.model.Vcn;
+import com.oracle.bmc.core.model.*;
 import com.oracle.bmc.core.responses.GetSubnetResponse;
 import com.oracle.bmc.identity.model.AvailabilityDomain;
 import com.oracle.bmc.identity.model.Compartment;
@@ -123,6 +119,16 @@ public interface BaremetalCloudClient extends AutoCloseable {
      * @throws Exception if an error occurs
      */
     List<Subnet> getSubNetList(String tenantId, String vcnId) throws Exception;
+
+    /**
+     * Get the network security group list
+     *
+     * @param compartmentId the compartment id
+     * @param vcnId vcn id
+     * @return network security group list
+     * @throws Exception if an error occurs
+     */
+    List<NetworkSecurityGroup> getNsgIdsList(String compartmentId, String vcnId) throws Exception;
 
     /**
      * Get the sub net

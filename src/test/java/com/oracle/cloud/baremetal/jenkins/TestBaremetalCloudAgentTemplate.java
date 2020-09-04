@@ -1,6 +1,7 @@
 package com.oracle.cloud.baremetal.jenkins;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import hudson.model.Node;
@@ -28,6 +29,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         String vcnCompartmentId;
         String vcnId;
         String subnetId;
+        List<BaremetalCloudNsgTemplate> nsgIds;
         String imageCompartmentId;
         String imageId;
         String shape;
@@ -139,6 +141,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             return this;
         }
 
+        public Builder nsgIds(List<BaremetalCloudNsgTemplate> nsgIds) {
+            this.nsgIds = nsgIds;
+            return this;
+        }
+
         public Builder remoteFS(String remoteFS) {
             this.remoteFS = remoteFS;
             return this;
@@ -175,6 +182,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.vcnCompartmentId,
                 builder.vcnId,
                 builder.subnetId,
+                builder.nsgIds,
                 builder.imageCompartmentId,
                 builder.imageId,
                 builder.shape,

@@ -1,13 +1,12 @@
 package com.oracle.cloud.baremetal.jenkins.client;
 
 import com.oracle.bmc.ClientConfiguration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.oracle.bmc.ClientRuntime;
 import com.oracle.bmc.auth.InstancePrincipalsAuthenticationDetailsProvider;
@@ -18,26 +17,8 @@ import com.oracle.bmc.core.ComputeWaiters;
 import com.oracle.bmc.core.VirtualNetworkAsyncClient;
 import com.oracle.bmc.core.VirtualNetworkClient;
 import com.oracle.bmc.core.model.*;
-import com.oracle.bmc.core.requests.GetInstanceRequest;
-import com.oracle.bmc.core.requests.GetSubnetRequest;
-import com.oracle.bmc.core.requests.GetVnicRequest;
-import com.oracle.bmc.core.requests.LaunchInstanceRequest;
-import com.oracle.bmc.core.requests.ListImagesRequest;
-import com.oracle.bmc.core.requests.ListShapesRequest;
-import com.oracle.bmc.core.requests.ListSubnetsRequest;
-import com.oracle.bmc.core.requests.ListVcnsRequest;
-import com.oracle.bmc.core.requests.ListVnicAttachmentsRequest;
-import com.oracle.bmc.core.requests.TerminateInstanceRequest;
-import com.oracle.bmc.core.responses.GetInstanceResponse;
-import com.oracle.bmc.core.responses.GetSubnetResponse;
-import com.oracle.bmc.core.responses.GetVnicResponse;
-import com.oracle.bmc.core.responses.LaunchInstanceResponse;
-import com.oracle.bmc.core.responses.ListImagesResponse;
-import com.oracle.bmc.core.responses.ListShapesResponse;
-import com.oracle.bmc.core.responses.ListSubnetsResponse;
-import com.oracle.bmc.core.responses.ListVcnsResponse;
-import com.oracle.bmc.core.responses.ListVnicAttachmentsResponse;
-import com.oracle.bmc.core.responses.TerminateInstanceResponse;
+import com.oracle.bmc.core.requests.*;
+import com.oracle.bmc.core.responses.*;
 import com.oracle.bmc.identity.Identity;
 import com.oracle.bmc.identity.IdentityAsyncClient;
 import com.oracle.bmc.identity.IdentityClient;
@@ -50,7 +31,8 @@ import com.oracle.bmc.identity.requests.ListCompartmentsRequest;
 import com.oracle.bmc.identity.responses.ListCompartmentsResponse;
 import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.BaremetalCloudAgentTemplate;
-
+import com.oracle.bmc.core.model.NetworkSecurityGroup;
+import com.oracle.cloud.baremetal.jenkins.BaremetalCloudNsgTemplate;
 import jenkins.model.Jenkins;
 
 /**
@@ -204,6 +186,12 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             if (!template.getNumberOfOcpus().isEmpty()) {
                 shapeConfig = LaunchInstanceShapeConfigDetails.builder().ocpus(Float.parseFloat(template.getNumberOfOcpus())).build();
             }
+            List<String> nsgIds = new ArrayList<>();
+            if (template.getNsgIds() != null && !template.getNsgIds().isEmpty()) {
+                nsgIds = template.getNsgIds().stream()
+                        .map(BaremetalCloudNsgTemplate::getNsgId)
+                        .collect(Collectors.toList());
+            }
             LaunchInstanceResponse response = computeClient.launchInstance(LaunchInstanceRequest
                     .builder()
                     .launchInstanceDetails(
@@ -215,6 +203,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                                     CreateVnicDetails.builder()
                                     .assignPublicIp(assignPublicIP)
                                     .subnetId(subnetIdStr)
+                                    .nsgIds(nsgIds)
                                     .build())
                             .displayName(instanceName)
                             .imageId(imageIdStr)
@@ -449,6 +438,21 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             throw e;
         }
         return subnetList;
+    }
+
+    public List<NetworkSecurityGroup> getNsgIdsList(String compartmentId, String vcnId) throws Exception {
+        List<NetworkSecurityGroup> nsgList = new ArrayList<>();
+        try (VirtualNetworkAsyncClient vnc = getVirtualNetworkAsyncClient()) {
+            ListNetworkSecurityGroupsRequest request = ListNetworkSecurityGroupsRequest.builder()
+                    .compartmentId(compartmentId)
+                    .vcnId(vcnId)
+                    .build();
+            nsgList.addAll(vnc.listNetworkSecurityGroups(request,null).get().getItems());
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to get Network Security Group list", e);
+            throw e;
+        }
+        return nsgList;
     }
 
     @Override

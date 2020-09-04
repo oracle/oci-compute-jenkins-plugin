@@ -64,6 +64,10 @@
       <f:select />
     </f:entry>
 
+    <f:entry title="${%nsgIds}" field="nsgIds">
+      <f:repeatableProperty field="nsgIds"/>
+    </f:entry>
+
     <f:entry title="${%assignPublicIP}" field="assignPublicIP">
       <f:checkbox default='true'/>
     </f:entry>
@@ -112,6 +116,7 @@
 	  <f:entry title="${%autoImageUpdate}" field="autoImageUpdate">
         <f:checkbox/>
       </f:entry>
+
     </f:advanced>
 
     <f:entry title="">

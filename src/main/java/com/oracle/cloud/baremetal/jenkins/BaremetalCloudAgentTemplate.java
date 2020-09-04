@@ -5,9 +5,7 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +40,7 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
-import java.util.Collections;
+
 import java.util.stream.IntStream;
 
 import jenkins.model.Jenkins;
@@ -57,6 +55,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String vcnCompartmentId;
     public final String vcnId;
     public final String subnetId;
+    public final List<BaremetalCloudNsgTemplate> nsgIds;
     public final String imageCompartmentId;
     public final String imageId;
     public final String shape;
@@ -89,6 +88,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String vcnCompartmentId,
             final String vcnId,
             final String subnetId,
+            final List<BaremetalCloudNsgTemplate> nsgIds,
             final String imageCompartmentId,
             final String imageId,
             final String shape,
@@ -114,6 +114,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.vcnCompartmentId = vcnCompartmentId;
         this.vcnId = vcnId;
         this.subnetId = subnetId;
+        this.nsgIds = nsgIds;
         this.imageCompartmentId = imageCompartmentId;
         this.imageId = imageId;
         this.shape = shape;
@@ -154,6 +155,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getSubnet() {
         return subnetId;
+    }
+
+    public List<BaremetalCloudNsgTemplate> getNsgIds() {
+        return nsgIds;
     }
 
     public String getImageCompartmentId() {
@@ -279,6 +284,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         return numberOfOcpus;
     }
 
+
     public String getPublicKey() throws IOException {
         SSHUserPrivateKey sshCredentials = CredentialsMatchers.firstOrNull(
             CredentialsProvider.lookupCredentials(SSHUserPrivateKey.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
@@ -378,6 +384,13 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                    return FormValidation.error(Messages.BaremetalCloudAgentTemplate_usePublicIP_unable());
                }
                return FormValidation.ok();
+        }
+
+        public FormValidation doCheckNsgIds(@QueryParameter String nsgIds) {
+            if(nsgIds.contains(" ")) {
+                return FormValidation.error(Messages.BaremetalCloudAgentTemplate_nsgIds_contains_spaces());
+            }
+            return FormValidation.ok();
         }
 
         private static boolean anyRequiredFieldEmpty(String... fields) {

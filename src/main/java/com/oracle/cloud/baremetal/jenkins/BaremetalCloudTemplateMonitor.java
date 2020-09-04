@@ -87,7 +87,6 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                     JenkinsUtil.getJenkinsInstance().clouds.replace(cloud,newCLoud);
                     LOGGER.log(Level.INFO, "The cloud {0} was updated by templates monitor because a new image exists in OCI.", cloud.getDisplayName());
                 }
-
             }
         }
     }
@@ -104,6 +103,7 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 oldTemplate.vcnCompartmentId,
                 oldTemplate.vcnId,
                 oldTemplate.subnetId,
+                oldTemplate.nsgIds,
                 oldTemplate.imageCompartmentId,
                 newImageId,
                 oldTemplate.shape,
