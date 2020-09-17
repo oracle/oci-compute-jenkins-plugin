@@ -228,9 +228,27 @@ public class BaremetalCloud extends AbstractCloudImpl{
         LOGGER.info("Provisioning new cloud infrastructure instance");
         try {
             BaremetalCloudClient client = getClient();
-            Instance instance = client.createInstance(instanceName, template);
-            String Ip = "";
+            Instance instance = null;
 
+            if (!template.getStopOnIdle()) {
+                instance = client.createInstance(instanceName, template);
+            } else {
+                List<Instance> instances = client.getStoppedInstances(template.getcompartmentId(), template.getAvailableDomain());
+                if (!instances.isEmpty()) {
+                    String instanceId = instances.stream()
+                            .filter(n -> n.getDisplayName().contains(INSTANCE_NAME_PREFIX + JENKINS_IP + "-"))
+                            .filter(n -> n.getShape().equals(template.getShape()))
+                            .findAny().get().getId();
+                    instance = client.startInstance(instanceId);
+                    instanceName = instance.getDisplayName();
+                    name = BaremetalCloud.NAME_PREFIX + instanceName.replace(INSTANCE_NAME_PREFIX + JENKINS_IP + "-","");
+                } else {
+                    instance = client.createInstance(instanceName, template);
+                }
+
+            }
+
+            String Ip = "";
             TimeoutHelper timeoutHelper = new TimeoutHelper(getClock(), template.getStartTimeoutNanos(), START_POLL_SLEEP_MILLIS);
             try{
                 client.waitForInstanceProvisioningToComplete(instance.getId());
@@ -284,6 +302,17 @@ public class BaremetalCloud extends AbstractCloudImpl{
         try{
             retry.run();
             client.waitForInstanceTerminationToComplete(instanceId);
+        }catch(Exception e){
+            throw new IOException(e);
+        }
+    }
+
+    public synchronized void stopCloudResources(String instanceId) throws IOException {
+        BaremetalCloudClient client = getClient();
+        Retry<String> retry = getTerminationRetry(() -> client.stopInstance(instanceId));
+        try{
+            retry.run();
+            //client.waitForInstanceTerminationToComplete(instanceId);
         }catch(Exception e){
             throw new IOException(e);
         }

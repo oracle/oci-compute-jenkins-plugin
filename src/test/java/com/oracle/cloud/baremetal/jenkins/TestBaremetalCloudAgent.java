@@ -13,6 +13,7 @@ public class TestBaremetalCloudAgent extends BaremetalCloudAgent {
         private String numExecutors;
         private String cloudName;
         private String instanceId;
+        private Boolean stopOnIdle;
 
         private BaremetalCloud cloud;
 
@@ -35,6 +36,10 @@ public class TestBaremetalCloudAgent extends BaremetalCloudAgent {
             return this;
         }
 
+        public Builder stopOnIdle(Boolean stopOnIdle) {
+            this.stopOnIdle = stopOnIdle;
+            return this;
+        }
         public Builder cloud(BaremetalCloud cloud) {
             this.cloud = cloud;
             return this;
@@ -52,6 +57,7 @@ public class TestBaremetalCloudAgent extends BaremetalCloudAgent {
             appendXml(xml, "numExecutors", numExecutors);
             appendXml(xml, "cloudName", cloudName);
             appendXml(xml, "instanceId", instanceId);
+            appendXml(xml, "stopOnIdle", stopOnIdle);
             xml.append("</slave>");
 
             TestBaremetalCloudAgent agent = (TestBaremetalCloudAgent)Jenkins.XSTREAM2.fromXML(xml.toString());

@@ -166,4 +166,31 @@ public interface BaremetalCloudClient extends AutoCloseable {
      */
     Instance.LifecycleState getInstanceState(String instanceId) throws Exception;
 
+    /**
+     * Get a list of stopped instances on OCI
+     *
+     * @param compartmentId the compartment id
+     * @param availableDomain available domain
+     * @return Instance.LifecycleState
+     * @throws Exception if an error occurs
+     */
+    List<Instance> getStoppedInstances(String compartmentId, String availableDomain) throws Exception;
+
+    /**
+     * Stop instance with the specified instance id
+     *
+     * @param instanceId the instance id created before
+     * @return Instance.LifecycleState
+     * @throws Exception if an error occurs
+     */
+    String stopInstance(String instanceId) throws Exception;
+
+    /**
+     * Start instance with the specified instance id
+     *
+     * @param instanceId the instance id created before
+     * @return Instance.LifecycleState
+     * @throws Exception if an error occurs
+     */
+    Instance startInstance(String instanceId) throws Exception;
 }

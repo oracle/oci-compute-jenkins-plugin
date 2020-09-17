@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import hudson.model.Node;
 import hudson.model.labels.LabelAtom;
+import org.apache.xpath.operations.Bool;
 
 
 public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate {
@@ -37,6 +38,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         String sshCredentialsId;
         String ocpu;
         Boolean autoImageUpdate;
+        Boolean stopOnIdle;
 
         public Builder description(String description) {
             this.description = description;
@@ -171,6 +173,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             this.startTimeoutSeconds = startTimeoutSeconds;
             return this;
         }
+
+        public Builder stopOnIdle(Boolean stopOnIdle) {
+            this.stopOnIdle = stopOnIdle;
+            return this;
+        }
         
         public TestBaremetalCloudAgentTemplate build() {
             return new TestBaremetalCloudAgentTemplate(this);
@@ -209,7 +216,8 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.initScriptTimeoutSeconds,
                 builder.instanceCap,
                 builder.ocpu,
-                builder.autoImageUpdate);
+                builder.autoImageUpdate,
+                builder.stopOnIdle);
 
     }
 

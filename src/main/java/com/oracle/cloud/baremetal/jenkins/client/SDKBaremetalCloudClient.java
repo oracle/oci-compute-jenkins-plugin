@@ -496,4 +496,50 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             return response.getInstance().getLifecycleState();
     	}
     }
+
+    @Override
+    public List<Instance> getStoppedInstances(String compartmentId, String availableDomain) throws Exception {
+        List<Instance> instances = new ArrayList<>();
+        try (ComputeClient computeClient = getComputeClient()) {
+            ListInstancesResponse response = computeClient.listInstances(ListInstancesRequest.builder()
+                    .compartmentId(compartmentId)
+                    .availabilityDomain(availableDomain)
+                    .lifecycleState(Instance.LifecycleState.Stopped)
+                    .build());
+            instances.addAll(response.getItems());
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to get Stopped list", e);
+            throw e;
+        }
+        return instances;
+    }
+
+    @Override
+    public String stopInstance(String instanceId) throws Exception {
+        try (ComputeClient computeClient = getComputeClient()) {
+            InstanceActionRequest.Builder builder = InstanceActionRequest.builder()
+                    .action("STOP")
+                    .instanceId(instanceId);
+            InstanceActionResponse response = computeClient.instanceAction(builder.build());
+
+            return response.getOpcRequestId();
+        }catch(Exception ex){
+            throw new Exception("Failed to stop an instance: " + ex.getMessage());
+        }
+    }
+
+    @Override
+    public Instance startInstance(String instanceId) throws Exception {
+        Instance instance = null;
+        try (ComputeClient computeClient = getComputeClient()) {
+            InstanceActionRequest.Builder builder = InstanceActionRequest.builder()
+                    .action("START")
+                    .instanceId(instanceId);
+            InstanceActionResponse response = computeClient.instanceAction(builder.build());
+            instance = response.getInstance();
+            return instance;
+        }catch(Exception ex){
+            throw new Exception("Failed to start an instance: " + ex.getMessage());
+        }
+    }
 }

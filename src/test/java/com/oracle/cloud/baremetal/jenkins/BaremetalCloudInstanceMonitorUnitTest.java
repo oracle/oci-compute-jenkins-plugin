@@ -47,6 +47,7 @@ public class BaremetalCloudInstanceMonitorUnitTest {
         }});
         TestBaremetalCloudAgent agent = new TestBaremetalCloudAgent.Builder()
                 .instanceId("in")
+                .stopOnIdle(false)
                 .cloud(new TestBaremetalCloud.Builder().client(client).clock(new TestClock()).build())
                 .build();
         return agent;

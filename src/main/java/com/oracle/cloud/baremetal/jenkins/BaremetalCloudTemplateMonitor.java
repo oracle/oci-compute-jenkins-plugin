@@ -124,7 +124,8 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 oldTemplate.initScriptTimeoutSeconds,
                 oldTemplate.instanceCap,
                 oldTemplate.numberOfOcpus,
-                oldTemplate.autoImageUpdate
+                oldTemplate.autoImageUpdate,
+                oldTemplate.stopOnIdle
         );
 
     }
