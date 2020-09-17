@@ -22,6 +22,24 @@
   <description>This plugin allows you to run dynamic slaves in the Oracle Cloud Infrastructure(OCI) Compute environment.</description>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/Oracle+Cloud+Infrastructure+Compute+Plugin</url>
 
+  <developers>
+    <developer>
+      <id>cheshi</id>
+      <name>Chenghao Shi</name>
+      <email>chenghao.shi@oracle.com</email>
+    </developer>
+    <developer>
+      <id>kennedyjf</id>
+      <name>Joe Kennedy</name>
+      <email>joe.kennedy@oracle.com</email>
+    </developer>
+    <developer>
+      <id>aandrey</id>
+      <name>Andrey Andreyev</name>
+      <email>andrey.adnreyev@oracle.com</email>
+    </developer>
+  </developers>
+
   <licenses>
     <license>
       <name>The Universal Permissive License (UPL), Version 1.0</name>
