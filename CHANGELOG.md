@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.9 - September 2020
+
+### Added
+
+- Network **Subnet Compartment** field.
+- **Network Security Groups** field.
+- **Identical Named Images** checkbox to automatically select the newest Image if multiple Images exist with same name.
+- **Stop on Idle Timeout** checkbox so an instance is stopped and not terminated when the Idle timeout expires.
+- Log if an Instance was created via Jenkins Job label or via Jenkins Nodes.
+
 ## 1.0.8 - July 2020
 
 ### Added
