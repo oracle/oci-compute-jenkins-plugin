@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.10 - September 2020
+
+### Fixed
+
+ - Fix java.util.NoSuchElementException: No value present
+
 ## 1.0.9 - September 2020
 
 ### Added
