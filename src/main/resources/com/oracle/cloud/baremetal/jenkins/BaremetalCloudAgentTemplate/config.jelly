@@ -118,11 +118,11 @@
 	  </f:entry>
 
 	  <f:entry title="${%autoImageUpdate}" field="autoImageUpdate">
-        <f:checkbox/>
+        <f:checkbox default='false' />
       </f:entry>
 
       <f:entry title="${%stopOnIdle}" field="stopOnIdle">
-        <f:checkbox/>
+        <f:checkbox default='false' />
       </f:entry>
 
     </f:advanced>
