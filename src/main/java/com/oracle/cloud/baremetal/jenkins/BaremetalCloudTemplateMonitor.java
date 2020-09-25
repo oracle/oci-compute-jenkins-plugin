@@ -40,7 +40,7 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 boolean updateCheck = false;
 
                 for (BaremetalCloudAgentTemplate template: cloud.getTemplates()) {
-                    if (template.autoImageUpdate) {
+                    if (template.getAutoImageUpdate()) {
                         String imageId = template.getImage();
 
                         BaremetalCloudClientFactory factory = SDKBaremetalCloudClientFactory.INSTANCE;
@@ -124,8 +124,8 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 oldTemplate.initScriptTimeoutSeconds,
                 oldTemplate.instanceCap,
                 oldTemplate.numberOfOcpus,
-                oldTemplate.autoImageUpdate,
-                oldTemplate.stopOnIdle
+                oldTemplate.getAutoImageUpdate(),
+                oldTemplate.getStopOnIdle()
         );
 
     }

@@ -233,16 +233,26 @@ public class BaremetalCloud extends AbstractCloudImpl{
             if (!template.getStopOnIdle()) {
                 instance = client.createInstance(instanceName, template);
             } else {
-                List<Instance> instances = client.getStoppedInstances(template.getcompartmentId(), template.getAvailableDomain());
-                if (!instances.isEmpty()) {
-                    String instanceId = instances.stream()
+                List<Instance> allStoppedInstances = client.getStoppedInstances(template.getcompartmentId(), template.getAvailableDomain());
+                if (!allStoppedInstances.isEmpty()) {
+                    long numberOfSuitableInstances = allStoppedInstances.stream()
                             .filter(n -> n.getDisplayName().contains(INSTANCE_NAME_PREFIX + JENKINS_IP + "-"))
                             .filter(n -> n.getShape().equals(template.getShape()))
-                            .findAny().get().getId();
-                    instance = client.startInstance(instanceId);
-                    instanceName = instance.getDisplayName();
-                    name = BaremetalCloud.NAME_PREFIX + instanceName.replace(INSTANCE_NAME_PREFIX + JENKINS_IP + "-","");
+                            .count();
+                    if (numberOfSuitableInstances > 0) {
+                        String instanceId = allStoppedInstances.stream()
+                                .filter(n -> n.getDisplayName().contains(INSTANCE_NAME_PREFIX + JENKINS_IP + "-"))
+                                .filter(n -> n.getShape().equals(template.getShape()))
+                                .findAny().get().getId();
+                        instance = client.startInstance(instanceId);
+                        instanceName = instance.getDisplayName();
+                        name = BaremetalCloud.NAME_PREFIX + instanceName.replace(INSTANCE_NAME_PREFIX + JENKINS_IP + "-", "");
+                    } else {
+                        // If there is no any stopped by this Jenkins instance -> create a new one
+                        instance = client.createInstance(instanceName, template);
+                    }
                 } else {
+                    // If there is no any stopped instance -> create a new one
                     instance = client.createInstance(instanceName, template);
                 }
 

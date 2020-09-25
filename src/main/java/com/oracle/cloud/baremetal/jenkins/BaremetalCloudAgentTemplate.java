@@ -179,7 +179,9 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         return imageId;
     }
 
-    public Boolean getAutoImageUpdate() { return autoImageUpdate; }
+    public Boolean getAutoImageUpdate() {
+        return autoImageUpdate == null ? false : autoImageUpdate;
+    }
 
     public String getShape() {
         return shape;
@@ -307,7 +309,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     }
 
     public Boolean getStopOnIdle() {
-        return stopOnIdle;
+        return stopOnIdle == null ? false : stopOnIdle;
     }
 
     private static FormValidationValue<Integer> checkInitScriptTimeoutSeconds(String value){
