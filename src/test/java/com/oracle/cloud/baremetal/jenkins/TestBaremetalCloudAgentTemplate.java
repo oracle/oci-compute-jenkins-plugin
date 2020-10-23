@@ -39,6 +39,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         String ocpu;
         Boolean autoImageUpdate;
         Boolean stopOnIdle;
+        List<BaremetalCloudTagsTemplate> tags;
 
         public Builder description(String description) {
             this.description = description;
@@ -178,6 +179,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             this.stopOnIdle = stopOnIdle;
             return this;
         }
+
+        public Builder tags(List<BaremetalCloudTagsTemplate> tags) {
+            this.tags = tags;
+            return this;
+        }
         
         public TestBaremetalCloudAgentTemplate build() {
             return new TestBaremetalCloudAgentTemplate(this);
@@ -217,7 +223,8 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.instanceCap,
                 builder.ocpu,
                 builder.autoImageUpdate,
-                builder.stopOnIdle);
+                builder.stopOnIdle,
+                builder.tags);
 
     }
 

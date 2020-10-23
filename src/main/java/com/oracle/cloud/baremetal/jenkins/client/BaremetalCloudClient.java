@@ -6,6 +6,7 @@ import com.oracle.bmc.core.model.*;
 import com.oracle.bmc.core.responses.GetSubnetResponse;
 import com.oracle.bmc.identity.model.AvailabilityDomain;
 import com.oracle.bmc.identity.model.Compartment;
+import com.oracle.bmc.identity.model.TagNamespaceSummary;
 import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.BaremetalCloudAgentTemplate;
 
@@ -193,4 +194,13 @@ public interface BaremetalCloudClient extends AutoCloseable {
      * @throws Exception if an error occurs
      */
     Instance startInstance(String instanceId) throws Exception;
+
+    /**
+     * Start instance with the specified instance id
+     *
+     * @param compartmentId the compartment id
+     * @return tag namespace summary list
+     * @throws Exception if an error occurs
+     */
+    List<TagNamespaceSummary> getTagNamespaces(String compartmentId) throws Exception;
 }

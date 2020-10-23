@@ -79,6 +79,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String numberOfOcpus;
     public final Boolean autoImageUpdate;
     public final Boolean stopOnIdle;
+    public final List<BaremetalCloudTagsTemplate> tags;
 
     private transient int failureCount;
     private transient String disableCause;
@@ -112,7 +113,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String instanceCap,
             final String numberOfOcpus,
             final Boolean autoImageUpdate,
-            final Boolean stopOnIdle){
+            final Boolean stopOnIdle,
+            final List<BaremetalCloudTagsTemplate> tags){
     	this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
         this.vcnCompartmentId = vcnCompartmentId;
@@ -141,6 +143,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.numberOfOcpus = numberOfOcpus;
         this.autoImageUpdate = autoImageUpdate;
         this.stopOnIdle = stopOnIdle;
+        this.tags = tags;
     }
 
     public String getcompartmentId() {
@@ -310,6 +313,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public Boolean getStopOnIdle() {
         return stopOnIdle == null ? Boolean.FALSE : stopOnIdle;
+    }
+
+    public List<BaremetalCloudTagsTemplate> getTags() {
+        return tags;
     }
 
     private static FormValidationValue<Integer> checkInitScriptTimeoutSeconds(String value){

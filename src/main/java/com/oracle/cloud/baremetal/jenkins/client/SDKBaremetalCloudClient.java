@@ -24,15 +24,15 @@ import com.oracle.bmc.identity.IdentityAsyncClient;
 import com.oracle.bmc.identity.IdentityClient;
 import com.oracle.bmc.identity.model.AvailabilityDomain;
 import com.oracle.bmc.identity.model.Compartment;
-import com.oracle.bmc.identity.requests.GetTenancyRequest;
-import com.oracle.bmc.identity.requests.GetUserRequest;
-import com.oracle.bmc.identity.requests.ListAvailabilityDomainsRequest;
-import com.oracle.bmc.identity.requests.ListCompartmentsRequest;
+import com.oracle.bmc.identity.model.TagNamespaceSummary;
+import com.oracle.bmc.identity.requests.*;
 import com.oracle.bmc.identity.responses.ListCompartmentsResponse;
+import com.oracle.bmc.identity.responses.ListTagNamespacesResponse;
 import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.BaremetalCloudAgentTemplate;
 import com.oracle.bmc.core.model.NetworkSecurityGroup;
 import com.oracle.cloud.baremetal.jenkins.BaremetalCloudNsgTemplate;
+import com.oracle.cloud.baremetal.jenkins.BaremetalCloudTagsTemplate;
 import jenkins.model.Jenkins;
 
 /**
@@ -182,35 +182,61 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             if(subnetResponse.getSubnet().getProhibitPublicIpOnVnic()) {
                 assignPublicIP=false;
             }
+
             LaunchInstanceShapeConfigDetails shapeConfig = null;
             if (!template.getNumberOfOcpus().isEmpty()) {
                 shapeConfig = LaunchInstanceShapeConfigDetails.builder().ocpus(Float.parseFloat(template.getNumberOfOcpus())).build();
             }
+
             List<String> nsgIds = new ArrayList<>();
             if (template.getNsgIds() != null && !template.getNsgIds().isEmpty()) {
                 nsgIds = template.getNsgIds().stream()
                         .map(BaremetalCloudNsgTemplate::getNsgId)
                         .collect(Collectors.toList());
             }
-            LaunchInstanceResponse response = computeClient.launchInstance(LaunchInstanceRequest
+
+            LaunchInstanceDetails.Builder instanceDetailsBuilder = LaunchInstanceDetails
                     .builder()
-                    .launchInstanceDetails(
-                            LaunchInstanceDetails
-                            .builder()
-                            .availabilityDomain(ad)
-                            .compartmentId(compartmentIdStr)
-                            .createVnicDetails(
-                                    CreateVnicDetails.builder()
+                    .availabilityDomain(ad)
+                    .compartmentId(compartmentIdStr)
+                    .createVnicDetails(
+                            CreateVnicDetails.builder()
                                     .assignPublicIp(assignPublicIP)
                                     .subnetId(subnetIdStr)
                                     .nsgIds(nsgIds)
                                     .build())
-                            .displayName(instanceName)
-                            .imageId(imageIdStr)
-                            .metadata(metadata)
-                            .shape(shape)
-                            .shapeConfig(shapeConfig)
-                            .subnetId(subnetIdStr)
+                    .displayName(instanceName)
+                    .imageId(imageIdStr)
+                    .metadata(metadata)
+                    .shape(shape)
+                    .shapeConfig(shapeConfig)
+                    .subnetId(subnetIdStr);
+
+            if(template.getTags() != null) {
+                Map<String,String> freeFormTags = new HashMap<>();
+                Map<String,Map<String,Object>> definedTags = new HashMap<>();
+                for (BaremetalCloudTagsTemplate tag : template.getTags()) {
+                    if (tag.getNamespace().equals("None")) {
+                        freeFormTags.put(tag.getKey(),tag.getValue());
+                    } else {
+                        Map<String,Object> definedTag = new HashMap<>();
+                        definedTag.put(tag.getKey(),tag.getValue());
+                        definedTags.put(tag.getNamespace(),definedTag);
+                    }
+                }
+                if (!freeFormTags.isEmpty()) {
+                    instanceDetailsBuilder.freeformTags(freeFormTags);
+                }
+
+                if (!definedTags.isEmpty()) {
+                    instanceDetailsBuilder.definedTags(definedTags);
+                }
+            }
+
+            LaunchInstanceResponse response = computeClient.launchInstance(LaunchInstanceRequest
+                    .builder()
+                    .launchInstanceDetails(
+                            instanceDetailsBuilder
                             .build())
                     .build());
 
@@ -544,5 +570,26 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         }catch(Exception ex){
             throw new Exception("Failed to start an instance: " + ex.getMessage());
         }
+    }
+
+    @Override
+    public List<TagNamespaceSummary> getTagNamespaces(String compartmentId) throws Exception {
+        List<TagNamespaceSummary> tagNamespaces = new ArrayList<>();
+        try (IdentityAsyncClient identityAsyncClient = getIdentityAsyncClient()) {
+            ListTagNamespacesRequest.Builder builder = ListTagNamespacesRequest.builder()
+                    .compartmentId(compartmentId)
+                    .includeSubcompartments(Boolean.TRUE);
+            String nextPageToken = null;
+            do {
+                builder.page(nextPageToken);
+                Future<ListTagNamespacesResponse> response = identityAsyncClient.listTagNamespaces(builder.build(),null);
+                tagNamespaces.addAll(response.get().getItems());
+                nextPageToken = response.get().getOpcNextPage();
+            } while (nextPageToken != null);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to get tag namespaces list", e);
+            throw e;
+        }
+        return tagNamespaces;
     }
 }
