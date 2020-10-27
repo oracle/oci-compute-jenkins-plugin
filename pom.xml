@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.2</version>
+    <version>4.10</version>
     <relativePath />
   </parent>
   <artifactId>oracle-cloud-infrastructure-compute</artifactId>
@@ -14,8 +14,9 @@
   <packaging>hpi</packaging>
 
   <properties>
+    <jenkins.version>2.261</jenkins.version>
     <java.level>8</java.level>
-    <oci-java-sdk.version>1.19.2</oci-java-sdk.version>
+    <oci-java-sdk.version>1.25.1</oci-java-sdk.version>
   </properties>
 
   <name>Oracle Cloud Infrastructure Compute Plugin</name>
