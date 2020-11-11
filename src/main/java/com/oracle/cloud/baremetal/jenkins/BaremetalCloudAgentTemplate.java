@@ -80,6 +80,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final Boolean autoImageUpdate;
     public final Boolean stopOnIdle;
     public final List<BaremetalCloudTagsTemplate> tags;
+    public final String instanceNamePrefix;
 
     private transient int failureCount;
     private transient String disableCause;
@@ -114,7 +115,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String numberOfOcpus,
             final Boolean autoImageUpdate,
             final Boolean stopOnIdle,
-            final List<BaremetalCloudTagsTemplate> tags){
+            final List<BaremetalCloudTagsTemplate> tags,
+            final String instanceNamePrefix){
     	this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
         this.vcnCompartmentId = vcnCompartmentId;
@@ -144,6 +146,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.autoImageUpdate = autoImageUpdate;
         this.stopOnIdle = stopOnIdle;
         this.tags = tags;
+        this.instanceNamePrefix = instanceNamePrefix;
     }
 
     public String getcompartmentId() {
@@ -319,6 +322,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         return tags;
     }
 
+    public String getInstanceNamePrefix() {
+        return instanceNamePrefix;
+    }
+
     private static FormValidationValue<Integer> checkInitScriptTimeoutSeconds(String value){
         return FormValidationValue.validateNonNegativeInteger(value, 120);
     }
@@ -409,9 +416,9 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                return FormValidation.ok();
         }
 
-        public FormValidation doCheckNsgIds(@QueryParameter String nsgIds) {
-            if(nsgIds.contains(" ")) {
-                return FormValidation.error(Messages.BaremetalCloudAgentTemplate_nsgIds_contains_spaces());
+        public FormValidation doCheckInstanceNamePrefix(@QueryParameter String instanceNamePrefix) {
+            if(instanceNamePrefix.contains(" ")) {
+                return FormValidation.error(Messages.BaremetalCloudAgentTemplate_prefix_contains_spaces());
             }
             return FormValidation.ok();
         }

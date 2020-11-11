@@ -129,6 +129,10 @@
         <f:repeatableProperty field="tags"/>
       </f:entry>
 
+      <f:entry title="${%instanceNamePrefix}" field="instanceNamePrefix">
+        <f:textbox default=""/>
+      </f:entry>
+
     </f:advanced>
 
     <f:entry title="">

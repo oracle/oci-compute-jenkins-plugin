@@ -211,7 +211,11 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
             UUID uuid = UUID.randomUUID();
             this.name = BaremetalCloud.NAME_PREFIX + uuid;
-            this.instanceName = INSTANCE_NAME_PREFIX + JENKINS_IP + "-" + uuid;
+            if (template.getInstanceNamePrefix() == null) {
+                this.instanceName = INSTANCE_NAME_PREFIX + JENKINS_IP + "-" + uuid;
+            } else {
+                this.instanceName = INSTANCE_NAME_PREFIX + template.getInstanceNamePrefix() + "-" + JENKINS_IP + "-" + uuid;
+            }
         }
 
         public String getPlannedNodeDisplayName() {
@@ -235,20 +239,25 @@ public class BaremetalCloud extends AbstractCloudImpl{
             } else {
                 List<Instance> allStoppedInstances = client.getStoppedInstances(template.getcompartmentId(), template.getAvailableDomain());
                 if (!allStoppedInstances.isEmpty()) {
+                    String displayName;
+                    if (template.getInstanceNamePrefix() == null) {
+                        displayName = INSTANCE_NAME_PREFIX + JENKINS_IP + "-";
+                    } else {
+                        displayName = INSTANCE_NAME_PREFIX + template.getInstanceNamePrefix() + "-";
+                    }
                     long numberOfSuitableInstances = allStoppedInstances.stream()
-                            .filter(n -> n.getDisplayName().contains(INSTANCE_NAME_PREFIX + JENKINS_IP + "-"))
+                            .filter(n -> n.getDisplayName().contains(displayName))
                             .filter(n -> n.getShape().equals(template.getShape()))
                             .filter(n -> n.getImageId().equals(template.getImage()))
                             .count();
                     if (numberOfSuitableInstances > 0) {
                         String instanceId = allStoppedInstances.stream()
-                                .filter(n -> n.getDisplayName().contains(INSTANCE_NAME_PREFIX + JENKINS_IP + "-"))
+                                .filter(n -> n.getDisplayName().contains(displayName))
                                 .filter(n -> n.getShape().equals(template.getShape()))
                                 .filter(n -> n.getImageId().equals(template.getImage()))
                                 .findAny().get().getId();
                         instance = client.startInstance(instanceId);
                         instanceName = instance.getDisplayName();
-                        name = BaremetalCloud.NAME_PREFIX + instanceName.replace(INSTANCE_NAME_PREFIX + JENKINS_IP + "-", "");
                     } else {
                         // If there is no any stopped by this Jenkins instance -> create a new one
                         instance = client.createInstance(instanceName, template);
