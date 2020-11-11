@@ -211,7 +211,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
             UUID uuid = UUID.randomUUID();
             this.name = BaremetalCloud.NAME_PREFIX + uuid;
-            if (template.getInstanceNamePrefix() == null) {
+            if (template.getInstanceNamePrefix() == null || template.getInstanceNamePrefix().isEmpty()) {
                 this.instanceName = INSTANCE_NAME_PREFIX + JENKINS_IP + "-" + uuid;
             } else {
                 this.instanceName = INSTANCE_NAME_PREFIX + template.getInstanceNamePrefix() + "-" + JENKINS_IP + "-" + uuid;
@@ -240,7 +240,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
                 List<Instance> allStoppedInstances = client.getStoppedInstances(template.getcompartmentId(), template.getAvailableDomain());
                 if (!allStoppedInstances.isEmpty()) {
                     String displayName;
-                    if (template.getInstanceNamePrefix() == null) {
+                    if (template.getInstanceNamePrefix() == null || template.getInstanceNamePrefix().isEmpty()) {
                         displayName = INSTANCE_NAME_PREFIX + JENKINS_IP + "-";
                     } else {
                         displayName = INSTANCE_NAME_PREFIX + template.getInstanceNamePrefix() + "-";
