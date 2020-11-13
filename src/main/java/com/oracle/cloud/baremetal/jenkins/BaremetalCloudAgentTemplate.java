@@ -14,6 +14,7 @@ import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserPrivateKey;
 
 import javax.servlet.ServletException;
 
+import com.oracle.bmc.identity.model.Tenancy;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -496,9 +497,9 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String compartmentId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
-            model.add("Default", compartmentId);
 
             if (anyRequiredFieldEmpty(credentialsId, compartmentId)) {
+                model.add("<First select 'Compartment'>", "");
                 return model;
             }
 
@@ -614,9 +615,9 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String compartmentId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
-            model.add("Default", compartmentId);
 
-            if (anyRequiredFieldEmpty(credentialsId)) {
+            if (anyRequiredFieldEmpty(credentialsId, compartmentId)) {
+                model.add("<First select 'Compartment'>", "");
                 return model;
             }
 
@@ -663,11 +664,11 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         public ListBoxModel doFillSubnetCompartmentIdItems(
                 @QueryParameter @RelativePath("..") String credentialsId,
                 @QueryParameter @RelativePath("..") String maxAsyncThreads,
-                @QueryParameter String vcnCompartmentId) throws IOException, ServletException {
+                @QueryParameter String compartmentId) throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
-            model.add("", vcnCompartmentId);
 
-            if (anyRequiredFieldEmpty(credentialsId)) {
+            if (anyRequiredFieldEmpty(credentialsId, compartmentId)) {
+                model.add("<First select 'Compartment'>", "");
                 return model;
             }
 
