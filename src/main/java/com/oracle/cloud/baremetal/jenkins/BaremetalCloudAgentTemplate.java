@@ -455,7 +455,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
             try{
                 BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
-                model.add(client.getTenant().getName(),client.getTenant().getId());
+                Tenancy tenant = client.getTenant();
+                model.add(tenant.getName(), tenant.getId());
                 for (Compartment compartmentId : client.getCompartmentsList()) {
                     model.add(compartmentId.getName(), compartmentId.getId());
                 }
@@ -505,7 +506,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
             try{
                 BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
-                model.add(client.getTenant().getName(),client.getTenant().getId());
+                Tenancy tenant = client.getTenant();
+                model.add(tenant.getName(), tenant.getId());
                 for (Compartment compartment : client.getCompartmentsList()) {
                         model.add(compartment.getName(), compartment.getId());
                     }
@@ -623,7 +625,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
             try{
                 BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
-                model.add(client.getTenant().getName(),client.getTenant().getId());
+                Tenancy tenant = client.getTenant();
+                model.add(tenant.getName(), tenant.getId());
                 for (Compartment compartment : client.getCompartmentsList()) {
                         model.add(compartment.getName(), compartment.getId());
                     }
@@ -674,7 +677,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
             try{
                 BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
-                model.add(client.getTenant().getName(),client.getTenant().getId());
+                Tenancy tenant = client.getTenant();
+                model.add(tenant.getName(), tenant.getId());
                 for (Compartment compartment : client.getCompartmentsList()) {
                     model.add(compartment.getName(), compartment.getId());
                 }
