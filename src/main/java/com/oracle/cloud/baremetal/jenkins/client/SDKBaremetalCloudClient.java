@@ -25,7 +25,9 @@ import com.oracle.bmc.identity.IdentityClient;
 import com.oracle.bmc.identity.model.AvailabilityDomain;
 import com.oracle.bmc.identity.model.Compartment;
 import com.oracle.bmc.identity.model.TagNamespaceSummary;
+import com.oracle.bmc.identity.model.Tenancy;
 import com.oracle.bmc.identity.requests.*;
+import com.oracle.bmc.identity.responses.GetTenancyResponse;
 import com.oracle.bmc.identity.responses.ListCompartmentsResponse;
 import com.oracle.bmc.identity.responses.ListTagNamespacesResponse;
 import com.oracle.bmc.model.BmcException;
@@ -321,8 +323,15 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     @Override
-    public String getTenantId() {
-            return provider.getTenantId();
+    public Tenancy getTenant() throws Exception {
+
+        try (IdentityClient identityClient = getIdentityClient()) {
+            GetTenancyResponse response =  identityClient.getTenancy(GetTenancyRequest.builder().tenancyId(provider.getTenantId()).build());
+            return response.getTenancy();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to get root compartment", e);
+            throw e;
+        }
     }
 
     @Override
@@ -331,7 +340,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         ListCompartmentsRequest.Builder builder;
         try (IdentityAsyncClient identityAsyncClient = getIdentityAsyncClient()) {
             if (!instancePrincipals) {
-                builder = ListCompartmentsRequest.builder().compartmentId(getTenantId()).compartmentIdInSubtree(Boolean.TRUE);
+                builder = ListCompartmentsRequest.builder().compartmentId(provider.getTenantId()).compartmentIdInSubtree(Boolean.TRUE);
             } else {
                 builder = ListCompartmentsRequest.builder().compartmentId(instancePrincipalsTenantId).compartmentIdInSubtree(Boolean.TRUE);
             }
