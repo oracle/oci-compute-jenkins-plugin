@@ -3,13 +3,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.11 - November 2020
+
+### Fixed
+
+- OCI Java SDK 1.26.0
+- Tags Template option
+- Custom Instance Name Prefix option
+- root compartment added to Compartment list
+- Images added to the Stop/Start filter
+
+
+
 ## 1.0.10 - September 2020
 
 ### Fixed
 
- - Fix java.util.NoSuchElementException: No value present
+- Fix java.util.NoSuchElementException: No value present
 
-## 1.0.9 - September 2020
+
+
+### 1.0.9 - September 2020
 
 ### Added
 
