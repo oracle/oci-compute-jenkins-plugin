@@ -40,7 +40,7 @@ View Oracle Cloud Infrastructure Compute Plugin page on the [plugins.jenkins.io]
    
 
 ## Compatibility
-Minimum Jenkins requirement: *2.261.x*
+Minimum Jenkins requirement: *2.204.x*
 
 
 
