@@ -40,7 +40,7 @@ View Oracle Cloud Infrastructure Compute Plugin page on the [plugins.jenkins.io]
    
 
 ## Compatibility
-Minimum Jenkins requirement: *2.164.x*
+Minimum Jenkins requirement: *2.261.x*
 
 
 
@@ -116,7 +116,7 @@ Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/bl
 2. If you want to use the latest version of OCI Java SDK, update pom.xml
 
    ```
-   <oci-java-sdk.version>1.19.2</oci-java-sdk.version>
+   <oci-java-sdk.version>1.25.1</oci-java-sdk.version>
    ```
 
    Compile and Install package:
