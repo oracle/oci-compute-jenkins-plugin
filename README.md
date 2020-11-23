@@ -40,7 +40,7 @@ View Oracle Cloud Infrastructure Compute Plugin page on the [plugins.jenkins.io]
    
 
 ## Compatibility
-Minimum Jenkins requirement: *2.204.x*
+Minimum Jenkins requirement: *2.204*
 
 
 
@@ -116,7 +116,7 @@ Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/bl
 2. If you want to use the latest version of OCI Java SDK, update pom.xml
 
    ```
-   <oci-java-sdk.version>1.25.1</oci-java-sdk.version>
+   <oci-java-sdk.version>1.26.0</oci-java-sdk.version>
    ```
 
    Compile and Install package:
@@ -229,9 +229,10 @@ Click **Verify Credentials** that you can connect successfully to your Oracle Cl
    - **Init Script** - You can define several lines of shell based commands to configure the instance (one-time) before it comes online. For example, if the image selected does not have Java pre-installed, you can add command "sudo yum -y install java". This functionality works for Linux instances only.
    - **Init Script Timeout** - Number of seconds to wait for the completion of Init Script. 
    - **Template Instance Cap** - Places a limit on the number of OCI Instances that Jenkins may launch from this Template. Leave this field empty to remove the Template Instance Cap. 
-- **Identical Named Images** - Check this Box if you want to automatically select the newest Image if multiple Images exist with same name.
+   - **Identical Named Images** - Check this Box if you want to automatically select the newest Image if multiple Images exist with same name.
    - **Stop on Idle Timeout** - If this is checked, the Instance is stopped when the Idle timeout expires. If the Instance is required again, then the plugin will look for a stopped Instance that exactly matches the OCI Template specification and resume it if found.
-   
+   - **Tags** - Click Add Button to add Tagging to your Instance. See the [Tagging Overview](https://docs.cloud.oracle.com/en-us/iaas/Content/Tagging/Concepts/taggingoverview.htm)  documentation for additional information.
+   - **Instance Name Prefix** - Using this option, you can add additional naming to the Instance in OCI.    Default name is "jenkins-{IP_Address}-{OCID}", using this option it  would be "jenkins-{Instance_Name_Prefix}-{IP_Address}-{OCID}".
 6. Click **Save** or **Apply**
 
 
