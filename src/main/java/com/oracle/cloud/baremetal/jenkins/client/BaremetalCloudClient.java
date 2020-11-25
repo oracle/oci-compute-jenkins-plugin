@@ -126,11 +126,10 @@ public interface BaremetalCloudClient extends AutoCloseable {
      * Get the network security group list
      *
      * @param compartmentId the compartment id
-     * @param vcnId vcn id
      * @return network security group list
      * @throws Exception if an error occurs
      */
-    List<NetworkSecurityGroup> getNsgIdsList(String compartmentId, String vcnId) throws Exception;
+    List<NetworkSecurityGroup> getNsgIdsList(String compartmentId) throws Exception;
 
     /**
      * Get the sub net

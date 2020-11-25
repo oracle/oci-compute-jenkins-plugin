@@ -475,12 +475,11 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         return subnetList;
     }
 
-    public List<NetworkSecurityGroup> getNsgIdsList(String compartmentId, String vcnId) throws Exception {
+    public List<NetworkSecurityGroup> getNsgIdsList(String compartmentId) throws Exception {
         List<NetworkSecurityGroup> nsgList = new ArrayList<>();
         try (VirtualNetworkAsyncClient vnc = getVirtualNetworkAsyncClient()) {
             ListNetworkSecurityGroupsRequest request = ListNetworkSecurityGroupsRequest.builder()
                     .compartmentId(compartmentId)
-                    .vcnId(vcnId)
                     .build();
             nsgList.addAll(vnc.listNetworkSecurityGroups(request,null).get().getItems());
         } catch (Exception e) {
