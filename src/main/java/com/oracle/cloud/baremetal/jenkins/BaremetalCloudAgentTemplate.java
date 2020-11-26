@@ -82,6 +82,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final Boolean stopOnIdle;
     public final List<BaremetalCloudTagsTemplate> tags;
     public final String instanceNamePrefix;
+    public final String memoryInGBs;
 
     private transient int failureCount;
     private transient String disableCause;
@@ -117,7 +118,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final Boolean autoImageUpdate,
             final Boolean stopOnIdle,
             final List<BaremetalCloudTagsTemplate> tags,
-            final String instanceNamePrefix){
+            final String instanceNamePrefix,
+            final String memoryInGBs){
     	this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
         this.vcnCompartmentId = vcnCompartmentId;
@@ -148,6 +150,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.stopOnIdle = stopOnIdle;
         this.tags = tags;
         this.instanceNamePrefix = instanceNamePrefix;
+        this.memoryInGBs = memoryInGBs;
     }
 
     public String getcompartmentId() {
@@ -301,6 +304,11 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getNumberOfOcpus() {
         return numberOfOcpus;
+    }
+
+    public String getMemoryInGBs() {
+        // if condition is needed for upgrade compatibility
+        return memoryInGBs == null ? Integer.toString(Integer.parseInt(numberOfOcpus)*16) : memoryInGBs;
     }
 
 
@@ -607,7 +615,40 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 Integer[] ocpuOptions = client.getMinMaxOcpus(compartmentId, availableDomain, imageId, shape);
                 IntStream.range(ocpuOptions[0], ocpuOptions[1]+1).forEach(n -> model.add(Integer.toString(n)));
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to get shapes list", e);
+                LOGGER.log(Level.WARNING, "Failed to get ocpus options list", e);
+            }
+            return model;
+        }
+
+        public ListBoxModel doFillMemoryInGBsItems(
+                @QueryParameter @RelativePath("..") String credentialsId,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
+                @QueryParameter String compartmentId,
+                @QueryParameter String availableDomain,
+                @QueryParameter String imageId,
+                @QueryParameter String shape)
+                throws IOException, ServletException {
+            ListBoxModel model = new ListBoxModel();
+
+            if (anyRequiredFieldEmpty(credentialsId, compartmentId, availableDomain, imageId, shape)) {
+                model.clear();
+                model.add("<First select 'Availablity Domain' and 'Image' and 'Shape' above>","");
+                return model;
+            }
+
+            if (!shape.contains("Flex")) {
+                model.clear();
+                model.add("<This field only takes effect for flexible shape if selected>","");
+                return model;
+            }
+
+            try {
+                model.clear();
+                BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
+                Integer[] memoryOptions = client.getMinMaxMemory(compartmentId, availableDomain, imageId, shape);
+                IntStream.range(memoryOptions[0], memoryOptions[1]+1).forEach(n -> model.add(Integer.toString(n)));
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to get memory options list", e);
             }
             return model;
         }

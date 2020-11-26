@@ -186,8 +186,11 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             }
 
             LaunchInstanceShapeConfigDetails shapeConfig = null;
-            if (!template.getNumberOfOcpus().isEmpty()) {
-                shapeConfig = LaunchInstanceShapeConfigDetails.builder().ocpus(Float.parseFloat(template.getNumberOfOcpus())).build();
+            if (!template.getNumberOfOcpus().isEmpty() && !template.getMemoryInGBs().isEmpty()) {
+                shapeConfig = LaunchInstanceShapeConfigDetails.builder()
+                        .ocpus(Float.parseFloat(template.getNumberOfOcpus()))
+                        .memoryInGBs(Float.parseFloat(template.getMemoryInGBs()))
+                        .build();
             }
 
             List<String> nsgIds = new ArrayList<>();
@@ -431,6 +434,20 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                 });
 
         return ocpuOptions;
+    }
+
+    public Integer[] getMinMaxMemory(String compartmentId, String availableDomain, String imageId, String shape) throws Exception {
+        Integer[] memoryOptions = new Integer[2];
+
+        getShapesList(compartmentId, availableDomain, imageId).stream()
+                .parallel()
+                .filter(n -> n.getShape().equals(shape))
+                .forEach(n -> {
+                    memoryOptions[0] = n.getMemoryOptions().getMinInGBs().intValue();
+                    memoryOptions[1] = n.getMemoryOptions().getMaxInGBs().intValue();
+                });
+
+        return memoryOptions;
     }
 
     @Override

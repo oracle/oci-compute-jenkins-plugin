@@ -127,7 +127,8 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 oldTemplate.getAutoImageUpdate(),
                 oldTemplate.getStopOnIdle(),
                 oldTemplate.getTags(),
-                oldTemplate.getInstanceNamePrefix()
+                oldTemplate.getInstanceNamePrefix(),
+                oldTemplate.getMemoryInGBs()
         );
 
     }

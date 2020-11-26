@@ -104,6 +104,17 @@ public interface BaremetalCloudClient extends AutoCloseable {
     Integer[] getMinMaxOcpus(String compartmentId, String availableDomain, String imageId, String shape) throws Exception;
 
     /**
+     * Get the memory options of Flex shapes
+     *
+     * @param compartmentId the compartment id
+     * @param availableDomain available domain
+     * @param imageId image id
+     * @param shape shape name
+     * @return an array with min (array[0]) and max (array[1])
+     * @throws Exception if an error occurs
+     */
+    Integer[] getMinMaxMemory(String compartmentId, String availableDomain, String imageId, String shape) throws Exception;
+    /**
      * Get the Virtual Cloud Network list
      *
      * @param tenantId the tenant id

@@ -52,6 +52,10 @@
       <f:select />
     </f:entry>
 
+    <f:entry title="${%memoryInGBs}" field="memoryInGBs">
+      <f:select />
+    </f:entry>
+
     <f:entry title="${%vcnCompartmentId}" field="vcnCompartmentId">
       <f:select />
     </f:entry>
