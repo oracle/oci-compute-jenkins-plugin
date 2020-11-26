@@ -1,7 +1,6 @@
 package com.oracle.cloud.baremetal.jenkins;
 
 
-import com.oracle.bmc.identity.model.Compartment;
 import com.oracle.bmc.identity.model.Tenancy;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClientFactory;
