@@ -308,7 +308,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getMemoryInGBs() {
         // if condition is needed for upgrade compatibility
-        return memoryInGBs == null ? Integer.toString(Integer.parseInt(numberOfOcpus)*16) : memoryInGBs;
+        return (memoryInGBs == null  && !numberOfOcpus.isEmpty()) ? Integer.toString(Integer.parseInt(numberOfOcpus)*16) : memoryInGBs;
     }
 
 
