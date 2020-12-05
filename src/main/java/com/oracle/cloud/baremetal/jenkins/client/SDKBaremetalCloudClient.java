@@ -49,13 +49,14 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     private ClientConfiguration clientConfig;
     private InstancePrincipalsAuthenticationDetailsProvider instancePrincipalsProvider;
     private boolean instancePrincipals;
-    private String instancePrincipalsTenantId;
+    private String tenantId;
 
     public SDKBaremetalCloudClient(SimpleAuthenticationDetailsProvider provider, String regionId, int maxAsyncThreads) {
         this.provider = provider;
         this.regionId = regionId;
         this.maxAsyncThreads = maxAsyncThreads;
         this.clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
+        this.tenantId = provider.getTenantId();
         ClientRuntime.setClientUserAgent("Oracle-Jenkins/" + Jenkins.VERSION);
     }
 
@@ -64,7 +65,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         this.regionId = regionId;
         this.maxAsyncThreads = maxAsyncThreads;
         this.instancePrincipals = true;
-        this.instancePrincipalsTenantId = instancePrincipalsTenantId;
+        this.tenantId = instancePrincipalsTenantId;
         this.clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
         ClientRuntime.setClientUserAgent("Oracle-Jenkins/" + Jenkins.VERSION);
     }
@@ -144,7 +145,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             if (!instancePrincipals) {
                 identityClient.getUser(GetUserRequest.builder().userId(provider.getUserId()).build());
             } else {
-                identityClient.getTenancy(GetTenancyRequest.builder().tenancyId(instancePrincipalsTenantId).build());
+                identityClient.getTenancy(GetTenancyRequest.builder().tenancyId(tenantId).build());
             }
         }catch(BmcException e){
             LOGGER.log(Level.FINE, "Failed to connect to Oracle Cloud Infrastructure, Please verify all the credential informations enterred", e);
@@ -329,7 +330,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     public Tenancy getTenant() throws Exception {
 
         try (IdentityClient identityClient = getIdentityClient()) {
-            GetTenancyResponse response =  identityClient.getTenancy(GetTenancyRequest.builder().tenancyId(provider.getTenantId()).build());
+            GetTenancyResponse response =  identityClient.getTenancy(GetTenancyRequest.builder().tenancyId(tenantId).build());
             return response.getTenancy();
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to get root compartment", e);
@@ -342,11 +343,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         List<Compartment> compartmentIds = new ArrayList<>();
         ListCompartmentsRequest.Builder builder;
         try (IdentityAsyncClient identityAsyncClient = getIdentityAsyncClient()) {
-            if (!instancePrincipals) {
-                builder = ListCompartmentsRequest.builder().compartmentId(provider.getTenantId()).compartmentIdInSubtree(Boolean.TRUE);
-            } else {
-                builder = ListCompartmentsRequest.builder().compartmentId(instancePrincipalsTenantId).compartmentIdInSubtree(Boolean.TRUE);
-            }
+            builder = ListCompartmentsRequest.builder().compartmentId(tenantId).compartmentIdInSubtree(Boolean.TRUE);
             String nextPageToken = null;
             do {
                 builder.page(nextPageToken);
