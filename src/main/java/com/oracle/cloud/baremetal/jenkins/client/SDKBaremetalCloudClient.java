@@ -226,8 +226,13 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                         freeFormTags.put(tag.getKey(),tag.getValue());
                     } else {
                         Map<String,Object> definedTag = new HashMap<>();
-                        definedTag.put(tag.getKey(),tag.getValue());
-                        definedTags.put(tag.getNamespace(),definedTag);
+                        if (definedTags.containsKey(tag.getNamespace())) {
+                            definedTag = definedTags.get(tag.getNamespace());
+                            definedTag.put(tag.getKey(),tag.getValue());
+                        } else {
+                            definedTag.put(tag.getKey(),tag.getValue());
+                        }
+                        definedTags.put(tag.getNamespace(), definedTag);
                     }
                 }
                 if (!freeFormTags.isEmpty()) {
