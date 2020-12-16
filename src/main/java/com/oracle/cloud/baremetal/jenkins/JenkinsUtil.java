@@ -1,8 +1,10 @@
 package com.oracle.cloud.baremetal.jenkins;
 
+import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 
@@ -79,11 +81,15 @@ public class JenkinsUtil {
     }
 
     public static Jenkins getJenkinsInstance() {
-        Jenkins jenkins = Jenkins.getInstance();
+        Jenkins jenkins = Jenkins.getInstanceOrNull();
         if (jenkins == null) {
             throw new IllegalStateException("Fail to get Jenkins instance, which means it has not been started, or was already shut down");
         }
         return jenkins;
+    }
+
+    public static EnvVars getJenkinsEnvVars() {
+        return getJenkinsInstance().getGlobalNodeProperties().getAll(EnvironmentVariablesNodeProperty.class).get(0).getEnvVars();
     }
 }
 

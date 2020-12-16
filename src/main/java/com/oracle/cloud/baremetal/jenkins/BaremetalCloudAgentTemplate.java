@@ -67,6 +67,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public transient Collection<LabelAtom> labelAtoms;
     public final Node.Mode mode;
     public final String initScript;
+    public final Boolean exportJenkinsEnvVars;
     public final String numExecutors;
     public final String idleTerminationMinutes;
     public final int templateId;
@@ -110,6 +111,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String idleTerminationMinutes,
             final int templateId,
             final String initScript,
+            final Boolean exportJenkinsEnvVars,
             final String sshConnectTimeoutSeconds,
             final String startTimeoutSeconds,
             final String initScriptTimeoutSeconds,
@@ -141,6 +143,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.idleTerminationMinutes = idleTerminationMinutes;
         this.templateId = templateId;
         this.initScript = initScript;
+        this.exportJenkinsEnvVars = exportJenkinsEnvVars;
         this.sshConnectTimeoutSeconds = sshConnectTimeoutSeconds;
         this.startTimeoutSeconds = startTimeoutSeconds;
         this.initScriptTimeoutSeconds = initScriptTimeoutSeconds;
@@ -270,6 +273,15 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         return initScript;
     }
 
+    public String getInitScriptEnvVarsVersion(){
+        return !getExportJenkinsEnvVars() ? initScript : addJenkinsEnvVarsToInitScript(initScript);
+    }
+
+    public Boolean getExportJenkinsEnvVars() {
+        // if condition is needed for upgrade compatibility
+        return exportJenkinsEnvVars == null ? Boolean.FALSE : exportJenkinsEnvVars;
+    }
+
     public String getStartTimeoutSeconds() {
         return startTimeoutSeconds;
     }
@@ -366,6 +378,16 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public synchronized String getDisableCause() {
         return disableCause;
+    }
+
+    private String addJenkinsEnvVarsToInitScript(String initScript) {
+        StringBuilder newInitScript = new StringBuilder();
+        for(Map.Entry<String,String> entry : JenkinsUtil.getJenkinsEnvVars().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            newInitScript.append("export "+key+"="+value+"\n");
+        }
+        return newInitScript.append(initScript).toString();
     }
 
     @Extension

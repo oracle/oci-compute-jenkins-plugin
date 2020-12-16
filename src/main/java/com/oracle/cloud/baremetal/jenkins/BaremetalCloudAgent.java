@@ -71,7 +71,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                 cloudName,
                 template.getSshConnectTimeoutMillis(),
                 instanceId,
-                template.getInitScript(),
+                template.getInitScriptEnvVarsVersion(),
                 template.getInitScriptTimeoutSeconds(),
                 host,
                 template.getTemplateId(),
