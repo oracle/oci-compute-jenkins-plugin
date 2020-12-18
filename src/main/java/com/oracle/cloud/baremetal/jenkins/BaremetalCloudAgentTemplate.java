@@ -15,6 +15,7 @@ import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserPrivateKey;
 import javax.servlet.ServletException;
 
 import com.oracle.bmc.identity.model.Tenancy;
+import hudson.EnvVars;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -381,13 +382,18 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     }
 
     private String addJenkinsEnvVarsToInitScript(String initScript) {
-        StringBuilder newInitScript = new StringBuilder();
-        for(Map.Entry<String,String> entry : JenkinsUtil.getJenkinsEnvVars().entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            newInitScript.append("export "+key+"="+value+"\n");
+
+        EnvVars vars = JenkinsUtil.getJenkinsEnvVars();
+        if (vars != null) {
+            StringBuilder newInitScript = new StringBuilder();
+            for (Map.Entry<String, String> entry : vars.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                newInitScript.append("export " + key + "=" + value + "\n");
+            }
+            return newInitScript.append(initScript).toString();
         }
-        return newInitScript.append(initScript).toString();
+        return initScript;
     }
 
     @Extension

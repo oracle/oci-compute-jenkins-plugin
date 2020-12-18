@@ -8,6 +8,8 @@ import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 
+import java.util.List;
+
 public class JenkinsUtil {
 
     //Generic type-safe wrapper for {@link Jenkins#getDescriptorOrDie}.
@@ -89,7 +91,11 @@ public class JenkinsUtil {
     }
 
     public static EnvVars getJenkinsEnvVars() {
-        return getJenkinsInstance().getGlobalNodeProperties().getAll(EnvironmentVariablesNodeProperty.class).get(0).getEnvVars();
+        List<EnvironmentVariablesNodeProperty> properties = getJenkinsInstance().getGlobalNodeProperties().getAll(EnvironmentVariablesNodeProperty.class);
+        if (properties.isEmpty()) {
+            return null;
+        }
+        return properties.get(0).getEnvVars();
     }
 }
 
