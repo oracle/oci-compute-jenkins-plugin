@@ -3,6 +3,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.12 - January 2021
+
+### Added
+
+- OCI Java SDK 1.29.0
+- Export Jenkins Variables to Init Script
+- **Memory in GBs** option for Flex Shapes
+- Network Security Groups Compartment option
+
+### Fixed
+
+- java.lang.NumberFormatException: For input string: ""
+- NPE in SDKBaremetalCloudClient.getTenant() when using Instance Principals
+- Only the last Tag is set when setting more than one Tag
+
+
+
 ## 1.0.11 - November 2020
 
 ### Fixed
