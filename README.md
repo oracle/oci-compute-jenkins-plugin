@@ -115,19 +115,16 @@ Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/bl
 
 2. If you want to use the latest version of OCI Java SDK, update pom.xml
 
-   ```
-   <oci-java-sdk.version>1.26.0</oci-java-sdk.version>
-   ```
+   > <oci-java-sdk.version>1.29.0</oci-java-sdk.version>
 
-   Compile and Install package:
+3. Compile and Install package:
 
-   ```
-   $ mvn package
-   ```
+   > $ mvn package
 
    
 
 #####  Install the Plugin
+
 A logged-in Jenkins administrator may upload the file from within the web UI.
 
 1. Navigate to the Manage Jenkins > Manage Plugins page in the web UI
@@ -211,6 +208,7 @@ Click **Verify Credentials** that you can connect successfully to your Oracle Cl
    - **Image** - Select the Image the instance will use. **Note:** Java should be installed on the image as a Jenkins requirement. Alternatively refer to **Init Script** in Advanced section below to install Java on the newly launched Linux instances. **Note:** Windows images also need to be preconfigured and to be able to authenticate with SSH.
    - **Shape** - The Shape for your instance.
    - **Number of OCPUs** - You can customize the number of OCPUs that are allocated to a flexible  shape. This field only takes effect if you select a flexible shape. For more information, see [Compute Shapes](https://docs.cloud.oracle.com/en-us/iaas/Content/Compute/References/computeshapes.htm#flexible).
+   - **Memory in GBs** - You can customize the amount of memory that is allocated to a flexible shape. This field only takes effect if you select a flexible shape. For more information, see [Compute Shapes](https://docs.cloud.oracle.com/en-us/iaas/Content/Compute/References/computeshapes.htm#flexible).
    - **Virtual Cloud Network Compartment** -  The compartment from which to select the Virtual Cloud Network. 
    - **Virtual Cloud Network** - The Virtual Cloud Network for your instance.
    - **Subnet Compartment** - The compartment from which to select the Network's Subnet. 
@@ -218,7 +216,7 @@ Click **Verify Credentials** that you can connect successfully to your Oracle Cl
    - **Network Security Groups** -  Click Add to select Network Security Groups. For more information, see [Network Security Groups](https://docs.cloud.oracle.com/en-us/iaas/Content/Network/Concepts/networksecuritygroups.htm).
    - **Assign Public IP Address** - The Plugin will assign a public IP to an instance, provided the subnet has an available public IP range. If this Option is unchecked, only the private IP is assigned. 
    - **Connect Agent using Public IP** - The Plugin will connect to the public IP of the instance. If this Option is unchecked, the Plugin will connect to the private IP of the instance. 
-   - **SSH credentials** - The Private SSH Key for accessing the OCI instance. For more information, see [Credentials](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/credentials.htm).
+   - **SSH credentials** - The Private SSH Key in PEM format for accessing the OCI instance. For more information, see [Credentials](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/credentials.htm).
    
 3. Click **Advanced** for more options:
    - **Remote FS root** - Dedicated directory for Jenkins agent in instance.
