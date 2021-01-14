@@ -15,7 +15,7 @@
 
   <properties>
     <java.level>8</java.level>
-    <oci-java-sdk.version>1.26.0</oci-java-sdk.version>
+    <oci-java-sdk.version>1.29.0</oci-java-sdk.version>
   </properties>
 
   <name>Oracle Cloud Infrastructure Compute Plugin</name>
