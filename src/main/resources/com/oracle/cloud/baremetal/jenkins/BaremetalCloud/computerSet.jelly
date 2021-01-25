@@ -4,8 +4,10 @@
     <tr>
       <td />
       <td colspan="${monitors.size()+1}">
-        <f:form action="${rootURL}/cloud/${it.name}/provision" method="post" name="provision">
+        <f:form action="${rootURL}/cloud/${it.name}/provisionArguments" method="post" name="provisionArguments">
+
           <input type="submit" class="compute-provision-button" value="${%provision(it.displayName)}" />
+
           <select name="templateId">
             <j:forEach var="t" items="${it.templates}">
               <j:if test="${t.disableCause==null}">
@@ -13,6 +15,7 @@
               </j:if>
             </j:forEach>
           </select>
+
           <st:once>
             <script>
               Behaviour.register({
@@ -22,6 +25,7 @@
               });
             </script>
           </st:once>
+
         </f:form>
       </td>
     </tr>

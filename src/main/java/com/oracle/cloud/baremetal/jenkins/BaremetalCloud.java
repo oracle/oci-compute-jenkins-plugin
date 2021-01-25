@@ -389,31 +389,71 @@ public class BaremetalCloud extends AbstractCloudImpl{
      * @throws IOException if a IO error occurs
      */
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
-    public void doProvision(
+    public void doProvisionArguments(
             @QueryParameter int templateId,
             StaplerRequest req,
             StaplerResponse rsp) throws ServletException, IOException {
         checkPermission(PROVISION);
+        req.setAttribute("PROVISION_TEMPLATE_ID",templateId);
+        req.getView(this, "provisionArguments").forward(req, rsp);
+    }
+
+    /**
+     * Called by {@code provisionArguments.jelly} when explicitly provisioning a new
+     * node via the nodes page.
+     *
+     * @param numberOfComputers a number of agents
+     * @param templateId template id
+     * @param req request
+     * @param rsp response
+     *
+     * @throws ServletException if a servlet exception occurs
+     * @throws IOException if a IO error occurs
+     */
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
+    public void doProvision(
+            @QueryParameter int numberOfComputers,
+            @QueryParameter int templateId,
+            StaplerRequest req,
+            StaplerResponse rsp) throws ServletException, IOException {
 
         BaremetalCloudAgentTemplate template = getTemplateById(templateId);
-        if (template == null) {
-            sendError(Messages.BaremetalCloud_provision_templateNotFound(), req, rsp);
-            return;
-        }
-        if (template.getDisableCause() != null) {
-            sendError(Messages.BaremetalCloud_provision_templateDisabled(), req, rsp);
-            return;
-        }
+        StringBuilder sbNames = new StringBuilder();
+        int numExecutors = 0;
+        for (int i=0;i<numberOfComputers;i++) {
+            if (template == null) {
+                sendError(Messages.BaremetalCloud_provision_templateNotFound(), req, rsp);
+                return;
+            }
+            if (template.getDisableCause() != null) {
+                sendError(Messages.BaremetalCloud_provision_templateDisabled(), req, rsp);
+                return;
+            }
 
-        // Note that this will directly add a new node without involving
-        // NodeProvisioner, so that class will not be aware that a node is being
-        // provisioned until ExplicitProvisioner adds it.
-        ExplicitProvisioner provisioner = new ExplicitProvisioner(template);
-        getThreadPoolForRemoting().submit(provisioner);
+            // Note that this will directly add a new node without involving
+            // NodeProvisioner, so that class will not be aware that a node is being
+            // provisioned until ExplicitProvisioner adds it.
+            ExplicitProvisioner provisioner = new ExplicitProvisioner(template);
+            getThreadPoolForRemoting().submit(provisioner);
+            sbNames.append(provisioner.name+" ");
+            numExecutors = provisioner.numExecutors;
 
-        req.setAttribute(PROVISION_ATTR_AGENT_NAME, provisioner.name);
-        req.setAttribute(PROVISION_ATTR_NUM_EXECUTORS, provisioner.numExecutors);
+        }
+        req.setAttribute(PROVISION_ATTR_AGENT_NAME, sbNames.toString());
+        req.setAttribute(PROVISION_ATTR_NUM_EXECUTORS, numExecutors);
         req.getView(this, "provision").forward(req, rsp);
+    }
+
+    /**
+     * Called by {@code provisionArguments.jelly} to pass templateId to doProvision()
+     *
+     * @param req request
+     *
+     * @return template id
+     */
+    public int getTemplateId(HttpServletRequest req) {
+        return (int) req.getAttribute("PROVISION_TEMPLATE_ID");
+
     }
 
     void addNode(Node node) throws IOException {
@@ -451,7 +491,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
     }
 
     /**
-     * Called by {@code provision.jelly} to show a sidepanel.
+     * Called by {@code provisionArguments.jelly} and {@code provision.jelly} to show a sidepanel.
      *
      * @return provision side panel class
      */
@@ -469,12 +509,12 @@ public class BaremetalCloud extends AbstractCloudImpl{
      */
     public String getProvisionStartedMessage(HttpServletRequest req) {
         String name = (String)req.getAttribute(PROVISION_ATTR_AGENT_NAME);
-        Integer numExecutors = (Integer)req.getAttribute(PROVISION_ATTR_NUM_EXECUTORS);
+        Integer numExecutors = (Integer) req.getAttribute(PROVISION_ATTR_NUM_EXECUTORS);
         return Messages.BaremetalCloud_provision_started(name, numExecutors);
     }
 
     /**
-     * The breadcrumb on the {@code provision.jelly} page contains a link to
+     * The breadcrumb on the {@code provisionArguments.jelly} page contains a link to
      * this object.  We have no data to display, so redirect the user to the
      * computer set page.
      *
