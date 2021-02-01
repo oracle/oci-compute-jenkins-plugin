@@ -1,13 +1,11 @@
 package com.oracle.cloud.baremetal.jenkins.ssh;
 
 import com.cloudbees.jenkins.plugins.sshcredentials.SSHUserPrivateKey;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import com.oracle.cloud.baremetal.jenkins.BaremetalCloud;
 import org.apache.commons.io.IOUtils;
 
 import com.oracle.cloud.baremetal.jenkins.JenkinsUtil;
@@ -22,11 +20,8 @@ import hudson.model.Slave;
 import hudson.model.TaskListener;
 import hudson.remoting.Channel;
 import hudson.remoting.Channel.Listener;
-import hudson.security.ACL;
 import hudson.slaves.ComputerLauncher;
 import hudson.slaves.SlaveComputer;
-import java.util.Collections;
-import jenkins.model.Jenkins;
 
 public class SshComputerLauncher extends ComputerLauncher {
     private static final Logger LOGGER = Logger.getLogger(SshComputerLauncher.class.getName());
@@ -62,9 +57,7 @@ public class SshComputerLauncher extends ComputerLauncher {
             final int initScriptTimeoutSeconds,
             final String sshCredentialsId,
             final int sshPort) {
-        this.sshCredentials = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(SSHUserPrivateKey.class, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
-            CredentialsMatchers.withId(sshCredentialsId));
+        this.sshCredentials = (SSHUserPrivateKey) BaremetalCloud.matchCredentials(SSHUserPrivateKey.class, sshCredentialsId);
         this.host = host;
         this.connectTimeoutMillis = connectTimeoutMillis;
         if (sshCredentials != null) {

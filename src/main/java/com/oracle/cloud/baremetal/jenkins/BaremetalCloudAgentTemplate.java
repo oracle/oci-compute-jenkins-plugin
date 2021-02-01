@@ -1,6 +1,5 @@
 package com.oracle.cloud.baremetal.jenkins;
 
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
@@ -326,9 +325,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
 
     public String getPublicKey() throws IOException {
-        SSHUserPrivateKey sshCredentials = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(SSHUserPrivateKey.class, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
-            CredentialsMatchers.withId(this.sshCredentialsId));
+        SSHUserPrivateKey sshCredentials = (SSHUserPrivateKey) BaremetalCloud.matchCredentials(SSHUserPrivateKey.class, this.sshCredentialsId);
         if (sshCredentials != null) {
             return SshKeyUtil.getPublicKey(sshCredentials.getPrivateKey(), Secret.toString(sshCredentials.getPassphrase()));
         } else {

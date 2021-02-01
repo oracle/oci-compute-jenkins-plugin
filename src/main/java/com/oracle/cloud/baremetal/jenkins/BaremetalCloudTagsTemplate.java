@@ -1,9 +1,5 @@
 package com.oracle.cloud.baremetal.jenkins;
 
-
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClientFactory;
 import com.oracle.cloud.baremetal.jenkins.client.SDKBaremetalCloudClientFactory;
@@ -12,14 +8,11 @@ import hudson.Extension;
 import hudson.RelativePath;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
-import hudson.security.ACL;
 import hudson.util.ListBoxModel;
-import jenkins.model.Jenkins;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.export.Exported;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,9 +69,7 @@ public class BaremetalCloudTagsTemplate extends AbstractDescribableImpl<Baremeta
                 model.add("None (add a free-form tag)","None");
                 BaremetalCloudClientFactory factory = SDKBaremetalCloudClientFactory.INSTANCE;
                 BaremetalCloudClient client = factory.createClient(credentialsId, Integer.parseInt(maxAsyncThreads));
-                BaremetalCloudCredentials credentials = CredentialsMatchers.firstOrNull(
-                        CredentialsProvider.lookupCredentials(BaremetalCloudCredentials.class, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
-                        CredentialsMatchers.withId(credentialsId));
+                BaremetalCloudCredentials credentials = (BaremetalCloudCredentials) BaremetalCloud.matchCredentials(BaremetalCloudCredentials.class, credentialsId);
                 if (credentials != null){
                     compartmentId = credentials.getTenantId();
                 }

@@ -2,6 +2,9 @@ package com.oracle.cloud.baremetal.jenkins;
 
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.anyOf;
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.instanceOf;
+
+import com.cloudbees.plugins.credentials.Credentials;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
@@ -676,5 +679,11 @@ public class BaremetalCloud extends AbstractCloudImpl{
         public static FormValidation withContext(FormValidation fv, String context) {
             return FormValidation.error(JenkinsUtil.unescape(fv.getMessage()) + ": " + context);
         }
+    }
+
+    public static Credentials matchCredentials(Class c, String id){
+        return CredentialsMatchers.firstOrNull(
+                CredentialsProvider.lookupCredentials(c, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
+                CredentialsMatchers.withId(id));
     }
 }
