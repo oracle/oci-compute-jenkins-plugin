@@ -11,9 +11,7 @@ import com.oracle.bmc.auth.SimpleAuthenticationDetailsProvider;
 import com.oracle.bmc.model.BmcException;
 
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
-import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClientFactory;
 import com.oracle.cloud.baremetal.jenkins.client.SDKBaremetalCloudClient;
-import com.oracle.cloud.baremetal.jenkins.client.SDKBaremetalCloudClientFactory;
 import hudson.Extension;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
