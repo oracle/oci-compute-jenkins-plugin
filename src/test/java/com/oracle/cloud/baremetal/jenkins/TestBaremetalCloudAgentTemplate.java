@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import hudson.model.Node;
 import hudson.model.labels.LabelAtom;
-import org.apache.xpath.operations.Bool;
 
 
 public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate {
