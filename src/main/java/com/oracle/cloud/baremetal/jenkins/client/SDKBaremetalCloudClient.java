@@ -582,14 +582,12 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     @Override
     public Instance startInstance(String instanceId) throws Exception {
-        Instance instance = null;
         try (ComputeClient computeClient = getComputeClient()) {
             InstanceActionRequest.Builder builder = InstanceActionRequest.builder()
                     .action("START")
                     .instanceId(instanceId);
             InstanceActionResponse response = computeClient.instanceAction(builder.build());
-            instance = response.getInstance();
-            return instance;
+            return response.getInstance();
         }catch(Exception ex){
             throw new Exception("Failed to start an instance: " + ex.getMessage());
         }
