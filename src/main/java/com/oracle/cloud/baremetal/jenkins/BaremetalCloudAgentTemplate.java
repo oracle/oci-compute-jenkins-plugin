@@ -603,7 +603,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 List<String>  lstShape = new ArrayList<String>();
 
                 for (Shape shape : client.getShapesList(compartmentId, availableDomain, imageId)) {
-                    if (lstShape.indexOf(shape.getShape()) < 0) {
+                    if (!lstShape.contains(shape.getShape())) {
                         model.add(shape.getShape(), shape.getShape());
                         lstShape.add(shape.getShape());
                     }
