@@ -63,7 +63,7 @@ public class SshComputerLauncher extends ComputerLauncher {
             final String sshCredentialsId,
             final int sshPort) {
         this.sshCredentials = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(SSHUserPrivateKey.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
+            CredentialsProvider.lookupCredentials(SSHUserPrivateKey.class, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
             CredentialsMatchers.withId(sshCredentialsId));
         this.host = host;
         this.connectTimeoutMillis = connectTimeoutMillis;
