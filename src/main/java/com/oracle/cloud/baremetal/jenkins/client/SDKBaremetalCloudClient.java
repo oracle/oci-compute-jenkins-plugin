@@ -168,7 +168,6 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             String imageIdStr = template.getImage();
             String shape = template.getShape();
             String sshPublicKey = template.getPublicKey();
-            String instanceName = name;
 
             boolean assignPublicIP = true;
             if(template.getAssignPublicIP() != null) {
@@ -208,7 +207,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                                     .subnetId(subnetIdStr)
                                     .nsgIds(nsgIds)
                                     .build())
-                    .displayName(instanceName)
+                    .displayName(name)
                     .imageId(imageIdStr)
                     .metadata(metadata)
                     .shape(shape)
