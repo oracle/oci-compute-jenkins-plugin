@@ -23,7 +23,7 @@ public class BaremetalCloudRetentionStrategy extends CloudRetentionStrategy {
     @GuardedBy("hudson.model.Queue.lock")
     public long check(final AbstractCloudComputer c) {
         if (c.isOffline() && c.getOfflineCause() instanceof SimpleOfflineCause) {
-            LOGGER.fine(c.getDisplayName() + ": Node is set temprrarily offline - will not terminate");
+            LOGGER.fine(c.getDisplayName() + ": Node is set temporarily offline - will not terminate");
             return 1;
         }
 
