@@ -425,7 +425,6 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         public FormValidation doCheckAssignPublicIP(
                 @QueryParameter @RelativePath("..") String credentialsId,
                 @QueryParameter @RelativePath("..") String maxAsyncThreads,
-                @QueryParameter String compartmentId,
                 @QueryParameter String subnetId,
                 @QueryParameter Boolean assignPublicIP) {
                if (subnetId != null && !subnetId.equals("") && (assignPublicIP == null || assignPublicIP)) {
