@@ -4,14 +4,12 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.oracle.bmc.auth.InstancePrincipalsAuthenticationDetailsProvider;
-import com.oracle.bmc.auth.InstancePrincipalsAuthenticationDetailsProvider.InstancePrincipalsAuthenticationDetailsProviderBuilder;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
 import com.oracle.bmc.auth.SimpleAuthenticationDetailsProvider;
 import com.oracle.cloud.baremetal.jenkins.credentials.BaremetalCloudCredentials;
 import hudson.security.ACL;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
