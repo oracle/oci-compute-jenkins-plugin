@@ -45,7 +45,6 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
     private SimpleAuthenticationDetailsProvider provider;
     private String regionId;
-    private int maxAsyncThreads;
     private ClientConfiguration clientConfig;
     private InstancePrincipalsAuthenticationDetailsProvider instancePrincipalsProvider;
     private boolean instancePrincipals;
@@ -54,7 +53,6 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     public SDKBaremetalCloudClient(SimpleAuthenticationDetailsProvider provider, String regionId, int maxAsyncThreads) {
         this.provider = provider;
         this.regionId = regionId;
-        this.maxAsyncThreads = maxAsyncThreads;
         this.clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
         this.tenantId = provider.getTenantId();
         ClientRuntime.setClientUserAgent("Oracle-Jenkins/" + Jenkins.VERSION);
@@ -63,7 +61,6 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     public SDKBaremetalCloudClient(InstancePrincipalsAuthenticationDetailsProvider instancePrincipalsProvider, String regionId, int maxAsyncThreads, String instancePrincipalsTenantId) {
         this.instancePrincipalsProvider = instancePrincipalsProvider;
         this.regionId = regionId;
-        this.maxAsyncThreads = maxAsyncThreads;
         this.instancePrincipals = true;
         this.tenantId = instancePrincipalsTenantId;
         this.clientConfig = ClientConfiguration.builder().maxAsyncThreads(maxAsyncThreads).build();
