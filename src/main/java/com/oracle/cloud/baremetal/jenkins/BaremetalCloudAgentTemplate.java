@@ -389,7 +389,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             for (Map.Entry<String, String> entry : vars.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
-                newInitScript.append("export " + key + "=" + value + "\n");
+                newInitScript.append("export ").append(key).append("=").append(value).append("\n");
             }
             return newInitScript.append(initScript).toString();
         }
