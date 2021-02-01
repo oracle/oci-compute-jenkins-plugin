@@ -1,29 +1,17 @@
 package com.oracle.cloud.baremetal.jenkins;
 
-import static com.oracle.cloud.baremetal.jenkins.BaremetalCloudTestUtils.CREDENTIALS_ID;
-
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.security.KeyPair;
-import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.concurrent.TimeUnit;
 
-import org.jmock.Expectations;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
-import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClientFactory;
-
 import hudson.model.Node;
 import hudson.model.labels.LabelAtom;
 import hudson.util.FormValidation;
-import jenkins.bouncycastle.api.PEMEncodable;
 import jenkins.bouncycastle.api.SecurityProviderInitializer;
 
 public class BaremetalCloudAgentTemplateUnitTest {
@@ -56,9 +44,9 @@ public class BaremetalCloudAgentTemplateUnitTest {
 
     @Test
     public void testGetCompartmentId() {
-        Assert.assertNull(new TestBaremetalCloudAgentTemplate().getcompartmentId());
-        Assert.assertEquals("", new TestBaremetalCloudAgentTemplate.Builder().compartmentId("").build().getcompartmentId());
-        Assert.assertEquals("123", new TestBaremetalCloudAgentTemplate.Builder().compartmentId("123").build().getcompartmentId());
+        Assert.assertNull(new TestBaremetalCloudAgentTemplate().getCompartmentId());
+        Assert.assertEquals("", new TestBaremetalCloudAgentTemplate.Builder().compartmentId("").build().getCompartmentId());
+        Assert.assertEquals("123", new TestBaremetalCloudAgentTemplate.Builder().compartmentId("123").build().getCompartmentId());
     }
 
     @Test

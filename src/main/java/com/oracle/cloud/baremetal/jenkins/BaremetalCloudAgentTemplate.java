@@ -157,7 +157,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.memoryInGBs = memoryInGBs;
     }
 
-    public String getcompartmentId() {
+    public String getCompartmentId() {
         return compartmentId;
     }
 

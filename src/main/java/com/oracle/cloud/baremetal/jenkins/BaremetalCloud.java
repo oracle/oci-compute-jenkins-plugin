@@ -239,7 +239,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
             if (!template.getStopOnIdle()) {
                 instance = client.createInstance(instanceName, template);
             } else {
-                List<Instance> allStoppedInstances = client.getStoppedInstances(template.getcompartmentId(), template.getAvailableDomain());
+                List<Instance> allStoppedInstances = client.getStoppedInstances(template.getCompartmentId(), template.getAvailableDomain());
                 if (!allStoppedInstances.isEmpty()) {
                     String displayName;
                     if (template.getInstanceNamePrefix() == null || template.getInstanceNamePrefix().isEmpty()) {

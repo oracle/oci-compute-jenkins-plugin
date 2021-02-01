@@ -163,7 +163,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         try (ComputeClient computeClient = getComputeClient()) {
 
             String ad = template.getAvailableDomain();
-            String compartmentIdStr = template.getcompartmentId();
+            String compartmentIdStr = template.getCompartmentId();
             String subnetIdStr = template.getSubnet();
             String imageIdStr = template.getImage();
             String shape = template.getShape();
@@ -285,7 +285,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         try (ComputeClient computeClient = getComputeClient();
                 VirtualNetworkClient vcnClient = getVirtualNetworkClient()) {
 
-            String compartmentId = template.getcompartmentId();
+            String compartmentId = template.getCompartmentId();
 
             // for the instance, list its vnic attachments
             ListVnicAttachmentsResponse listVnicResponse =
