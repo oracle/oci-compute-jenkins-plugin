@@ -160,7 +160,9 @@ public class BaremetalCloud extends AbstractCloudImpl{
         String IP = "";
         try {
             IP = InetAddress.getLocalHost().getHostAddress();
-        } catch (Exception e){}
+        } catch (Exception e){
+            LOGGER.info("Failed to get Jenkins IP address: " + e.getMessage());
+        }
         return IP;
     }
 
