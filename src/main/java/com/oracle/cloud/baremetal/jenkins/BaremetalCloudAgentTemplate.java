@@ -327,7 +327,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getPublicKey() throws IOException {
         SSHUserPrivateKey sshCredentials = CredentialsMatchers.firstOrNull(
-            CredentialsProvider.lookupCredentials(SSHUserPrivateKey.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
+            CredentialsProvider.lookupCredentials(SSHUserPrivateKey.class, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
             CredentialsMatchers.withId(this.sshCredentialsId));
         if (sshCredentials != null) {
             return SshKeyUtil.getPublicKey(sshCredentials.getPrivateKey(), Secret.toString(sshCredentials.getPassphrase()));
@@ -403,7 +403,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         public String getHelpFile(String fieldName) {
             String p = super.getHelpFile(fieldName);
             if (p == null) {
-                Descriptor descriptor = Jenkins.getInstance().getDescriptor(BaremetalCloudAgent.class);
+                Descriptor descriptor = Jenkins.getInstanceOrNull().getDescriptor(BaremetalCloudAgent.class);
                 if (descriptor != null)
                     p = descriptor.getHelpFile(fieldName);
             }
@@ -794,7 +794,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @AncestorInPath Item context, 
                 @QueryParameter String sshCredentialsId) {
             StandardListBoxModel result = new StandardListBoxModel();
-            Jenkins instance = Jenkins.getInstance();
+            Jenkins instance = Jenkins.getInstanceOrNull();
             if (context == null) {
                 if (instance != null && !instance.hasPermission(Jenkins.ADMINISTER)) {
                     return result.includeCurrentValue(sshCredentialsId);
