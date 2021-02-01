@@ -657,7 +657,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item context, @QueryParameter String credentialsId) {
             StandardListBoxModel result = new StandardListBoxModel();
-            Jenkins instance = Jenkins.getInstance();
+            Jenkins instance = Jenkins.getInstanceOrNull();
             if (context != null && instance != null ) {
                 if (!context.hasPermission(Item.EXTENDED_READ) && !context.hasPermission(CredentialsProvider.USE_ITEM)) {
                     return result.includeCurrentValue(credentialsId);
