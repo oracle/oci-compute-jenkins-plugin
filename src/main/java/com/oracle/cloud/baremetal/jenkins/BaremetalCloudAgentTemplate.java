@@ -403,9 +403,12 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         public String getHelpFile(String fieldName) {
             String p = super.getHelpFile(fieldName);
             if (p == null) {
-                Descriptor descriptor = Jenkins.getInstanceOrNull().getDescriptor(BaremetalCloudAgent.class);
-                if (descriptor != null)
-                    p = descriptor.getHelpFile(fieldName);
+                Jenkins jenkins = Jenkins.getInstanceOrNull();
+                if (jenkins != null) {
+                    Descriptor descriptor = jenkins.getDescriptor(BaremetalCloudAgent.class);
+                    if (descriptor != null)
+                        p = descriptor.getHelpFile(fieldName);
+                }
             }
             return p;
         }
