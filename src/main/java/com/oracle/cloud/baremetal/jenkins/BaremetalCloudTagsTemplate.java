@@ -77,7 +77,7 @@ public class BaremetalCloudTagsTemplate extends AbstractDescribableImpl<Baremeta
                 BaremetalCloudClientFactory factory = SDKBaremetalCloudClientFactory.INSTANCE;
                 BaremetalCloudClient client = factory.createClient(credentialsId, Integer.parseInt(maxAsyncThreads));
                 BaremetalCloudCredentials credentials = CredentialsMatchers.firstOrNull(
-                        CredentialsProvider.lookupCredentials(BaremetalCloudCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
+                        CredentialsProvider.lookupCredentials(BaremetalCloudCredentials.class, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
                         CredentialsMatchers.withId(credentialsId));
                 if (credentials != null){
                     compartmentId = credentials.getTenantId();
