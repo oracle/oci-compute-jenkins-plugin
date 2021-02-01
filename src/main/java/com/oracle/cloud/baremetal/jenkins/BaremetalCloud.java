@@ -600,7 +600,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
                 SshConnector.connect(connnection, connectTimeoutMillis);
                 return;
             } catch (IOException e) {
-                LOGGER.log(Level.FINER, "Ignoring exception connecting to SSH during privision", e);
+                LOGGER.log(Level.FINER, "Ignoring exception connecting to SSH during provision", e);
             } finally {
                 connnection.close();
             }
