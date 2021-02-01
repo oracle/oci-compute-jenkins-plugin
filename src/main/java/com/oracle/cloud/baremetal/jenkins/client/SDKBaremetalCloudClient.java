@@ -298,9 +298,9 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                                     .build());
             // for each vnic attachment, get the vnic details from the virtualNetwork API
             List<VnicAttachment> vnics = listVnicResponse.getItems();
-            for (int i = 0; i < vnics.size(); i++) {
+            for (VnicAttachment vnic : vnics) {
 
-                String vnicId = vnics.get(i).getVnicId();
+                String vnicId = vnic.getVnicId();
 
                 GetVnicResponse getVnicResponse =
                         vcnClient.getVnic(GetVnicRequest.builder().vnicId(vnicId).build());
@@ -308,17 +308,17 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                 // then check the vnic for a public IP or private IP
                 String publicIpLocal = getVnicResponse.getVnic().getPublicIp();
                 boolean usePublicIP = true;
-                if(template.getUsePublicIP()!= null) {
+                if (template.getUsePublicIP() != null) {
                     usePublicIP = template.getUsePublicIP();
                 }
                 if (usePublicIP && publicIpLocal != null) {
                     LOGGER.info("Get public ip for instance " + instanceId + ": " + publicIpLocal);
-                    Ip =  publicIpLocal;
+                    Ip = publicIpLocal;
                 } else {
                     String privateIpLocal = getVnicResponse.getVnic().getPrivateIp();
                     if (privateIpLocal != null) {
                         LOGGER.info("Get private ip for instance " + instanceId + ": " + privateIpLocal);
-                        Ip =  privateIpLocal;
+                        Ip = privateIpLocal;
                     }
 
                 }
