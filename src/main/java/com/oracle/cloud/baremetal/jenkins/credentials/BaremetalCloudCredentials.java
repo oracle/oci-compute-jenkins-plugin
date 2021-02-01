@@ -4,18 +4,18 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 
 public interface BaremetalCloudCredentials extends StandardCredentials {
 
-    public String getFingerprint();
+    String getFingerprint();
 
-    public String getApikey();
+    String getApikey();
 
-    public String getPassphrase();
+    String getPassphrase();
 
-    public String getTenantId();
+    String getTenantId();
 
-    public String getUserId();
+    String getUserId();
 
-    public String getRegionId();
+    String getRegionId();
 
-    public boolean isInstancePrincipals();
+    boolean isInstancePrincipals();
 
 }
