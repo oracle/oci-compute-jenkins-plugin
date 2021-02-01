@@ -13,7 +13,7 @@ public class BaremetalCloudTestUtils {
     public static final String CREDENTIALS_ID = "1";
     /**
      * Similar to {@link hudson.model.Label#parse} but does not use
-     * {@link Jenkins#getInstance}.
+     * {@link Jenkins#getInstanceOrNull()}.
      */
     public static Collection<LabelAtom> parseLabels(String labels) {
         Collection<LabelAtom> result = new TreeSet<>();
