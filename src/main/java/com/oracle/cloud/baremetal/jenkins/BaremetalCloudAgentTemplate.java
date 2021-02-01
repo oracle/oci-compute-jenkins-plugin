@@ -517,7 +517,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
                 List<String>  lstDomain = new ArrayList<String>();
                 for (AvailabilityDomain domain : client.getAvailabilityDomainsList(compartmentId)) {
-                    if (lstDomain.indexOf(domain.getName()) < 0) {
+                    if (!lstDomain.contains(domain.getName())) {
                         model.add(domain.getName(), domain.getName());
                         lstDomain.add(domain.getName());
                     }
