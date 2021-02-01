@@ -573,7 +573,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 List<String>  lstImage = new ArrayList<String>();
 
                 for (Image imageId : client.getImagesList(imageCompartmentId)) {
-                    if (lstImage.indexOf(imageId.getId()) < 0) {
+                    if (!lstImage.contains(imageId.getId())) {
                         model.add(imageId.getDisplayName(), imageId.getId());
                         lstImage.add(imageId.getId());
                     }
