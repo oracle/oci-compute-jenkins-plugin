@@ -24,7 +24,7 @@ public class SDKBaremetalCloudClientFactory implements BaremetalCloudClientFacto
     @Override
     public BaremetalCloudClient createClient (String credentialsId, int maxAsyncThreads) {
         BaremetalCloudCredentials credentials = CredentialsMatchers.firstOrNull(
-                CredentialsProvider.lookupCredentials(BaremetalCloudCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
+                CredentialsProvider.lookupCredentials(BaremetalCloudCredentials.class, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()),
                 CredentialsMatchers.withId(credentialsId));
         if (credentials != null) {
             if (!credentials.isInstancePrincipals()) {
