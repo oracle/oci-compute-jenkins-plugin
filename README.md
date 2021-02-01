@@ -237,7 +237,7 @@ Click **Verify Credentials** that you can connect successfully to your Oracle Cl
 
 ## Licensing
 
-Copyright (c) 2018-2020 Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved.
 
 This Plugin is licensed under the Universal Permissive License 1.0
 
