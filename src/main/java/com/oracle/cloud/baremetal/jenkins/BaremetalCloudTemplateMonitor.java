@@ -59,7 +59,7 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                                                 && image2.getTimeCreated().compareTo(image.getTimeCreated()) > 0) {
                                             LOGGER.log(Level.INFO, "A new version of the image {0} was found. It is used in the template.", imageName);
                                             updateCheck = true;
-                                            lstTemplates.add(createNewTemplate(cloud, template, image2.getId()));
+                                            lstTemplates.add(createNewTemplate(template, image2.getId()));
 
                                         }
                                     }
@@ -96,7 +96,7 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
         return recurrencePeriod;
     }
 
-    private BaremetalCloudAgentTemplate createNewTemplate(BaremetalCloud cloud, BaremetalCloudAgentTemplate oldTemplate, String newImageId) {
+    private BaremetalCloudAgentTemplate createNewTemplate(BaremetalCloudAgentTemplate oldTemplate, String newImageId) {
         return new BaremetalCloudAgentTemplate(
                 oldTemplate.compartmentId,
                 oldTemplate.availableDomain,
