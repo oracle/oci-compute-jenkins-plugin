@@ -437,7 +437,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
             // provisioned until ExplicitProvisioner adds it.
             ExplicitProvisioner provisioner = new ExplicitProvisioner(template);
             getThreadPoolForRemoting().submit(provisioner);
-            sbNames.append(provisioner.name+" ");
+            sbNames.append(provisioner.name).append(" ");
             numExecutors = provisioner.numExecutors;
 
         }
