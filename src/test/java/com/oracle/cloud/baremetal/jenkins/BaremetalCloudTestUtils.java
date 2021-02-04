@@ -9,8 +9,6 @@ import jenkins.model.Jenkins;
 
 public class BaremetalCloudTestUtils {
 
-    public static final String INVALID_FINGERPRINT = ":";
-    public static final String CREDENTIALS_ID = "1";
     /**
      * Similar to {@link hudson.model.Label#parse} but does not use
      * {@link Jenkins#getInstanceOrNull()}.
