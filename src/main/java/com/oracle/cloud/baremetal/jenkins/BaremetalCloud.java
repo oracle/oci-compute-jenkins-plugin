@@ -263,6 +263,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
                                 .findAny().get().getId();
                         instance = client.startInstance(instanceId);
                         instanceName = instance.getDisplayName();
+                        name = BaremetalCloud.NAME_PREFIX + instance.getDisplayName().replace(displayName+JENKINS_IP+"-","");
                     } else {
                         // If there is no any stopped by this Jenkins instance -> create a new one
                         instance = client.createInstance(instanceName, template);
