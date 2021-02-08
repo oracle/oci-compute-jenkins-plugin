@@ -3,6 +3,7 @@ package com.oracle.cloud.baremetal.jenkins;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,7 +50,6 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
     private final String instanceId;
     public final String initScript;
     public final int templateId;
-    private final Boolean stopOnIdle;
 
     public BaremetalCloudAgent(final String name,
             final BaremetalCloudAgentTemplate template,
@@ -74,8 +74,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                 template.getInitScriptEnvVarsVersion(),
                 template.getInitScriptTimeoutSeconds(),
                 host,
-                template.getTemplateId(),
-                template.getStopOnIdle());
+                template.getTemplateId());
     }
 
     @DataBoundConstructor
@@ -96,8 +95,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             final String initScript,
             final int initScriptTimeoutSeconds,
             final String host,
-            final int templateId,
-            final Boolean stopOnIdle) throws IOException, FormException{
+            final int templateId) throws IOException, FormException{
     	super(name,
                 description,
                 remoteFS,
@@ -116,7 +114,6 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
         this.instanceId = instanceId;
         this.initScript = initScript;
         this.templateId = templateId;
-        this.stopOnIdle = stopOnIdle;
     }
 
     private BaremetalCloudAgent(final String name,
@@ -131,8 +128,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             final String initScript,
             final ComputerLauncher computerLauncher,
             final RetentionStrategy retentionStrategy,
-            final int templateId,
-            final Boolean stopOnIdle) throws IOException,
+            final int templateId) throws IOException,
             FormException {
         super(name, description, remoteFS, numExecutors, mode, labelString, computerLauncher, retentionStrategy,
                 nodeProperties);
@@ -140,7 +136,6 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
         this.instanceId = instanceId;
         this.initScript = initScript;
         this.templateId = templateId;
-        this.stopOnIdle = stopOnIdle;
     }
 
     public String getInstanceId() {
@@ -176,6 +171,14 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             LOGGER.log(Level.SEVERE, "Unable to stop or terminate {0} because the Oracle Compute Cloud {1} does not exist",
                     new Object[] { instanceId, BaremetalCloud.nameToCloudName(cloudName) });
             return;
+        }
+
+        boolean stopOnIdle = false;
+        Optional<? extends BaremetalCloudAgentTemplate> temp = cloud.getTemplates().stream().parallel()
+                .filter(t->t.getTemplateId() == templateId)
+                .findFirst();
+        if (temp.isPresent()){
+            stopOnIdle = temp.get().getStopOnIdle();
         }
         if (!stopOnIdle) {
             cloud.recycleCloudResources(instanceId);
@@ -238,8 +241,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                     initScript,
                     getLauncher(),
                     getRetentionStrategy(),
-                    templateId,
-                    stopOnIdle);
+                    templateId);
         } catch (FormException | IOException e) {
             LOGGER.warning("Failed to reconfigure BareMetalAgent: " + name);
         }
