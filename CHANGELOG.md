@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.13 - February 2021
+
+### Added
+
+- OCI Java SDK 1.30.0
+- Masking of OCI Credentials
+- Explicit multiple Instance Provisioning
+
+### Fixed
+
+- Stop/Start Node's name not matching Instance's name
+- Stop/Start Option not affecting already created Nodes
+
+
+
 ## 1.0.12 - January 2021
 
 ### Added
@@ -22,7 +37,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## 1.0.11 - November 2020
 
-### Fixed
+### Added
 
 - OCI Java SDK 1.26.0
 - Tags Template option
