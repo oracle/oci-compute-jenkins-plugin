@@ -157,8 +157,6 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
 
 	@Override
 	protected void _terminate(TaskListener listener) throws IOException, InterruptedException {
-	    LOGGER.info("Terminating/Stopping instance " + instanceId);
-
         Computer computer = getComputer();
         if (computer != null) {
             computer.disconnect(null);
@@ -181,8 +179,10 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             stopOnIdle = temp.get().getStopOnIdle();
         }
         if (!stopOnIdle) {
+            LOGGER.info("Terminating instance " + instanceId);
             cloud.recycleCloudResources(instanceId);
         } else {
+            LOGGER.info("Stopping instance " + instanceId);
             cloud.stopCloudResources(instanceId);
         }
 	}
