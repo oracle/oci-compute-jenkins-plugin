@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.10</version>
+    <version>4.16</version>
     <relativePath />
   </parent>
   <artifactId>oracle-cloud-infrastructure-compute</artifactId>
@@ -15,7 +15,7 @@
 
   <properties>
     <java.level>8</java.level>
-    <oci-java-sdk.version>1.30.0</oci-java-sdk.version>
+    <oci-java-sdk.version>1.33.0</oci-java-sdk.version>
   </properties>
 
   <name>Oracle Cloud Infrastructure Compute Plugin</name>
@@ -117,7 +117,7 @@
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.13</version>
+      <version>1.15</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
