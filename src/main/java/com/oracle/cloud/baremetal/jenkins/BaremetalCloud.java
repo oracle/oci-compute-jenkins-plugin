@@ -339,7 +339,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
         Retry<String> retry = getTerminationRetry(() -> client.stopInstance(instanceId));
         try{
             retry.run();
-            //client.waitForInstanceTerminationToComplete(instanceId);
+            client.waitForInstanceTerminationToComplete(instanceId);
         }catch(Exception e){
             throw new IOException(e);
         }
