@@ -4,7 +4,7 @@ jdk:
 dist: trusty
 sudo: false
 before_install:
-  - curl -OL https://github.com/oracle/oci-java-sdk/archive/v1.30.0.tar.gz
-  - tar -xvf v1.30.0.tar.gz
-  - pushd oci-java-sdk-1.30.0/ && mvn -q clean install && popd
+  - curl -OL https://github.com/oracle/oci-java-sdk/archive/v1.36.0.tar.gz
+  - tar -xvf v1.36.0.tar.gz
+  - pushd oci-java-sdk-1.36.0/ && mvn -q clean install && popd
 script: mvn clean compile
