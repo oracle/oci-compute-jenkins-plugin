@@ -1,6 +1,7 @@
 [**Oracle Cloud Infrastructure Compute Plugin**](https://updates.jenkins.io/latest/oracle-cloud-infrastructure-compute.hpi) allows users to access and manage cloud resources on the Oracle Cloud Infrastructure (OCI) from Jenkins.
-A Jenkins master instance with Oracle Cloud Infrastructure Compute Plugin can spin up OCI Instances (slaves or agents) on demand within OCI, and remove the Instances and free its resources automatically once the Job completes.
+A Jenkins master instance with OCI Compute Plugin can spin up OCI Instances (slaves or agents) on demand within OCI, and remove the Instances and free its resources automatically once the Job completes.
 
+**NOTE:** From v1.0.6, the OCI plugin added support and functionality for OCI Credentials. It is not possible to separate the OCI Credentials functionality to a separate Plugin as it will cause issues with existing OCI Compute plugin installations. If you require OCI Credentials functionality, please install the OCI Compute plugin.
 
 
 ## Table of Contents
@@ -20,12 +21,12 @@ A Jenkins master instance with Oracle Cloud Infrastructure Compute Plugin can sp
 
 ## Features
 
-**Oracle Cloud Infrastructure Compute Plugin** provides functionality to dynamically allocate OCI resources for continuous integration tasks, and to bring up and down OCI Instances and resources as required to serve Jenkins Build Jobs.
+**OCI Compute Plugin** provides functionality to dynamically allocate OCI resources for continuous integration tasks, and to bring up and down OCI Instances and resources as required to serve Jenkins Build Jobs.
 
 After installing the Plugin, you can add OCI Clouds and Templates with your required OCI Instance configuration. The Template will have a Label that you can use in your Jenkins Job. Multiple Templates are supported. The Template options include Labels, Domains, Credentials, Shapes, Images, Virtual Cloud Network, Template Instance Cap, etc.
 After your Jenkins Job completes its work, the OCI Instance is cleanly removed and resources are released back to the OCI pool.
 
-View Oracle Cloud Infrastructure Compute Plugin page on the [plugins.jenkins.io](https://plugins.jenkins.io/oracle-cloud-infrastructure-compute) site for more information.
+View OCI Compute Plugin page on the [plugins.jenkins.io](https://plugins.jenkins.io/oracle-cloud-infrastructure-compute) site for more information.
 
 
 
@@ -46,7 +47,7 @@ Minimum Jenkins requirement: *2.204*
 
 
 ## Installation
-There are a number of ways to install the Oracle Cloud Infrastructure Compute Plugin.
+There are a number of ways to install the OCI Compute Plugin.
 
 - Using the Plugin Manager in the web UI.
 - Using the Jenkins CLI install-plugin command.
@@ -104,7 +105,7 @@ The Jenkins master will need to be restarted before the plugin is loaded and mad
 ## Building
 Jenkins plugins are packaged as self-contained .hpi files, which have all the necessary code, images, and other resources which the plugin needs to operate successfully. 
 
-If desired, you can build the Oracle Cloud Infrastructure Compute Plugin .hpi from the source code, and then install the .hpi file in Jenkins.
+If desired, you can build the OCI Compute Plugin .hpi from the source code, and then install the .hpi file in Jenkins.
 
 To build the .hpi file, OCI Java SDK is required and is available on [Maven Central](https://search.maven.org/search?q=g:com.oracle.oci.sdk) and [JCenter](https://bintray.com/oracle/jars/oci-java-sdk).
 
@@ -115,7 +116,7 @@ Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/bl
 
 2. If you want to use the latest version of OCI Java SDK, update pom.xml
 
-   > <oci-java-sdk.version>1.29.0</oci-java-sdk.version>
+   > <oci-java-sdk.version>1.36.0</oci-java-sdk.version>
 
 3. Compile and Install package:
 
@@ -141,11 +142,15 @@ The master will need to be restarted before the plugin is loaded and made availa
 
 
 ## Upgrade
-Updates are listed in the Updates tab of the **Manage Plugins** page and can be installed by checking the checkbox of the Oracle Cloud Infrastructure Compute plugin updates and clicking the **Download now and install after restart** button.
+Updates are listed in the Updates tab of the **Manage Plugins** page and can be installed by checking the checkbox of the OCI Compute plugin updates and clicking the **Download now and install after restart** button.
+
+
 
 **Note**:  Upgrading the Plugin may require you to update your already created OCI Cloud and Templates Configuration. After upgrade please check all OCI Cloud values are OK in Manage Jenkins > Manage Nodes and Clouds > Configure Clouds. Then Click **Save**.
 
 For example, a new method of adding OCI Credentials was added in v106 of the Plugin. Previously these OCI Credentials were added in the OCI Cloud Configuration. If upgrading from a version earlier than v106, then you may have to update the values in your existing Cloud configuration.
+
+
 
 **Note**: A plugin version with new functionality may only take effect on Slaves built with that new version. You may need to remove older Slaves.
 
@@ -155,28 +160,30 @@ For example, a new method of adding OCI Credentials was added in v106 of the Plu
 
 #### Add OCI Credentials
 
-Oracle Cloud Infrastructure Credentials are required to connect to your Oracle Cloud Infrastructure. For more information on OCI Credentials and other required keys, please see [Security Credentials](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/credentials.htm).
+OCI Credentials are required to connect to your OCI. For more information on OCI Credentials and other required keys, please see [Security Credentials](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/credentials.htm).
 
 You can add these OCI Credentials by navigating to the Jenkins Server console, Credentials, System,  and **Add Credentials**
 
 *or*
 
-by navigating to the Jenkins Server console, click Manage Jenkins, then Manage Nodes and Clouds, and  Configure Clouds. Click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**. In **Credentials**, click **Add**.
+by navigating to the Jenkins Server console, click Manage Jenkins, then Manage Nodes and Clouds, and  Configure Clouds. Click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**. In **Credentials**, click **Add**. 
 
 Once in the New Credentials Screen, select **Oracle Cloud Infrastructure Credentials** from the **Kind** Drop-Down.
 
-- **Fingerprint** - The Fingerprint for the key pair being used. 
-- **API Key** - The OCI API Signing Private Key. 
-- **PassPhrase** - The PassPhrase for the key pair being used.
-- **Tenant Id** - The Tenant OCID.
-- **User Id** - The OCID of the User whose API signing key you are using. 
+- **Fingerprint** - The Fingerprint for the key pair being used. See [How to Get the Key's Fingerprint](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm#four) for additional information.
+- **API Key** - The OCI API Signing Private Key. See [How to Generate an API Signing Key](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm#two) for additional information.
+- **PassPhrase** - The PassPhrase for the key pair being used. See [How to Generate an API Signing Key](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm#two) for additional information.
+- **Tenant Id** - The Tenant OCID. See [Where to Get the Tenancy's OCID and User's OCID](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm#five) for additional information.
+- **User Id** - The OCID of the User whose API signing key you are using. See [Where to Get the Tenancy's OCID and User's OCID](https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm#five) for additional information.
 - **Region** - The OCI region to use for all OCI API requests for example, us-phoenix-1.
 - **ID** - An internal unique ID by which these credentials are identified from jobs and other configuration.
 - **Description** - An optional description to help tell similar credentials apart.
-- **Calling Services from an Instance** - You can authorize an instance to make API calls in Oracle Cloud 
-  Infrastructure services.  After you set up the required resources and policies in OCI, an application running on an instance can call OCI public services, removing the need to configure user credentials or a configuration file. If using this functionality, then the Jenkins Master is configured to authorize an instance to make API calls in OCI services. By checking this Option, only the Tenant Id and Region Fields are required. See [Calling Services from an Instance](https://docs.cloud.oracle.com/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm) documentation for additional information.
 
-Click **Verify Credentials** that you can connect successfully to your Oracle Cloud Infrastructure.
+Separately you can select the **Calling Services from an Instance** option. Using this option you can authorize an instance to make API calls in OCI services.  After you set up the required resources and policies in OCI, an application running on an instance can call OCI public services, removing the need to configure user credentials or a configuration file. If using this functionality, then the Jenkins Master is configured to authorize an instance to make API calls in OCI services. By checking this Option, only the Tenant Id and Region Fields are required. See [Calling Services from an Instance](https://docs.cloud.oracle.com/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm) for additional information.
+
+
+
+Click **Verify Credentials** that you can connect successfully to your OCI.
 
 
 
@@ -186,7 +193,7 @@ Click **Verify Credentials** that you can connect successfully to your Oracle Cl
 2. Click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**
 3. Enter credentials to access your OCI account. You can create multiple Clouds.
    - **Name**  - A name for this OCI Compute Cloud.
-   - **Credentials** - The OCI credentials required to connect to your Oracle Cloud Infrastructure.
+   - **Credentials** - The OCI credentials required to connect to your OCI.
      If you want to add an OCI Credential click **Add**. See the previous **Add OCI Credentials** section for more information.
 4. Click **Advanced** for more options.
 	- **Instance Cap** - A number to limit the maximum number of instances that can be created for this Cloud configuration. Leave this field empty to have no cap. 
@@ -254,6 +261,6 @@ For CHANGELOG please refer to [CHANGELOG.md](https://github.com/oracle/oci-compu
 
 
 ## Contributing
-Oracle Cloud Infrastructure Compute Plugin is an open source project. See [CONTRIBUTING.md](https://github.com/oracle/oci-compute-jenkins-plugin/blob/master/CONTRIBUTING.md) for more details.
+OCI Compute Plugin is an open source project. See [CONTRIBUTING.md](https://github.com/oracle/oci-compute-jenkins-plugin/blob/master/CONTRIBUTING.md) for more details.
 
-Oracle gratefully acknowledges the contributions to Oracle Cloud Infrastructure Compute Plugin that have been made by the community.
+Oracle gratefully acknowledges the contributions to OCI Compute Plugin that have been made by the community.

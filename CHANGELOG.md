@@ -3,6 +3,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.14 - April 2021
+
+### Added
+
+- OCI Java SDK 1.36.0
+
+### Fixed
+
+- Instance Termination if Jenkins tries to reconnect node while its Stopping
+- Terminating log string is ambiguous
+
+
+
 ## 1.0.13 - February 2021
 
 ### Added
