@@ -145,7 +145,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                 identityClient.getTenancy(GetTenancyRequest.builder().tenancyId(tenantId).build());
             }
         }catch(BmcException e){
-            LOGGER.log(Level.FINE, "Failed to connect to Oracle Cloud Infrastructure, Please verify all the credential informations enterred", e);
+            LOGGER.log(Level.FINE, "Failed to connect to Oracle Cloud Infrastructure. Please verify all credential information.", e);
             throw e;
         }finally{
             try {
@@ -247,11 +247,18 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
 
             instance = response.getInstance();
             return instance;
-        }catch(Exception ex){
-            if(null != instance && null != instance.getId()){
-                terminateInstance(instance.getId());
-            }
-            throw new Exception("Instance creation fails because: " + ex.getMessage());
+
+        } catch(Exception ex) {
+            LOGGER.log(Level.WARNING, "Failed to launch instance " + name, ex);
+
+	    if (instance != null && instance.getId() != null) {
+                try {
+                    terminateInstance(instance.getId());
+                } catch (Exception e) {
+	            LOGGER.log(Level.WARNING, "Failed to terminate unlaunchable instance" + name, e);
+                }
+	    }
+            throw ex;
         }
     }
 

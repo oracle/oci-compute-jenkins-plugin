@@ -118,6 +118,7 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 oldTemplate.labelString,
                 oldTemplate.idleTerminationMinutes,
                 oldTemplate.templateId,
+		oldTemplate.jenkinsAgentUser,
                 oldTemplate.initScript,
                 oldTemplate.getExportJenkinsEnvVars(),
                 oldTemplate.sshConnectTimeoutSeconds,

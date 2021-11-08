@@ -20,6 +20,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         Boolean assignPublicIP;
         Boolean usePublicIP;
         String sshConnectTimeoutSeconds;
+        String jenkinsAgentUser;
         String initScript;
         Boolean exportJenkinsEnvVars;
         String startTimeoutSeconds;
@@ -167,6 +168,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             return this;
         }
 
+        public Builder jenkinsAgentUser(String jenkinsAgentUser) {
+            this.jenkinsAgentUser = jenkinsAgentUser;
+            return this;
+	}
+
         public Builder initScript(String initScript) {
             this.initScript = initScript;
             return this;
@@ -232,6 +238,7 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.labelString,
                 builder.idleTerminationMinutes,
                 builder.templateId,
+	        builder.jenkinsAgentUser,
                 builder.initScript,
                 builder.exportJenkinsEnvVars,
                 builder.sshConnectTimeoutSeconds,

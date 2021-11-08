@@ -13,7 +13,7 @@ import hudson.ProxyConfiguration;
 
 public class HTTPProxyConfigurator extends DefaultConfigurator {
     @Override
-    protected void setConnectorProvider(ClientBuilder builder) {
+    public void setConnectorProvider(ClientBuilder builder) {
         ClientConfig clientConfig = new ClientConfig();
 
         // OCI API HTTP proxy workaround

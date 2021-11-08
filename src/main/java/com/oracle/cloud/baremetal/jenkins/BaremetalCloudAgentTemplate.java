@@ -66,6 +66,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String labelString;
     public transient Collection<LabelAtom> labelAtoms;
     public final Node.Mode mode;
+    public final String jenkinsAgentUser;
     public final String initScript;
     public final Boolean exportJenkinsEnvVars;
     public final String numExecutors;
@@ -110,6 +111,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String labelString,
             final String idleTerminationMinutes,
             final int templateId,
+            final String jenkinsAgentUser,
             final String initScript,
             final Boolean exportJenkinsEnvVars,
             final String sshConnectTimeoutSeconds,
@@ -142,6 +144,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.labelString = labelString;
         this.idleTerminationMinutes = idleTerminationMinutes;
         this.templateId = templateId;
+        this.jenkinsAgentUser = jenkinsAgentUser;
         this.initScript = initScript;
         this.exportJenkinsEnvVars = exportJenkinsEnvVars;
         this.sshConnectTimeoutSeconds = sshConnectTimeoutSeconds;
@@ -210,6 +213,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getDescription() {
         return description;
+    }
+
+    public String getJenkinsAgentUser() {
+        return jenkinsAgentUser;
     }
 
     public String getRemoteFS() {

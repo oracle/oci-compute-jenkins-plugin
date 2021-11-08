@@ -37,6 +37,7 @@ public class SshComputerLauncher extends ComputerLauncher {
     private final int connectTimeoutMillis;
     private final String privateKey;
 
+    private final String jenkinsAgentUser;
     private final String initScript;
     private final int initScriptTimeoutSeconds;
     private transient SSHUserPrivateKey sshCredentials;
@@ -44,15 +45,18 @@ public class SshComputerLauncher extends ComputerLauncher {
     public SshComputerLauncher(
             final String host,
             final int connectTimeoutMillis,
+	    final String jenkinsAgentUser,
             final String initScript,
             final int initScriptTimeoutSeconds,
             final String sshCredentialsId) {
-        this(host, connectTimeoutMillis, initScript, initScriptTimeoutSeconds, sshCredentialsId, DEFAULT_SSH_PORT);
+        this(host, connectTimeoutMillis, jenkinsAgentUser, initScript,
+	     initScriptTimeoutSeconds, sshCredentialsId, DEFAULT_SSH_PORT);
     }
 
     public SshComputerLauncher(
             final String host,
             final int connectTimeoutMillis,
+            final String jenkinsAgentUser,
             final String initScript,
             final int initScriptTimeoutSeconds,
             final String sshCredentialsId,
@@ -65,6 +69,7 @@ public class SshComputerLauncher extends ComputerLauncher {
         } else {
             this.privateKey = DEFAULT_SSH_PUBLIC_KEY;
         }
+        this.jenkinsAgentUser = jenkinsAgentUser;
         this.initScript = initScript;
         this.initScriptTimeoutSeconds = initScriptTimeoutSeconds;
         if (sshCredentials != null) {
@@ -93,7 +98,7 @@ public class SshComputerLauncher extends ComputerLauncher {
             launchAgent(connection, workingDirectory, computer, listener);
         } catch (IOException | InterruptedException e) {
             tearDownConnection(connection, listener);
-            listener.fatalError("SSH Agen launch failed on: " + sshUser + "@" + host + ":" + sshPort);
+            listener.fatalError("SSH Agent launch failed on: " + sshUser + "@" + host + ":" + sshPort);
             throw e;
         }
     }
@@ -128,7 +133,7 @@ public class SshComputerLauncher extends ComputerLauncher {
     }
 
     private void ensureJavaInstalled(final Connection connection, final TaskListener listener) throws IOException, InterruptedException {
-        listener.getLogger().println("Veryfing that Java is installed");
+        listener.getLogger().println("Verifying that Java is installed");
         int ret = connection.exec("java -fullversion", listener.getLogger());
 
         if (ret != 0) {
@@ -161,16 +166,6 @@ public class SshComputerLauncher extends ComputerLauncher {
     private void runInitScript(Connection connection, String remoteDirectory, final TaskListener listener)
             throws InterruptedException,
             IOException {
-        final String initIndicationFile = "~/.hudson-run-init";
-
-        if (initScript == null || initScript.trim().length() <= 0) {
-            listener.getLogger().println("No init script to copy to remote agent");
-            return;
-        }
-        if (connection.exec("test -e \"" + initIndicationFile + "\"", listener.getLogger()) == 0) {
-            listener.getLogger().println("Init script previously executed on remote agent (\"" + initIndicationFile + "\" exists) - skipping");
-            return;
-        }
 
         listener.getLogger().println("Copying init script to remote agent using scp");
         try {
@@ -186,11 +181,22 @@ public class SshComputerLauncher extends ComputerLauncher {
         try {
             initSession = connection.openSession();
             initSession.requestDumbPTY();
-            initSession.execCommand("/bin/bash " + remoteDirectory + "/init.sh");
+	    final String initIndicatorFile = "~/.hudson-run-init";
+	    final String initCommand =
+                "/bin/bash -c \"if [[ -e " + initIndicatorFile + " ]]; then" +
+                        "  echo 'Agent already initialized '" + initIndicatorFile +" exists;" +
+                        "else" +
+                        "  echo 'Running init script on agent';" +
+                        "  /bin/bash " + remoteDirectory + "/init.sh;" +
+                        "  echo Creating " + initIndicatorFile + " on agent;" +
+                        "  touch " + initIndicatorFile + ";" +
+                        "fi\"";
+            initSession.execCommand(initCommand);
 
+            IOUtils.copy(initSession.getStdout(), listener.getLogger());
+            IOUtils.copy(initSession.getStderr(), listener.getLogger());
             initSession.getStdin().close();
             initSession.getStderr().close();
-            IOUtils.copy(initSession.getStdout(), listener.getLogger());
 
             int exitStatus = waitCompletion(initSession);
             if (exitStatus != 0) {
@@ -206,23 +212,37 @@ public class SshComputerLauncher extends ComputerLauncher {
                 initSession.close();
             }
         }
-
-        Session touchSession = null;
-        try {
-            touchSession = connection.openSession();
-            touchSession.requestDumbPTY();
-            touchSession.execCommand("touch \"" + initIndicationFile + "\"");
-        } finally {
-            if (touchSession != null) {
-                touchSession.close();
-            }
-        }
     }
 
 
     private void copyAgentJar(Connection connection, String remoteDirectory, final TaskListener listener)
             throws IOException {
-        listener.getLogger().println("Copying the slave.jar to remote agent using scp");
+
+	// Delete slave.jar in case it already exists and is owned by a different
+	// user, which could happen if Jenkins Agent User is set.
+	//
+	String deleteString = "sudo rm -f " + remoteDirectory + "/slave.jar";
+        listener.getLogger().println("Deleting remote slave.jar if it exists prior to copy ["
+	             + deleteString + "]");
+        Session deleteSession = null;
+        try {
+            deleteSession = connection.openSession();
+            deleteSession.requestDumbPTY();
+            deleteSession.execCommand(deleteString);
+            deleteSession.getStdin().close();
+            IOUtils.copy(deleteSession.getStderr(), listener.getLogger());
+            IOUtils.copy(deleteSession.getStdout(), listener.getLogger());
+        } catch (IOException e) {
+            listener.fatalError("Failed trying to delete slave.jar on remote agent ["
+	             + e.getMessage() +"] command=[" + deleteString + "]");
+            throw e;
+        } finally {
+            if (deleteSession != null) {
+                deleteSession.close();
+            }
+        }
+
+        listener.getLogger().println("Copying slave.jar to remote agent using scp");
 
         try {
             SCPClient scp = connection.createSCPClient();
@@ -241,8 +261,18 @@ public class SshComputerLauncher extends ComputerLauncher {
             final TaskListener listener)
             throws IOException,
             InterruptedException {
-        String launchString = "java -jar " + remoteDirectory + "/slave.jar";
-        listener.getLogger().println("Launching Agent (via Trilead SSH2 Connection): " + launchString);
+
+        String jarfile = remoteDirectory + "/slave.jar";
+        String launchString = "java -jar " + jarfile;
+        if (jenkinsAgentUser == null || jenkinsAgentUser.trim().isEmpty()) {
+            listener.getLogger().println("Jenkins Agent User is empty, default opc.");
+        } else {
+            launchString = "sudo chown " + jenkinsAgentUser + " " + jarfile +
+	                  " && sudo -u " + jenkinsAgentUser + " " + launchString;
+        }
+
+        listener.getLogger().println("Launching Agent (via Trilead SSH2 Connection): "
+	          + launchString);
 
         Session session = connection.openSession();
         try {
@@ -256,7 +286,7 @@ public class SshComputerLauncher extends ComputerLauncher {
                     });
         } catch (IOException | InterruptedException e) {
             tearDownSession(session, listener);
-            listener.fatalError("Failed to launching Agent");
+            listener.fatalError("Failed to launch Agent");
             throw e;
         }
     }

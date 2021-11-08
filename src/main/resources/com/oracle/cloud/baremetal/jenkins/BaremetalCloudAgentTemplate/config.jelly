@@ -109,6 +109,10 @@
 	    <f:textbox default="1"/>
 	  </f:entry>
 
+      <f:entry title="${%jenkinsAgentUser}" field="jenkinsAgentUser">
+        <f:textbox default=""/>
+      </f:entry>
+
       <f:entry title="${%initScript}" field="initScript">
 	    <f:textarea />
 	  </f:entry>

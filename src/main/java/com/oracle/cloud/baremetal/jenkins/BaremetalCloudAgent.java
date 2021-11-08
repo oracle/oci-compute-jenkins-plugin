@@ -48,6 +48,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
 
     public final String cloudName;
     private final String instanceId;
+    public final String jenkinsAgentUser;
     public final String initScript;
     public final int templateId;
 
@@ -71,6 +72,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                 cloudName,
                 template.getSshConnectTimeoutMillis(),
                 instanceId,
+		template.getJenkinsAgentUser(),
                 template.getInitScriptEnvVarsVersion(),
                 template.getInitScriptTimeoutSeconds(),
                 host,
@@ -92,6 +94,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             final String cloudName,
             final int sshConnectTimeoutMillis,
             final String instanceId,
+            final String jenkinsAgentUser,
             final String initScript,
             final int initScriptTimeoutSeconds,
             final String host,
@@ -105,6 +108,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                 new SshComputerLauncher(
                         host,
                         sshConnectTimeoutMillis,
+			jenkinsAgentUser,
                         initScript,
                         initScriptTimeoutSeconds,
                         sshCredentialsId),
@@ -112,6 +116,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                 nodeProperties);
     	this.cloudName = cloudName;
         this.instanceId = instanceId;
+	this.jenkinsAgentUser = jenkinsAgentUser;
         this.initScript = initScript;
         this.templateId = templateId;
     }
@@ -125,6 +130,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             final List<? extends NodeProperty<?>> nodeProperties,
             final String cloudName,
             final String instanceId,
+            final String jenkinsAgentUser,
             final String initScript,
             final ComputerLauncher computerLauncher,
             final RetentionStrategy retentionStrategy,
@@ -134,13 +140,18 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                 nodeProperties);
         this.cloudName = cloudName;
         this.instanceId = instanceId;
+	this.jenkinsAgentUser = jenkinsAgentUser;
         this.initScript = initScript;
         this.templateId = templateId;
     }
 
+    public String getJenkinsAgentUser() {
+        return jenkinsAgentUser;
+    }
+
     public String getInstanceId() {
-		return instanceId;
-	}
+	return instanceId;
+    }
 
 	@Override
     public AbstractCloudComputer<BaremetalCloudAgent> createComputer() {
@@ -238,6 +249,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                     getNodeProperties(),
                     cloudName,
                     instanceId,
+                    jenkinsAgentUser,
                     initScript,
                     getLauncher(),
                     getRetentionStrategy(),

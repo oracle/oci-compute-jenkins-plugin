@@ -129,17 +129,32 @@ public final class BaremetalCloudCredentialsImpl extends BaseStandardCredentials
                     client.authenticate();
                     return FormValidation.ok(com.oracle.cloud.baremetal.jenkins.Messages.BaremetalCloud_testConnection_success());
                 }catch(BmcException e){
-                    LOGGER.log(Level.INFO, "Failed to connect to Oracle Cloud Infrastructure, Please verify all the credential informations enterred", e);
+                    LOGGER.log(Level.INFO, "Failed to connect to Oracle Cloud Infrastructure. Please verify all the credential information entered.", e);
                     return FormValidation.error(com.oracle.cloud.baremetal.jenkins.Messages.BaremetalCloud_testConnection_unauthorized());
                 }
             } else {
                 InstancePrincipalsAuthenticationDetailsProvider provider = InstancePrincipalsAuthenticationDetailsProvider.builder().build(); 
                 BaremetalCloudClient client = new SDKBaremetalCloudClient(provider, regionId, 50, tenantId);
                 try{
+		    // If using Instance Principals, other credentials should not be
+		    // present.
+		    if (fingerprint != null && !fingerprint.trim().isEmpty()) {
+		       LOGGER.log(Level.INFO, "Fingerprint ignored when using Instance Principals");
+		    }
+		    if (apikey != null && !apikey.trim().isEmpty()) {
+		       LOGGER.log(Level.INFO, "API Key ignored when using Instance Principals");
+		    }
+		    if (passphrase != null && !passphrase.trim().isEmpty()) {
+		       LOGGER.log(Level.INFO, "Passphrase ignored when using Instance Principals");
+		    }
+		    if (userId != null && !userId.trim().isEmpty()) {
+		       LOGGER.log(Level.INFO, "User ID ignored when using Instance Principals");
+		    }
+
                     client.authenticate();
                     return FormValidation.ok(com.oracle.cloud.baremetal.jenkins.Messages.BaremetalCloud_testConnection_success());
                 }catch(BmcException e){
-                    LOGGER.log(Level.INFO, "Failed to connect to Oracle Cloud Infrastructure, Please verify all the credential informations enterred", e);
+                    LOGGER.log(Level.INFO, "Failed to connect to Oracle Cloud Infrastructure using Instance Principals. Please verify all the credential information entered.", e);
                     return FormValidation.error(com.oracle.cloud.baremetal.jenkins.Messages.BaremetalCloud_testConnection_unauthorized());
                 }
             }
