@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.15 - November 2021
+
+### Added
+
+- OCI Java SDK 2.5.1
+- Credentials Plugin 2.3.19
+- Custom Agent User
+
+
+### Fixed
+
+- Error reporting - print original stack trace.
+- Details on Instance Principals option. 
+
 ## 1.0.14 - April 2021
 
 ### Added

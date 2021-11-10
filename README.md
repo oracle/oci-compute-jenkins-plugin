@@ -10,7 +10,7 @@ A Jenkins master instance with OCI Compute Plugin can spin up OCI Instances (sla
 - [Prerequisites](#prerequisites)
 - [Compatibility](#compatibility)
 - [Installation](#installation)
-- [Building](building)
+- [Building](#building)
 - [Upgrade](#upgrade)
 - [Configuration](#configuration)
 - [Licensing](#licensing)
@@ -41,7 +41,7 @@ View OCI Compute Plugin page on the [plugins.jenkins.io](https://plugins.jenkins
    
 
 ## Compatibility
-Minimum Jenkins requirement: *2.204*
+Minimum Jenkins requirement: ***2.222.4***
 
 
 
@@ -116,7 +116,7 @@ Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/bl
 
 2. If you want to use the latest version of OCI Java SDK, update pom.xml
 
-   > <oci-java-sdk.version>1.36.0</oci-java-sdk.version>
+   > <oci-java-sdk.version>2.5.1</oci-java-sdk.version>
 
 3. Compile and Install package:
 
@@ -179,7 +179,7 @@ Once in the New Credentials Screen, select **Oracle Cloud Infrastructure Credent
 - **ID** - An internal unique ID by which these credentials are identified from jobs and other configuration.
 - **Description** - An optional description to help tell similar credentials apart.
 
-Separately you can select the **Calling Services from an Instance** option. Using this option you can authorize an instance to make API calls in OCI services.  After you set up the required resources and policies in OCI, an application running on an instance can call OCI public services, removing the need to configure user credentials or a configuration file. If using this functionality, then the Jenkins Master is configured to authorize an instance to make API calls in OCI services. By checking this Option, only the Tenant Id and Region Fields are required. See [Calling Services from an Instance](https://docs.cloud.oracle.com/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm) for additional information.
+Separately you can select the **Instance Principals** option. Using this option you can authorize an instance to make API calls in OCI services.  After you set up the required resources and policies in OCI, an application running on an instance can call OCI public services, removing the need to configure user credentials or a configuration file. If using this functionality, then the Jenkins Master is configured to authorize an instance to make API calls in OCI services. By checking this Option, only the Tenant Id and Region Fields are required. See [Calling Services from an Instance](https://docs.cloud.oracle.com/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm) for additional information.
 
 
 
@@ -231,6 +231,7 @@ Click **Verify Credentials** that you can connect successfully to your OCI.
    - **Instance SSH Connection Timeout** - Number of seconds to wait for instance from state Running to be able to ssh connect from Jenkins master. 
    - **Idle Termination Minutes** - Number of minutes for Jenkins to wait before deleting and completely removing an idle instance. A value of 0 (or an empty string) indicates that instance will never be stopped/deleted. 
    - **Number of Executors** - Number of concurrent builds that Jenkins can perform. Value should be at least 1.
+   - **JenkinsAgentUser** -  The custom user to start the Jenkins agent process. This user must be baked into the OS image you select or created through an init script. To use this feature, the ssh user should have sudo privileges.
    - **Init Script** - You can define several lines of shell based commands to configure the instance (one-time) before it comes online. For example, if the image selected does not have Java pre-installed, you can add command "sudo yum -y install java". This functionality works for Linux instances only.
    - **Init Script Timeout** - Number of seconds to wait for the completion of Init Script. 
    - **Template Instance Cap** - Places a limit on the number of OCI Instances that Jenkins may launch from this Template. Leave this field empty to remove the Template Instance Cap. 
