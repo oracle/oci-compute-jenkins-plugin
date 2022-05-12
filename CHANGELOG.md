@@ -3,6 +3,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.16 - May 2022
+
+### Added
+
+- OCI Java SDK 2.27.0
+- Switch between multiple templates for provisioning.
+- Template Retry option
+- Logs for monitoring instances limit
+- No deletion of stopped instances upon failures
+
+
+### Fixed
+
+- Auto Image update option breaks the cloud config.
+- NPE in SSHComputerLauncher when InitScript is empty.
+- 'Delete Agent' redirect to homepage.
+
 ## 1.0.15 - November 2021
 
 ### Added
@@ -15,7 +32,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 
 - Error reporting - print original stack trace.
-- Details on Instance Principals option. 
+- Details on Instance Principals option.
 
 ## 1.0.14 - April 2021
 

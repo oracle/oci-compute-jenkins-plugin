@@ -38,7 +38,7 @@ View OCI Compute Plugin page on the [plugins.jenkins.io](https://plugins.jenkins
 
 3. Required Plugins: [bouncycastle API](https://plugins.jenkins.io/bouncycastle-api), [SSH Credentials](https://plugins.jenkins.io/ssh-credentials/), and [Credentials](https://plugins.jenkins.io/credentials)
 
-   
+
 
 ## Compatibility
 Minimum Jenkins requirement: ***2.222.4***
@@ -59,7 +59,7 @@ There are a number of ways to install the OCI Compute Plugin.
 
 The simplest and most common way of installing plugins is through the Manage Jenkins > Manage Plugins view, available to Administrators of a Jenkins environment.
 
-To install the Plugin in Jenkins: 
+To install the Plugin in Jenkins:
 1. Click on **Manage Jenkins** in Home
 2. Click **Manage Plugins**
 3. Click **Available** tab
@@ -93,7 +93,7 @@ Link to latest .hpi version can be found [here](https://updates.jenkins.io/lates
 
 
 
-##### Copying the .hpi file to the plugin directory 
+##### Copying the .hpi file to the plugin directory
 
 Using the .hpi file that has been explicitly downloaded by a systems administrator, the administrator can manually copy the downloaded .hpi file into the JENKINS_HOME/plugins directory on the Jenkins master.
 Link to latest .hpi version can be found [here](https://updates.jenkins.io/latest/oracle-cloud-infrastructure-compute.hpi).
@@ -103,7 +103,7 @@ The Jenkins master will need to be restarted before the plugin is loaded and mad
 
 
 ## Building
-Jenkins plugins are packaged as self-contained .hpi files, which have all the necessary code, images, and other resources which the plugin needs to operate successfully. 
+Jenkins plugins are packaged as self-contained .hpi files, which have all the necessary code, images, and other resources which the plugin needs to operate successfully.
 
 If desired, you can build the OCI Compute Plugin .hpi from the source code, and then install the .hpi file in Jenkins.
 
@@ -116,13 +116,13 @@ Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/bl
 
 2. If you want to use the latest version of OCI Java SDK, update pom.xml
 
-   > <oci-java-sdk.version>2.5.1</oci-java-sdk.version>
+   > <oci-java-sdk.version>2.27.0</oci-java-sdk.version>
 
 3. Compile and Install package:
 
    > $ mvn package
 
-   
+
 
 #####  Install the Plugin
 
@@ -133,7 +133,7 @@ A logged-in Jenkins administrator may upload the file from within the web UI.
 1. Choose the .hpi file under the Upload Plugin section
 1. Click Upload
 
-**or**	
+**or**
 
 The System Administrator can copy the .hpi file into the JENKINS_HOME/plugins directory on the Jenkins master.
 The master will need to be restarted before the plugin is loaded and made available in the Jenkins environment.
@@ -156,7 +156,7 @@ For example, a new method of adding OCI Credentials was added in v106 of the Plu
 
 
 
-## Configuration 
+## Configuration
 
 #### Add OCI Credentials
 
@@ -166,7 +166,7 @@ You can add these OCI Credentials by navigating to the Jenkins Server console, C
 
 *or*
 
-by navigating to the Jenkins Server console, click Manage Jenkins, then Manage Nodes and Clouds, and  Configure Clouds. Click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**. In **Credentials**, click **Add**. 
+by navigating to the Jenkins Server console, click Manage Jenkins, then Manage Nodes and Clouds, and  Configure Clouds. Click **Add a new cloud** and select **Oracle Cloud Infrastructure Compute**. In **Credentials**, click **Add**.
 
 Once in the New Credentials Screen, select **Oracle Cloud Infrastructure Credentials** from the **Kind** Drop-Down.
 
@@ -196,8 +196,8 @@ Click **Verify Credentials** that you can connect successfully to your OCI.
    - **Credentials** - The OCI credentials required to connect to your OCI.
      If you want to add an OCI Credential click **Add**. See the previous **Add OCI Credentials** section for more information.
 4. Click **Advanced** for more options.
-	- **Instance Cap** - A number to limit the maximum number of instances that can be created for this Cloud configuration. Leave this field empty to have no cap. 
-	- **Max number of async threads** - The max number of async threads to use to load the Templates configuration. Consider reducing this value for Cloud configurations with a large number of Templates and if some values fail to load due to OCI API limit being exceeded. In this case the logs will show "User-rate limit exceeded" errors.
+   - **Instance Cap** - A number to limit the maximum number of instances that can be created for this Cloud configuration. Leave this field empty to have no cap.
+   - **Max number of async threads** - The max number of async threads to use to load the Templates configuration. Consider reducing this value for Cloud configurations with a large number of Templates and if some values fail to load due to OCI API limit being exceeded. In this case the logs will show "User-rate limit exceeded" errors.
 
 
 
@@ -209,47 +209,49 @@ Click **Verify Credentials** that you can connect successfully to your OCI.
    - **Description** - Provide a description for this Template.
    - **Usage** - It's recommended that you select "Only build jobs with label expressions matching this node" for now.
    - **Labels** - Enter a unique identifier which allows Jenkins to pick the right instance template to run Job.
-   - **Compartment** - The compartment from which the new Instance is launched. 
-   - **Availability Domain** - The Availability Domain for your instance.  
-   - **Image Compartment** -  The compartment from which to select the Instance's image. 
+   - **Compartment** - The compartment from which the new Instance is launched.
+   - **Availability Domain** - The Availability Domain for your instance.
+   - **Image Compartment** -  The compartment from which to select the Instance's image.
    - **Image** - Select the Image the instance will use. **Note:** Java should be installed on the image as a Jenkins requirement. Alternatively refer to **Init Script** in Advanced section below to install Java on the newly launched Linux instances. **Note:** Windows images also need to be preconfigured and to be able to authenticate with SSH.
    - **Shape** - The Shape for your instance.
    - **Number of OCPUs** - You can customize the number of OCPUs that are allocated to a flexible  shape. This field only takes effect if you select a flexible shape. For more information, see [Compute Shapes](https://docs.cloud.oracle.com/en-us/iaas/Content/Compute/References/computeshapes.htm#flexible).
    - **Memory in GBs** - You can customize the amount of memory that is allocated to a flexible shape. This field only takes effect if you select a flexible shape. For more information, see [Compute Shapes](https://docs.cloud.oracle.com/en-us/iaas/Content/Compute/References/computeshapes.htm#flexible).
-   - **Virtual Cloud Network Compartment** -  The compartment from which to select the Virtual Cloud Network. 
+   - **Virtual Cloud Network Compartment** -  The compartment from which to select the Virtual Cloud Network.
    - **Virtual Cloud Network** - The Virtual Cloud Network for your instance.
-   - **Subnet Compartment** - The compartment from which to select the Network's Subnet. 
+   - **Subnet Compartment** - The compartment from which to select the Network's Subnet.
    - **Subnet** - Subnet of your Virtual Cloud Network.
    - **Network Security Groups** -  Click Add to select Network Security Groups. For more information, see [Network Security Groups](https://docs.cloud.oracle.com/en-us/iaas/Content/Network/Concepts/networksecuritygroups.htm).
-   - **Assign Public IP Address** - The Plugin will assign a public IP to an instance, provided the subnet has an available public IP range. If this Option is unchecked, only the private IP is assigned. 
-   - **Connect Agent using Public IP** - The Plugin will connect to the public IP of the instance. If this Option is unchecked, the Plugin will connect to the private IP of the instance. 
+   - **Assign Public IP Address** - The Plugin will assign a public IP to an instance, provided the subnet has an available public IP range. If this Option is unchecked, only the private IP is assigned.
+   - **Connect Agent using Public IP** - The Plugin will connect to the public IP of the instance. If this Option is unchecked, the Plugin will connect to the private IP of the instance.
    - **SSH credentials** - The Private SSH Key in PEM format for accessing the OCI instance. For more information, see [Credentials](https://docs.cloud.oracle.com/iaas/Content/General/Concepts/credentials.htm).
-   
+
 3. Click **Advanced** for more options:
    - **Remote FS root** - Dedicated directory for Jenkins agent in instance.
-   - **Instance Creation Timeout** - Number of seconds to wait for instance to reach state Running. 
-   - **Instance SSH Connection Timeout** - Number of seconds to wait for instance from state Running to be able to ssh connect from Jenkins master. 
-   - **Idle Termination Minutes** - Number of minutes for Jenkins to wait before deleting and completely removing an idle instance. A value of 0 (or an empty string) indicates that instance will never be stopped/deleted. 
+   - **Instance Creation Timeout** - Number of seconds to wait for instance to reach state Running.
+   - **Instance SSH Connection Timeout** - Number of seconds to wait for instance from state Running to be able to ssh connect from Jenkins master.
+   - **Idle Termination Minutes** - Number of minutes for Jenkins to wait before deleting and completely removing an idle instance. A value of 0 (or an empty string) indicates that instance will never be stopped/deleted.
    - **Number of Executors** - Number of concurrent builds that Jenkins can perform. Value should be at least 1.
    - **JenkinsAgentUser** -  The custom user to start the Jenkins agent process. This user must be baked into the OS image you select or created through an init script. To use this feature, the ssh user should have sudo privileges.
    - **Init Script** - You can define several lines of shell based commands to configure the instance (one-time) before it comes online. For example, if the image selected does not have Java pre-installed, you can add command "sudo yum -y install java". This functionality works for Linux instances only.
-   - **Init Script Timeout** - Number of seconds to wait for the completion of Init Script. 
-   - **Template Instance Cap** - Places a limit on the number of OCI Instances that Jenkins may launch from this Template. Leave this field empty to remove the Template Instance Cap. 
+   - **Init Script Timeout** - Number of seconds to wait for the completion of Init Script.
+   - **Template Instance Cap** - Places a limit on the number of OCI Instances that Jenkins may launch from this Template. Leave this field empty to remove the Template Instance Cap.
    - **Identical Named Images** - Check this Box if you want to automatically select the newest Image if multiple Images exist with same name.
    - **Stop on Idle Timeout** - If this is checked, the Instance is stopped when the Idle timeout expires. If the Instance is required again, then the plugin will look for a stopped Instance that exactly matches the OCI Template specification and resume it if found.
    - **Tags** - Click Add Button to add Tagging to your Instance. See the [Tagging Overview](https://docs.cloud.oracle.com/en-us/iaas/Content/Tagging/Concepts/taggingoverview.htm)  documentation for additional information.
    - **Instance Name Prefix** - Using this option, you can add additional naming to the Instance in OCI.    Default name is "jenkins-{IP_Address}-{OCID}", using this option it  would be "jenkins-{Instance_Name_Prefix}-{IP_Address}-{OCID}".
+   - **Do Not Disable** - If this is checked, then the template will not be disabled upon any kind of failure. The job tied to this template will remain to stay in the queue until there is a resource available (or) the issue is manually resolved. The template will be retried after a configured time. *Make sure you understand the effects of this option and configure the retry time accordingly.*
+   - **Retry Timeout Mins** - Number of minutes after which the provisioning of an instance shall be attempted using this template. Applicable only when the do not disable option is checked. (Provided that there is existing workload after the waiting period.)
 6. Click **Save** or **Apply**
 
 
 
 ## Licensing
 
-Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2018, 2022, Oracle and/or its affiliates. All rights reserved.
 
 This Plugin is licensed under the Universal Permissive License 1.0
 
-This software is dual-licensed to you under the Universal Permissive License (UPL) and Apache License 2.0. 
+This software is dual-licensed to you under the Universal Permissive License (UPL) and Apache License 2.0.
 
 See [LICENSE.txt](https://github.com/oracle/oci-compute-jenkins-plugin/blob/master/LICENSE.txt) for more details.
 
