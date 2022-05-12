@@ -167,6 +167,11 @@ public class SshComputerLauncher extends ComputerLauncher {
             throws InterruptedException,
             IOException {
 
+        if (initScript == null || initScript.trim().length() <= 0) {
+            listener.getLogger().println("No init script to copy to remote agent");
+            return;
+        }
+
         listener.getLogger().println("Copying init script to remote agent using scp");
         try {
             SCPClient scp = connection.createSCPClient();
