@@ -1,6 +1,6 @@
 # Contributing to Oracle Cloud Infrastructure Compute Plugin
 
-*Copyright (c) 2018, 2021, Oracle and/or its affiliates. All rights reserved.*
+*Copyright (c) 2018, 2022, Oracle and/or its affiliates. All rights reserved.*
 
 Pull requests can be made under [The Oracle Contributor Agreement](https://www.oracle.com/technetwork/community/oca-486395.html)  (OCA).
 
