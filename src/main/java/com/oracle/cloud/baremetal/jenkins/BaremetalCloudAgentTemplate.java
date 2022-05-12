@@ -50,6 +50,8 @@ import org.kohsuke.stapler.AncestorInPath;
 public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAgentTemplate>{
     private static final Logger LOGGER = Logger.getLogger(BaremetalCloud.class.getName());
     static final int FAILURE_COUNT_LIMIT = 3;
+    static final int DISABLE_FAILURE_COUNT_LIMIT = 20;
+    public transient boolean templateSleep = false;
 
     public final String compartmentId;
     public final String availableDomain;
@@ -85,9 +87,12 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final List<BaremetalCloudTagsTemplate> tags;
     public final String instanceNamePrefix;
     public final String memoryInGBs;
+    public final Boolean doNotDisable;
+    public final String retryTimeoutMins;
 
-    private transient int failureCount;
+    private transient int failureCount=0;
     private transient String disableCause;
+    public transient long sleepStartTime = 0;
 
     @DataBoundConstructor
     public BaremetalCloudAgentTemplate(
@@ -123,7 +128,9 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final Boolean stopOnIdle,
             final List<BaremetalCloudTagsTemplate> tags,
             final String instanceNamePrefix,
-            final String memoryInGBs){
+            final String memoryInGBs,
+            final Boolean doNotDisable,
+            final String retryTimeoutMins){
     	this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
         this.vcnCompartmentId = vcnCompartmentId;
@@ -157,6 +164,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.tags = tags;
         this.instanceNamePrefix = instanceNamePrefix;
         this.memoryInGBs = memoryInGBs;
+        this.doNotDisable = doNotDisable;
+        this.retryTimeoutMins = retryTimeoutMins;
     }
 
     public String getCompartmentId() {
@@ -330,7 +339,6 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         return (memoryInGBs == null  && !numberOfOcpus.isEmpty()) ? Integer.toString(Integer.parseInt(numberOfOcpus)*16) : memoryInGBs;
     }
 
-
     public String getPublicKey() throws IOException {
         SSHUserPrivateKey sshCredentials = (SSHUserPrivateKey) BaremetalCloud.matchCredentials(SSHUserPrivateKey.class, this.sshCredentialsId);
         if (sshCredentials != null) {
@@ -356,7 +364,6 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         return FormValidationValue.validateNonNegativeInteger(value, 120);
     }
 
-
     @Override
     public Descriptor<BaremetalCloudAgentTemplate> getDescriptor() {
         // TODO Auto-generated method stub
@@ -364,9 +371,21 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     }
 
     public synchronized void increaseFailureCount(String cause) {
-        if (++failureCount >= FAILURE_COUNT_LIMIT) {
+        ++failureCount;
+        if(doNotDisable==null) {
+            if (failureCount >= FAILURE_COUNT_LIMIT) {
+                LOGGER.warning("Agent template " + getDisplayName() + " disabled due to error: " + cause);
+                disableCause = cause;
+            }
+        }else if(failureCount >= FAILURE_COUNT_LIMIT && !doNotDisable){
             LOGGER.warning("Agent template " + getDisplayName() + " disabled due to error: " + cause);
             disableCause = cause;
+        }else if(failureCount >= DISABLE_FAILURE_COUNT_LIMIT && doNotDisable){
+            LOGGER.info("Agent template "+getDisplayName()+ " encountered " + failureCount +" failures till now. " +
+                    "It is disabled due to error: " + cause);
+            disableCause = cause;
+        } else{
+            LOGGER.info("Agent template "+getDisplayName()+ " encountered " + failureCount +" failures till now.");
         }
     }
 
@@ -398,6 +417,34 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             return newInitScript.append(initScript).toString();
         }
         return initScript;
+    }
+
+    public Boolean getDoNotDisable() { return doNotDisable; }
+
+    public synchronized void setTemplateSleep(Boolean sleepvar){
+        this.templateSleep=sleepvar;
+    }
+
+    public synchronized boolean isTemplateSleep() {
+        return templateSleep;
+    }
+
+    private static FormValidationValue<Integer> checkRetryTimeoutMins(String value) {
+        return FormValidationValue.validateNonNegativeInteger(value, 10);
+    }
+
+    public int getRetryTimeoutMins() {
+        return (int)TimeUnit.MINUTES.toMinutes(checkRetryTimeoutMins(retryTimeoutMins).getValue());
+    }
+
+    public synchronized void setSleepStartTime(long sleepStartTime) {
+        LOGGER.log(Level.FINE, "Setting the current time for sleep " + sleepStartTime);
+        this.sleepStartTime = sleepStartTime;
+    }
+
+    public synchronized long getSleepStartTime() {
+        LOGGER.log(Level.FINE, "Getting the set time for sleep " + this.sleepStartTime);
+        return this.sleepStartTime;
     }
 
     @Extension
@@ -448,6 +495,16 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                }
 
                return FormValidation.ok();
+        }
+
+        public FormValidation doCheckDoNotDisable(
+                @QueryParameter @RelativePath("..") String credentialsId,
+                @QueryParameter @RelativePath("..") String maxAsyncThreads,
+                @QueryParameter Boolean doNotDisable) {
+            if (doNotDisable == null || doNotDisable) {
+                return FormValidation.warning(Messages.BaremetalCloudAgentTemplate_doNotDisable_warningmsg());
+            }
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckUsePublicIP(

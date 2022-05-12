@@ -182,7 +182,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
         boolean templateInstanceCapInvalid = false;
 
-        if (template.getInstanceCap().isEmpty()) {
+        if (template.getInstanceCap() == null || template.getInstanceCap().isEmpty()) {
             templateInstanceCapInvalid = true;
         } else if (Integer.parseInt(template.getInstanceCap()) >= getInstanceCap()) {
             templateInstanceCapInvalid = true;
@@ -235,6 +235,7 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
     private BaremetalCloudAgent provision(String name, BaremetalCloudAgentTemplate template, String instanceName) throws Exception {
         LOGGER.info("Provisioning new cloud infrastructure instance");
+	boolean using_stopped_instance = false;
         try {
             BaremetalCloudClient client = getClient();
             Instance instance = null;
@@ -261,9 +262,10 @@ public class BaremetalCloud extends AbstractCloudImpl{
                                 .filter(n -> n.getShape().equals(template.getShape()))
                                 .filter(n -> n.getImageId().equals(template.getImage()))
                                 .findAny().get().getId();
+                        using_stopped_instance = true;
                         instance = client.startInstance(instanceId);
                         instanceName = instance.getDisplayName();
-                        name = BaremetalCloud.NAME_PREFIX + instance.getDisplayName().replace(searchName,"");
+                        name = BaremetalCloud.NAME_PREFIX + instance.getDisplayName().replace(searchName, "");
                     } else {
                         // If there is no any stopped by this Jenkins instance -> create a new one
                         instance = client.createInstance(instanceName, template);
@@ -277,26 +279,52 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
             String Ip = "";
             TimeoutHelper timeoutHelper = new TimeoutHelper(getClock(), template.getStartTimeoutNanos(), START_POLL_SLEEP_MILLIS);
-            try{
+            try {
                 client.waitForInstanceProvisioningToComplete(instance.getId());
                 Ip = client.getInstanceIp(template, instance.getId());
                 LOGGER.info("Provisioned instance " + instanceName + " with ip " + Ip);
                 awaitInstanceSshAvailable(Ip, template.getSshConnectTimeoutMillis(), timeoutHelper);
+                template.setTemplateSleep(false);
                 template.resetFailureCount();
-            } catch( BmcGenericWaiter.WaitConditionFailedException | IOException | RuntimeException ex){
-                try{
-                    recycleCloudResources(instance.getId());
-                    LOGGER.log(Level.WARNING, "Provision node: " + instanceName + " failed, and created resources have been recycled.", ex);
-                } catch(IOException | RuntimeException e2) {
-                    LOGGER.log(Level.WARNING, "Provision node: " + instanceName + " failed, and failed to recycle node " + instanceName, ex);
+            } catch (BmcGenericWaiter.WaitConditionFailedException | IOException | RuntimeException ex) {
+		        if (using_stopped_instance) {
+		            LOGGER.log(Level.WARNING, "Provision node: " + instanceName + " failed for stopped node. Check credentials.", ex);
+                    try {
+                        stopCloudResources(instance.getId());
+                    } catch(Exception e){
+                        LOGGER.log(Level.WARNING, "Stopping failed node failed",e);
+                    }
+                } else {
+                    try {
+                        recycleCloudResources(instance.getId());
+                        LOGGER.log(Level.WARNING, "Provision node: " + instanceName + " failed, and created resources have been recycled.", ex);
+                    } catch (IOException | RuntimeException e2) {
+                        LOGGER.log(Level.WARNING, "Provision node: " + instanceName + " failed, and failed to recycle node " + instanceName, ex);
+                    }
                 }
                 throw ex;
             }
             return newBaremetalCloudAgent(name, template, this.name, instance.getId(), Ip);
         } catch (IOException | RuntimeException e) {
             String message = e.getMessage();
-            template.increaseFailureCount(message != null ? message : e.toString());
-            throw e;
+            String cause = (message != null) ? message : e.toString();
+            if(!template.isTemplateSleep()) {
+                template.increaseFailureCount(cause);
+            }
+            if(template.doNotDisable==null) {
+                LOGGER.log(Level.INFO, "DoNotDisable option is null. Go to template config, if you wish to change.");
+                throw e;
+            }
+            if (!template.getDoNotDisable()) {
+                throw e;
+            } else {
+                LOGGER.log(Level.WARNING, e.toString());
+                template.setTemplateSleep(true);
+                LOGGER.log(Level.WARNING, "Since do not disable option is selected, " +
+                        "this particular template will sleep for {0} minutes before re-trying any provisioning: " + template.getDisplayName(),template.getRetryTimeoutMins());
+                template.setSleepStartTime(System.currentTimeMillis());
+                throw e;
+            }
         }
     }
 
@@ -364,7 +392,12 @@ public class BaremetalCloud extends AbstractCloudImpl{
 
     public BaremetalCloudAgentTemplate getTemplate(Label label) {
         for (BaremetalCloudAgentTemplate t : templates) {
-            if (t.getDisableCause() != null) {
+            if (t.getDisableCause() != null || t.isTemplateSleep()) {
+                if(t.getDisableCause()!=null) {
+                    LOGGER.log(Level.FINER, "Template is disabled, cause: " + t.getDisableCause());
+                } else {
+                    LOGGER.log(Level.FINER, "Template encountered a failure, now waiting before retry." + t.getDisplayName());
+                }
                 continue;
             }
             if (t.getMode() == Node.Mode.NORMAL) {
@@ -435,7 +468,6 @@ public class BaremetalCloud extends AbstractCloudImpl{
                 sendError(Messages.BaremetalCloud_provision_templateDisabled(), req, rsp);
                 return;
             }
-
             // Note that this will directly add a new node without involving
             // NodeProvisioner, so that class will not be aware that a node is being
             // provisioned until ExplicitProvisioner adds it.
@@ -566,9 +598,10 @@ public class BaremetalCloud extends AbstractCloudImpl{
         return toIntExact(count);
     }
 
-    private synchronized int getTemplateNodeCount(int templateId) {
+    protected synchronized int getTemplateNodeCount(int templateId) {
         long count = 0;
         Jenkins jenkins = JenkinsUtil.getJenkinsInstance();
+        BaremetalCloudAgentTemplate template = getTemplateById(templateId);
 
         // Provisioned nodes
         count += jenkins.getNodes()
@@ -592,7 +625,10 @@ public class BaremetalCloud extends AbstractCloudImpl{
             .peek(pn -> LOGGER.fine(fmtLogMsg("Peeking provisioning nodes: " + ((BaremetalCloudPlannedNode) pn).displayName)))
             .count();
 
-        LOGGER.info(fmtLogMsg("Found " + count + " provisioned or provisioning Nodes for the template " + templateId));
+        String tempCap = template.getInstanceCap();
+        String maxCap = (tempCap==null || tempCap.isEmpty()) ? "NA" : tempCap;
+        LOGGER.fine(fmtLogMsg("Found " + count + " provisioned or provisioning Nodes for the template "
+                + template.getDisplayName() + ". Max Cap: " + maxCap));
 
         return toIntExact(count);
     }
