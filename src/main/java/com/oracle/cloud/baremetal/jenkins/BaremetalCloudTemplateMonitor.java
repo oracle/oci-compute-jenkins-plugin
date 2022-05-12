@@ -40,6 +40,28 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 boolean updateCheck = false;
 
                 for (BaremetalCloudAgentTemplate template: cloud.getTemplates()) {
+
+                    if(template.isTemplateSleep()) {
+                        long retryTimeOutMins = TimeUnit.MINUTES.toMillis(template.getRetryTimeoutMins());
+                        LOGGER.log(Level.INFO,"Monitoring sleeping template " + template.getDisplayName()
+                        + " provided retryTime "+ template.getRetryTimeoutMins()+" minutes.");
+                        long differenceTime = System.currentTimeMillis()-template.getSleepStartTime();
+                        if (differenceTime > retryTimeOutMins){
+                            template.setTemplateSleep(false);
+                            if(template.getDisableCause()==null) {
+                                LOGGER.log(Level.INFO, "Template {0} is available for provisioning now.", template.getDisplayName());
+                            } else {
+                                LOGGER.log(Level.INFO, "Template {0} is disabled after encountering 20 failures.", template.getDisplayName());
+                            }
+
+                        } else {
+                            if(template.getDisableCause()==null){
+                                LOGGER.log(Level.INFO,"Not yet available, wait for atleast {0} minutes.",
+                                    (TimeUnit.MILLISECONDS.toMinutes(retryTimeOutMins-differenceTime)+1));
+                            }
+                        }
+                    }
+
                     if (template.getAutoImageUpdate()) {
                         String imageId = template.getImage();
 
@@ -78,13 +100,14 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 //Update a cloud if it has updated templates
                 if (updateCheck) {
                     BaremetalCloud newCLoud = new BaremetalCloud(
-                            cloud.name,
+                            cloud.getCloudName(),
                             cloud.getCredentialsId(),
                             cloud.getInstanceCapStr(),
                             cloud.getMaxAsyncThreads(),
                             cloud.getNextTemplateId(),
                             lstTemplates);
                     JenkinsUtil.getJenkinsInstance().clouds.replace(cloud,newCLoud);
+                    JenkinsUtil.getJenkinsInstance().save();
                     LOGGER.log(Level.INFO, "The cloud {0} was updated by templates monitor because a new image exists in OCI.", cloud.getDisplayName());
                 }
             }
@@ -130,7 +153,9 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                 oldTemplate.getStopOnIdle(),
                 oldTemplate.getTags(),
                 oldTemplate.getInstanceNamePrefix(),
-                oldTemplate.getMemoryInGBs()
+                oldTemplate.getMemoryInGBs(),
+                oldTemplate.getDoNotDisable(),
+                oldTemplate.retryTimeoutMins
         );
 
     }

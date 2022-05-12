@@ -43,6 +43,8 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         List<BaremetalCloudTagsTemplate> tags;
         String instanceNamePrefix;
         String memoryInGBs;
+        Boolean doNotDisable;
+        String retryTimeoutMins;
 
         public Builder description(String description) {
             this.description = description;
@@ -138,6 +140,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
             return this;
         }
 
+        public Builder retryTimeoutMins(String retryTimeoutMins) {
+            this.retryTimeoutMins = retryTimeoutMins;
+            return this;
+        }
+
         public Builder instanceCap(String instanceCap) {
             this.instanceCap = instanceCap;
             return this;
@@ -189,6 +196,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
 
         public Builder stopOnIdle(Boolean stopOnIdle) {
             this.stopOnIdle = stopOnIdle;
+            return this;
+        }
+
+        public Builder doNotDisable(Boolean doNotDisable) {
+            this.doNotDisable = doNotDisable;
             return this;
         }
 
@@ -250,7 +262,9 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.stopOnIdle,
                 builder.tags,
                 builder.instanceNamePrefix,
-                builder.memoryInGBs);
+                builder.memoryInGBs,
+                builder.doNotDisable,
+                builder.retryTimeoutMins);
 
     }
 

@@ -3,6 +3,7 @@ package com.oracle.cloud.baremetal.jenkins;
 import java.util.Arrays;
 import java.util.List;
 
+import hudson.slaves.Cloud;
 import org.jmock.Expectations;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -20,6 +21,8 @@ public class BaremetalCloudInstanceMonitorUnitTest {
     static class TestBaremetalCloudInstanceMonitor extends BaremetalCloudInstanceMonitor {
         boolean removed;
         Node agent;
+        Cloud bmCloud;
+
 
         TestBaremetalCloudInstanceMonitor(Node agent) {
             this.agent = agent;
@@ -29,6 +32,9 @@ public class BaremetalCloudInstanceMonitorUnitTest {
         protected List<Node> getNodes() {
             return Arrays.asList(agent);
         }
+
+        @Override
+        protected List<Cloud> getClouds() { return Arrays.asList(bmCloud); }
 
         @Override
         protected void removeNode(BaremetalCloudAgent agent) {

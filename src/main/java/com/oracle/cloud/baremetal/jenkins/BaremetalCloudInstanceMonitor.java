@@ -1,7 +1,7 @@
 package com.oracle.cloud.baremetal.jenkins;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,6 +10,7 @@ import hudson.Extension;
 import hudson.model.AsyncPeriodicWork;
 import hudson.model.Node;
 import hudson.model.TaskListener;
+import hudson.slaves.Cloud;
 
 @Extension
 public class BaremetalCloudInstanceMonitor extends AsyncPeriodicWork {
@@ -31,8 +32,11 @@ public class BaremetalCloudInstanceMonitor extends AsyncPeriodicWork {
         return JenkinsUtil.getJenkinsInstance().getNodes();
     }
 
+	List<Cloud> getClouds() { return JenkinsUtil.getJenkinsInstance().clouds.toList(); }
+
 	@Override
 	protected void execute(TaskListener listener) {
+
 		for(Node node : getNodes()){
 			if(node instanceof BaremetalCloudAgent){
 				final BaremetalCloudAgent agent = (BaremetalCloudAgent)node;
@@ -48,6 +52,16 @@ public class BaremetalCloudInstanceMonitor extends AsyncPeriodicWork {
 				} catch (IOException | InterruptedException | RuntimeException e){
 					LOGGER.info("Failed to terminate node : " + agent.getDisplayName());
                                         LOGGER.info("ERROR : " + e.getMessage());
+				}
+			}
+		}
+
+		LOGGER.log(Level.FINE,"Monitoring the compute plugin online instances");
+		for (Cloud c : getClouds()) {
+			if (c instanceof BaremetalCloud) {
+				BaremetalCloud cloud = (BaremetalCloud) c;
+				for (BaremetalCloudAgentTemplate template: cloud.getTemplates()) {
+					cloud.getTemplateNodeCount(template.getTemplateId());
 				}
 			}
 		}
