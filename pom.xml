@@ -10,12 +10,12 @@
     <relativePath />
   </parent>
   <artifactId>oracle-cloud-infrastructure-compute</artifactId>
-  <version>1.0.14-SNAPSHOT</version>
+  <version>1.0.16-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <properties>
     <java.level>8</java.level>
-    <oci-java-sdk.version>2.5.1</oci-java-sdk.version>
+    <oci-java-sdk.version>2.27.0</oci-java-sdk.version>
     <jenkins.version>2.222.4</jenkins.version>
     <enforcer.skip>true</enforcer.skip>
   </properties>
@@ -39,6 +39,16 @@
       <id>aandrey</id>
       <name>Andrey Andreyev</name>
       <email>andrey.adnreyev@oracle.com</email>
+    </developer>
+    <developer>
+      <id>sindyarl</id>
+      <name>Sindhu Sri Yarlagadda</name>
+      <email>sindhu.sri.y.yarlagadda@oracle.com</email>
+    </developer>
+    <developer>
+      <id>dmeirowi</id>
+      <name>Diane Meirowitz</name>
+      <email>diane.meirowitz@oracle.com</email>
     </developer>
   </developers>
 
