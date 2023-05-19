@@ -217,29 +217,32 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             LOGGER.info("Terminating instance " + instanceId);
             cloud.recycleCloudResources(instanceId);
             File f1=new File("./known_hosts");
-            String[] words=null;
-            Reader fr = new InputStreamReader(new FileInputStream(f1),StandardCharsets.UTF_8);
-            BufferedReader br = new BufferedReader(fr);
-            File tempFile = new File("./known_host_temp");
-            Writer writer = new OutputStreamWriter(new FileOutputStream(tempFile), StandardCharsets.UTF_8);
-            String line;
-            String input=hostip;
-            while((line=br.readLine())!=null)
-            {
-                words=line.split(" ");
-                if (words[0].equals(input)) {
-                    LOGGER.log(Level.FINE,"IP Address entry to be removed from host file: "+words[0]);
-                    continue;
+            if(f1.exists()) {
+                String[] words = null;
+                Reader fr = new InputStreamReader(new FileInputStream(f1), StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(fr);
+                File tempFile = new File("./known_host_temp");
+                Writer writer = new OutputStreamWriter(new FileOutputStream(tempFile), StandardCharsets.UTF_8);
+                String line;
+                String input = hostip;
+                while ((line = br.readLine()) != null) {
+                    words = line.split(" ");
+                    if (words[0].equals(input)) {
+                        LOGGER.log(Level.FINE, "IP Address entry to be removed from host file: " + words[0]);
+                        continue;
+                    }
+                    writer.write(line + System.getProperty("line.separator"));
                 }
-                writer.write(line + System.getProperty("line.separator"));
-            }
 
-            boolean success = tempFile.renameTo(f1);
-            if(!success){
-                LOGGER.log(Level.INFO,"Cannot rename the file, hence entry not updated.");
+                boolean success = tempFile.renameTo(f1);
+                if (!success) {
+                    LOGGER.log(Level.INFO, "Cannot rename the file, hence entry not updated.");
+                }
+                br.close();
+                writer.close();
+            } else {
+                LOGGER.log(Level.INFO, "No knownHost file.");
             }
-            br.close();
-            writer.close();
         } else {
             LOGGER.info("Stopping instance " + instanceId);
             cloud.stopCloudResources(instanceId);
