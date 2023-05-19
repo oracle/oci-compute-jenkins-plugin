@@ -33,7 +33,6 @@ public class BaremetalCloudAgentUnitTest {
         TestBaremetalCloudAgent agent = new TestBaremetalCloudAgent.Builder()
                 .instanceId("in")
                 .cloud(new TestBaremetalCloud.Builder().client(client).clock(new TestClock()).build())
-                .createFile()
                 .build();
         agent._terminate(newTerminateTaskListener());
     }

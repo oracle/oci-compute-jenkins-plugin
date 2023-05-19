@@ -41,11 +41,6 @@ public class TestBaremetalCloudAgent extends BaremetalCloudAgent {
             return this;
         }
 
-        public Builder createFile(){
-            File f1= new File("./known_hosts");
-            return this;
-        }
-
         private void appendXml(StringBuilder xml, String name, Object value) {
             if (value != null) {
                 xml.append("  <").append(name).append(">").append(value).append("</").append(name).append(">\n");
