@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - OCI Java SDK 2.46.0
+- Credentials Plugin 2.6.1.1
 - Secure verification strategy for SSH Connection.
 - Custom Java options for agent.
 - Remoting options for debugging and caching.
