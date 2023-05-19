@@ -30,7 +30,7 @@ public class SshComputerLauncher extends ComputerLauncher {
     public static final int DEFAULT_SSH_PORT = 22;
     public static final String DEFAULT_SSH_PUBLIC_KEY = " ";
 
-    private final String host;
+    public final String host;
     private final int sshPort;
     private final String sshUser;
 
@@ -40,27 +40,36 @@ public class SshComputerLauncher extends ComputerLauncher {
     private final String jenkinsAgentUser;
     private final String initScript;
     private final int initScriptTimeoutSeconds;
+    private String customJavaPath;
+    private String customJVMOpts;
     private transient SSHUserPrivateKey sshCredentials;
+    private boolean verificationStrategy;
 
     public SshComputerLauncher(
             final String host,
             final int connectTimeoutMillis,
-	    final String jenkinsAgentUser,
+            final String jenkinsAgentUser,
+            final String customJavaPath,
+            final String customJVMOpts,
             final String initScript,
             final int initScriptTimeoutSeconds,
-            final String sshCredentialsId) {
-        this(host, connectTimeoutMillis, jenkinsAgentUser, initScript,
-	     initScriptTimeoutSeconds, sshCredentialsId, DEFAULT_SSH_PORT);
+            final String sshCredentialsId,
+            boolean verificationStrategy) {
+        this(host, connectTimeoutMillis, jenkinsAgentUser, customJavaPath, customJVMOpts, initScript,
+                initScriptTimeoutSeconds, sshCredentialsId, DEFAULT_SSH_PORT, verificationStrategy);
     }
 
     public SshComputerLauncher(
             final String host,
             final int connectTimeoutMillis,
             final String jenkinsAgentUser,
+            final String customJavaPath,
+            final String customJVMOpts,
             final String initScript,
             final int initScriptTimeoutSeconds,
             final String sshCredentialsId,
-            final int sshPort) {
+            final int sshPort,
+            boolean verificationStrategy) {
         this.sshCredentials = (SSHUserPrivateKey) BaremetalCloud.matchCredentials(SSHUserPrivateKey.class, sshCredentialsId);
         this.host = host;
         this.connectTimeoutMillis = connectTimeoutMillis;
@@ -78,6 +87,17 @@ public class SshComputerLauncher extends ComputerLauncher {
             this.sshUser = DEFAULT_SSH_USER;
         }
         this.sshPort = sshPort;
+        if (customJavaPath == null || customJavaPath.trim().isEmpty()) {
+            this.customJavaPath = "";
+        } else {
+            this.customJavaPath = customJavaPath;
+        }
+        if (customJVMOpts == null ||customJVMOpts.trim().isEmpty()) {
+            this.customJVMOpts = " ";
+        } else {
+            this.customJVMOpts = " "+customJVMOpts+" ";
+        }
+        this.verificationStrategy = verificationStrategy;
     }
 
     @Override
@@ -103,15 +123,19 @@ public class SshComputerLauncher extends ComputerLauncher {
         }
     }
 
-    private Connection connect(final TaskListener listener) throws IOException, InterruptedException {
+    private Connection connect(final TaskListener listener) throws IOException {
         final String uri = sshUser + "@" + host + ":" + sshPort;
 
         listener.getLogger().println("Connecting to ssh: " + uri);
         try {
             Connection connection = SshConnector.createConnection(host, sshPort);
-            new LinearRetry<ConnectionInfo>(() ->
-                SshConnector.connect(connection, connectTimeoutMillis)).run();
-
+            if(!verificationStrategy) {
+                new LinearRetry<ConnectionInfo>(() ->
+                        SshConnector.connect(connection, connectTimeoutMillis, "No Verification")).run();
+            } else {
+                new LinearRetry<ConnectionInfo>(() ->
+                        SshConnector.connect(connection, connectTimeoutMillis, "Strict Verification")).run();
+            }
             return connection;
         } catch (Exception e) {
             listener.fatalError("Failed to connect to ssh: " + uri);
@@ -134,7 +158,10 @@ public class SshComputerLauncher extends ComputerLauncher {
 
     private void ensureJavaInstalled(final Connection connection, final TaskListener listener) throws IOException, InterruptedException {
         listener.getLogger().println("Verifying that Java is installed");
-        int ret = connection.exec("java -fullversion", listener.getLogger());
+        if (customJavaPath == null || customJavaPath.trim().isEmpty()) {
+            customJavaPath = "";
+        }
+        int ret = connection.exec(customJavaPath+"java -fullversion", listener.getLogger());
 
         if (ret != 0) {
             listener.fatalError("Agent does not have java installed");
@@ -186,16 +213,16 @@ public class SshComputerLauncher extends ComputerLauncher {
         try {
             initSession = connection.openSession();
             initSession.requestDumbPTY();
-	    final String initIndicatorFile = "~/.hudson-run-init";
-	    final String initCommand =
-                "/bin/bash -c \"if [[ -e " + initIndicatorFile + " ]]; then" +
-                        "  echo 'Agent already initialized '" + initIndicatorFile +" exists;" +
-                        "else" +
-                        "  echo 'Running init script on agent';" +
-                        "  /bin/bash " + remoteDirectory + "/init.sh;" +
-                        "  echo Creating " + initIndicatorFile + " on agent;" +
-                        "  touch " + initIndicatorFile + ";" +
-                        "fi\"";
+            final String initIndicatorFile = "~/.hudson-run-init";
+            final String initCommand =
+                    "/bin/bash -c \"if [[ -e " + initIndicatorFile + " ]]; then" +
+                            "  echo 'Agent already initialized '" + initIndicatorFile +" exists;" +
+                            "else" +
+                            "  echo 'Running init script on agent';" +
+                            "  /bin/bash " + remoteDirectory + "/init.sh;" +
+                            "  echo Creating " + initIndicatorFile + " on agent;" +
+                            "  touch " + initIndicatorFile + ";" +
+                            "fi\"";
             initSession.execCommand(initCommand);
 
             IOUtils.copy(initSession.getStdout(), listener.getLogger());
@@ -221,30 +248,21 @@ public class SshComputerLauncher extends ComputerLauncher {
 
 
     private void copyAgentJar(Connection connection, String remoteDirectory, final TaskListener listener)
-            throws IOException {
+            throws IOException, InterruptedException {
 
-	// Delete slave.jar in case it already exists and is owned by a different
-	// user, which could happen if Jenkins Agent User is set.
-	//
-	String deleteString = "sudo rm -f " + remoteDirectory + "/slave.jar";
+        // Delete slave.jar in case it already exists and is owned by a different
+        // user, which could happen if Jenkins Agent User is set.
+        //
+        String deleteString = "sudo rm -f " + remoteDirectory + "/slave.jar";
         listener.getLogger().println("Deleting remote slave.jar if it exists prior to copy ["
-	             + deleteString + "]");
-        Session deleteSession = null;
+                + deleteString + "]");
+
         try {
-            deleteSession = connection.openSession();
-            deleteSession.requestDumbPTY();
-            deleteSession.execCommand(deleteString);
-            deleteSession.getStdin().close();
-            IOUtils.copy(deleteSession.getStderr(), listener.getLogger());
-            IOUtils.copy(deleteSession.getStdout(), listener.getLogger());
+            connection.exec(deleteString, listener.getLogger());
         } catch (IOException e) {
             listener.fatalError("Failed trying to delete slave.jar on remote agent ["
-	             + e.getMessage() +"] command=[" + deleteString + "]");
+                    + e.getMessage() + "] command=[" + deleteString + "]");
             throw e;
-        } finally {
-            if (deleteSession != null) {
-                deleteSession.close();
-            }
         }
 
         listener.getLogger().println("Copying slave.jar to remote agent using scp");
@@ -261,35 +279,40 @@ public class SshComputerLauncher extends ComputerLauncher {
     }
 
     private void launchAgent(Connection connection,
-            String remoteDirectory,
-            final SlaveComputer computer,
-            final TaskListener listener)
+                             String remoteDirectory,
+                             final SlaveComputer computer,
+                             final TaskListener listener)
             throws IOException,
             InterruptedException {
 
         String jarfile = remoteDirectory + "/slave.jar";
-        String launchString = "java -jar " + jarfile;
+        String remotingOptions = "-workDir " + remoteDirectory + " -jar-cache " + remoteDirectory + "/jarCache";
+        if (customJVMOpts == null ||customJVMOpts.trim().isEmpty()) {
+            customJVMOpts = " ";
+        }
+        String launchString = customJavaPath+"java"+customJVMOpts+ "-jar " + jarfile + " " + remotingOptions;
+
         if (jenkinsAgentUser == null || jenkinsAgentUser.trim().isEmpty()) {
             listener.getLogger().println("Jenkins Agent User is empty, default opc.");
         } else {
             launchString = "sudo chown " + jenkinsAgentUser + " " + jarfile +
-	                  " && sudo -u " + jenkinsAgentUser + " " + launchString;
+                    " && sudo -u " + jenkinsAgentUser + " " + launchString;
         }
 
         listener.getLogger().println("Launching Agent (via Trilead SSH2 Connection): "
-	          + launchString);
+                + launchString);
 
         Session session = connection.openSession();
         try {
             session.execCommand(launchString);
             computer.setChannel(session.getStdout(), session.getStdin(), listener.getLogger(), new Listener() {
-                        @Override
-                        public void onClosed(Channel channel, IOException cause) {
-                            tearDownSession(session, listener);
-                            tearDownConnection(connection, listener);
-                        }
-                    });
-        } catch (IOException | InterruptedException e) {
+                @Override
+                public void onClosed(Channel channel, IOException cause) {
+                    tearDownSession(session, listener);
+                    tearDownConnection(connection, listener);
+                }
+            });
+        } catch (IOException e) {
             tearDownSession(session, listener);
             listener.fatalError("Failed to launch Agent");
             throw e;

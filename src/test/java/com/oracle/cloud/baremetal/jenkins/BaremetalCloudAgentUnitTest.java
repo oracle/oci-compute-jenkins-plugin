@@ -33,6 +33,7 @@ public class BaremetalCloudAgentUnitTest {
         TestBaremetalCloudAgent agent = new TestBaremetalCloudAgent.Builder()
                 .instanceId("in")
                 .cloud(new TestBaremetalCloud.Builder().client(client).clock(new TestClock()).build())
+                .createFile()
                 .build();
         agent._terminate(newTerminateTaskListener());
     }
@@ -85,13 +86,13 @@ public class BaremetalCloudAgentUnitTest {
     public void testAlive() throws Exception {
         final BaremetalCloudClient client = mockery.mock(BaremetalCloudClient.class);
         mockery.checking(new Expectations() {{
-                oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Running));
-                oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Starting));
-                oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Provisioning));
-                oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Stopping));
-                oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Stopped));
-                oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Terminated));
-                oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Terminating));
+            oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Running));
+            oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Starting));
+            oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Provisioning));
+            oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Stopping));
+            oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Stopped));
+            oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Terminated));
+            oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Terminating));
         }});
 
         TestBaremetalCloudAgent agent = new TestBaremetalCloudAgent.Builder()

@@ -69,6 +69,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public transient Collection<LabelAtom> labelAtoms;
     public final Node.Mode mode;
     public final String jenkinsAgentUser;
+    public final String customJavaPath;
+    public final String customJVMOpts;
     public final String initScript;
     public final Boolean exportJenkinsEnvVars;
     public final String numExecutors;
@@ -78,6 +80,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final Boolean assignPublicIP;
     public final Boolean usePublicIP;
     public final String startTimeoutSeconds;
+    public boolean verificationStrategy = false;
     public final String sshConnectTimeoutSeconds;
     public final String initScriptTimeoutSeconds;
     public final String instanceCap;
@@ -117,9 +120,12 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String idleTerminationMinutes,
             final int templateId,
             final String jenkinsAgentUser,
+            final String customJavaPath,
+            final String customJVMOpts,
             final String initScript,
             final Boolean exportJenkinsEnvVars,
             final String sshConnectTimeoutSeconds,
+            final Boolean verificationStrategy,
             final String startTimeoutSeconds,
             final String initScriptTimeoutSeconds,
             final String instanceCap,
@@ -131,7 +137,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String memoryInGBs,
             final Boolean doNotDisable,
             final String retryTimeoutMins){
-    	this.compartmentId = compartmentId;
+        this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
         this.vcnCompartmentId = vcnCompartmentId;
         this.vcnId = vcnId;
@@ -152,6 +158,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.idleTerminationMinutes = idleTerminationMinutes;
         this.templateId = templateId;
         this.jenkinsAgentUser = jenkinsAgentUser;
+        this.customJavaPath = customJavaPath;
+        this.customJVMOpts = customJVMOpts;
         this.initScript = initScript;
         this.exportJenkinsEnvVars = exportJenkinsEnvVars;
         this.sshConnectTimeoutSeconds = sshConnectTimeoutSeconds;
@@ -166,6 +174,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.memoryInGBs = memoryInGBs;
         this.doNotDisable = doNotDisable;
         this.retryTimeoutMins = retryTimeoutMins;
+        this.verificationStrategy = verificationStrategy;
     }
 
     public String getCompartmentId() {
@@ -228,16 +237,24 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         return jenkinsAgentUser;
     }
 
+    public String getCustomJavaPath() {
+        return customJavaPath;
+    }
+
+    public String getCustomJVMOpts() {
+        return customJVMOpts;
+    }
+
     public String getRemoteFS() {
         return remoteFS;
     }
 
     public Boolean getAssignPublicIP() {
-    	return assignPublicIP;
+        return assignPublicIP;
     }
 
     public Boolean getUsePublicIP() {
-    	return usePublicIP;
+        return usePublicIP;
     }
 
     public int getNumExecutors() {
@@ -287,6 +304,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getInitScript() {
         return initScript;
+    }
+
+    public Boolean getVerificationStrategy() {
+        return verificationStrategy;
     }
 
     public String getInitScriptEnvVarsVersion(){
@@ -481,20 +502,20 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter @RelativePath("..") String maxAsyncThreads,
                 @QueryParameter String subnetId,
                 @QueryParameter Boolean assignPublicIP) {
-               if (subnetId != null && !subnetId.equals("") && (assignPublicIP == null || assignPublicIP)) {
-                   BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
+            if (subnetId != null && !subnetId.equals("") && (assignPublicIP == null || assignPublicIP)) {
+                BaremetalCloudClient client = getClient(credentialsId, maxAsyncThreads);
 
-                   try{
-                       GetSubnetResponse subnetResponse = client.getSubNet(subnetId);
-                       if (subnetResponse.getSubnet().getProhibitPublicIpOnVnic()) {
-                           return FormValidation.error(Messages.BaremetalCloudAgentTemplate_assignPublicIP_unable());
-                       }
-                   }catch (Exception e) {
-                       LOGGER.log(Level.WARNING, "Failed to get subnet: " + subnetId, e);
-                   }
-               }
+                try{
+                    GetSubnetResponse subnetResponse = client.getSubNet(subnetId);
+                    if (subnetResponse.getSubnet().getProhibitPublicIpOnVnic()) {
+                        return FormValidation.error(Messages.BaremetalCloudAgentTemplate_assignPublicIP_unable());
+                    }
+                }catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Failed to get subnet: " + subnetId, e);
+                }
+            }
 
-               return FormValidation.ok();
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckDoNotDisable(
@@ -510,10 +531,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         public FormValidation doCheckUsePublicIP(
                 @QueryParameter Boolean assignPublicIP,
                 @QueryParameter Boolean usePublicIP) {
-               if (usePublicIP != null && assignPublicIP != null && usePublicIP && !assignPublicIP) {
-                   return FormValidation.error(Messages.BaremetalCloudAgentTemplate_usePublicIP_unable());
-               }
-               return FormValidation.ok();
+            if (usePublicIP != null && assignPublicIP != null && usePublicIP && !assignPublicIP) {
+                return FormValidation.error(Messages.BaremetalCloudAgentTemplate_usePublicIP_unable());
+            }
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckInstanceNamePrefix(@QueryParameter String instanceNamePrefix) {
@@ -544,7 +565,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         public ListBoxModel doFillCompartmentIdItems(
                 @QueryParameter @RelativePath("..") String credentialsId,
                 @QueryParameter @RelativePath("..") String maxAsyncThreads)
-                        throws IOException, ServletException {
+                throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<Select a compartmentId>", "");
 
@@ -608,8 +629,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 Tenancy tenant = client.getTenant();
                 model.add(tenant.getName(), tenant.getId());
                 for (Compartment compartment : client.getCompartmentsList()) {
-                        model.add(compartment.getName(), compartment.getId());
-                    }
+                    model.add(compartment.getName(), compartment.getId());
+                }
             }catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
             }
@@ -653,7 +674,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 @QueryParameter String compartmentId,
                 @QueryParameter String availableDomain,
                 @QueryParameter String imageId)
-                        throws IOException, ServletException {
+                throws IOException, ServletException {
             ListBoxModel model = new ListBoxModel();
             model.add("<First select 'Availablity Domain' and 'Image' above>", "");
 
@@ -760,8 +781,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
                 Tenancy tenant = client.getTenant();
                 model.add(tenant.getName(), tenant.getId());
                 for (Compartment compartment : client.getCompartmentsList()) {
-                        model.add(compartment.getName(), compartment.getId());
-                    }
+                    model.add(compartment.getName(), compartment.getId());
+                }
             }catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get compartment list", e);
             }
@@ -854,7 +875,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         }
 
         public ListBoxModel doFillSshCredentialsIdItems(
-                @AncestorInPath Item context, 
+                @AncestorInPath Item context,
                 @QueryParameter String sshCredentialsId) {
             StandardListBoxModel result = new StandardListBoxModel();
             Jenkins instance = Jenkins.getInstanceOrNull();
@@ -870,7 +891,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
             List<DomainRequirement> domainRequirements = new ArrayList<DomainRequirement>();
             return result.includeMatchingAs(ACL.SYSTEM, context, SSHUserPrivateKey.class, domainRequirements, SSHAuthenticator.matcher());
-}
+        }
 
         public FormValidation doCheckLabelString(@QueryParameter String value, @QueryParameter Node.Mode mode) {
             if (mode == Node.Mode.EXCLUSIVE && (value == null || value.trim().isEmpty())) {

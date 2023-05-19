@@ -10,6 +10,7 @@ import hudson.model.labels.LabelAtom;
 
 public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate {
     public static class Builder {
+        public boolean verificationStrategy;
         String description;
         String numExecutors;
         Node.Mode mode;
@@ -21,6 +22,8 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         Boolean usePublicIP;
         String sshConnectTimeoutSeconds;
         String jenkinsAgentUser;
+        String customJavaPath;
+        String customJVMOpts;
         String initScript;
         Boolean exportJenkinsEnvVars;
         String startTimeoutSeconds;
@@ -72,6 +75,11 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
 
         public Builder idleTerminationMinutes(String idleTerminationMinutes) {
             this.idleTerminationMinutes = idleTerminationMinutes;
+            return this;
+        }
+
+        public Builder verificationStrategy(Boolean verificationStrategy){
+            this.verificationStrategy = verificationStrategy;
             return this;
         }
 
@@ -178,7 +186,17 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
         public Builder jenkinsAgentUser(String jenkinsAgentUser) {
             this.jenkinsAgentUser = jenkinsAgentUser;
             return this;
-	}
+        }
+
+        public Builder customJavaPath(String customJavaPath) {
+            this.customJavaPath = customJavaPath;
+            return this;
+        }
+
+        public Builder customJVMOpts(String customJVMOpts) {
+            this.customJVMOpts = customJVMOpts;
+            return this;
+        }
 
         public Builder initScript(String initScript) {
             this.initScript = initScript;
@@ -250,10 +268,13 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.labelString,
                 builder.idleTerminationMinutes,
                 builder.templateId,
-	        builder.jenkinsAgentUser,
+                builder.jenkinsAgentUser,
+                builder.customJavaPath,
+                builder.customJVMOpts,
                 builder.initScript,
                 builder.exportJenkinsEnvVars,
                 builder.sshConnectTimeoutSeconds,
+                builder.verificationStrategy,
                 builder.startTimeoutSeconds,
                 builder.initScriptTimeoutSeconds,
                 builder.instanceCap,

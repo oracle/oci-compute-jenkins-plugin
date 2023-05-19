@@ -1,5 +1,6 @@
 package com.oracle.cloud.baremetal.jenkins;
 
+import java.io.File;
 import java.io.IOException;
 
 import hudson.model.Descriptor.FormException;
@@ -37,6 +38,11 @@ public class TestBaremetalCloudAgent extends BaremetalCloudAgent {
 
         public Builder cloud(BaremetalCloud cloud) {
             this.cloud = cloud;
+            return this;
+        }
+
+        public Builder createFile(){
+            File f1= new File("./known_hosts");
             return this;
         }
 
