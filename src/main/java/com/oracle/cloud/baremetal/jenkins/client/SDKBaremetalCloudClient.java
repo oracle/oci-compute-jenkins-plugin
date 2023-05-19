@@ -242,22 +242,22 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
                     .builder()
                     .launchInstanceDetails(
                             instanceDetailsBuilder
-                            .build())
+                                    .build())
                     .build());
 
             instance = response.getInstance();
             return instance;
 
-        } catch(Exception ex) {
-            LOGGER.log(Level.WARNING, "Failed to launch instance " + name, ex);
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Failed to launch instance " + name + " based on template " + template.getTemplateId() + " (" + template.getDisplayName() + ")", ex);
 
-	    if (instance != null && instance.getId() != null) {
+            if (instance != null && instance.getId() != null) {
                 try {
                     terminateInstance(instance.getId());
                 } catch (Exception e) {
-	            LOGGER.log(Level.WARNING, "Failed to terminate unlaunchable instance" + name, e);
+                    LOGGER.log(Level.WARNING, "Failed to terminate unlaunchable instance" + name, e);
                 }
-	    }
+            }
             throw ex;
         }
     }
@@ -274,11 +274,11 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         try (ComputeClient computeClient = getComputeClient()) {
             ComputeWaiters waiter = computeClient.getWaiters();
             GetInstanceResponse response = waiter.forInstance(
-                    GetInstanceRequest
-                    .builder()
-                    .instanceId(instanceId)
-                    .build(),
-                    Instance.LifecycleState.Running)
+                            GetInstanceRequest
+                                    .builder()
+                                    .instanceId(instanceId)
+                                    .build(),
+                            Instance.LifecycleState.Running)
                     .execute();
             return response.getInstance();
         }
@@ -290,7 +290,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         String Ip = "";
 
         try (ComputeClient computeClient = getComputeClient();
-                VirtualNetworkClient vcnClient = getVirtualNetworkClient()) {
+             VirtualNetworkClient vcnClient = getVirtualNetworkClient()) {
 
             String compartmentId = template.getCompartmentId();
 
@@ -454,7 +454,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
     }
 
     @Override
-    public List<Vcn> getVcnList(String compartmentId) throws Exception {        
+    public List<Vcn> getVcnList(String compartmentId) throws Exception {
         List<Vcn> vcnList = new ArrayList<>();
 
         try (VirtualNetworkAsyncClient vnc = getVirtualNetworkAsyncClient()) {
@@ -536,8 +536,8 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             ComputeWaiters waiter = computeClient.getWaiters();
             GetInstanceResponse response = waiter.forInstance(
                     GetInstanceRequest.builder()
-                    .instanceId(instanceId)
-                    .build(),
+                            .instanceId(instanceId)
+                            .build(),
                     Instance.LifecycleState.Stopping,
                     Instance.LifecycleState.Stopped,
                     Instance.LifecycleState.Terminating,
@@ -551,7 +551,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
         try (ComputeClient computeClient = getComputeClient()) {
             GetInstanceResponse response = computeClient.getInstance(GetInstanceRequest.builder().instanceId(instanceId).build());
             return response.getInstance().getLifecycleState();
-    	}
+        }
     }
 
     @Override
