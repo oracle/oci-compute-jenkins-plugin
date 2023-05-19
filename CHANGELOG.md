@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.17 - May 2023
+
+### Added
+
+- OCI Java SDK 2.46.0
+- Secure verification strategy for SSH Connection.
+- Custom Java options for agent.
+- Remoting options for debugging and caching.
+
+
+### Fixed
+
+- Exclude jersey inside OCI SDK to prevent conflicts with plugins using jersey2.
+- Fix hangs when deleting slave.jar on Windows agents.
+- Improved logging on instance failure.
+
 ## 1.0.16 - May 2022
 
 ### Added
