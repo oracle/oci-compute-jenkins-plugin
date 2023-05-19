@@ -36,12 +36,12 @@ View OCI Compute Plugin page on the [plugins.jenkins.io](https://plugins.jenkins
 
 2. Jenkins installed with JDK 8 or higher.
 
-3. Required Plugins: [bouncycastle API](https://plugins.jenkins.io/bouncycastle-api), [SSH Credentials](https://plugins.jenkins.io/ssh-credentials/), and [Credentials](https://plugins.jenkins.io/credentials)
+3. Required Plugins: [bouncycastle API](https://plugins.jenkins.io/bouncycastle-api), [SSH Credentials](https://plugins.jenkins.io/ssh-credentials/), [Credentials](https://plugins.jenkins.io/credentials)  and [Jersey2 API](https://plugins.jenkins.io/jersey2-api)
 
 
 
 ## Compatibility
-Minimum Jenkins requirement: ***2.222.4***
+Minimum Jenkins requirement: ***2.263.1***
 
 
 
@@ -116,7 +116,7 @@ Refer to OCI Java SDK licensing [here](https://github.com/oracle/oci-java-sdk/bl
 
 2. If you want to use the latest version of OCI Java SDK, update pom.xml
 
-   > <oci-java-sdk.version>2.27.0</oci-java-sdk.version>
+   > <oci-java-sdk.version>2.46.0</oci-java-sdk.version>
 
 3. Compile and Install package:
 
@@ -228,10 +228,13 @@ Click **Verify Credentials** that you can connect successfully to your OCI.
 3. Click **Advanced** for more options:
    - **Remote FS root** - Dedicated directory for Jenkins agent in instance.
    - **Instance Creation Timeout** - Number of seconds to wait for instance to reach state Running.
+   - **Employ knownHost verification strategy** - Check this option to employ knownHost verification strategy. By default, this strategy adds a new host entry to a file which is used for ssh connection verification to the hosts.
    - **Instance SSH Connection Timeout** - Number of seconds to wait for instance from state Running to be able to ssh connect from Jenkins master.
    - **Idle Termination Minutes** - Number of minutes for Jenkins to wait before deleting and completely removing an idle instance. A value of 0 (or an empty string) indicates that instance will never be stopped/deleted.
    - **Number of Executors** - Number of concurrent builds that Jenkins can perform. Value should be at least 1.
    - **JenkinsAgentUser** -  The custom user to start the Jenkins agent process. This user must be baked into the OS image you select or created through an init script. To use this feature, the ssh user should have sudo privileges.
+   - **Custom Java Path** - Provide a custom java path if you wish to not use the java present in the current user's path to launch agent.jar. Make sure the current user has permission on that java bin directory. Example: /home/opc/installs/jdk-11.0.9/bin/ with the given user having permission on this directory.
+   - **Override JVM Options** - Provide JVM Options string to override the defaults. Eg: To increase heap size, provide this: -Xms256m -Xmx512m -Djava.awt.headless=true
    - **Init Script** - You can define several lines of shell based commands to configure the instance (one-time) before it comes online. For example, if the image selected does not have Java pre-installed, you can add command "sudo yum -y install java". This functionality works for Linux instances only.
    - **Init Script Timeout** - Number of seconds to wait for the completion of Init Script.
    - **Template Instance Cap** - Places a limit on the number of OCI Instances that Jenkins may launch from this Template. Leave this field empty to remove the Template Instance Cap.
