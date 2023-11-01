@@ -1,3 +1,5 @@
+# OCI Compute Jenkins Plugin
+
 [**Oracle Cloud Infrastructure Compute Plugin**](https://updates.jenkins.io/latest/oracle-cloud-infrastructure-compute.hpi) allows users to access and manage cloud resources on the Oracle Cloud Infrastructure (OCI) from Jenkins.
 A Jenkins master instance with OCI Compute Plugin can spin up OCI Instances (slaves or agents) on demand within OCI, and remove the Instances and free its resources automatically once the Job completes.
 
@@ -13,9 +15,10 @@ A Jenkins master instance with OCI Compute Plugin can spin up OCI Instances (sla
 - [Building](#building)
 - [Upgrade](#upgrade)
 - [Configuration](#configuration)
-- [Licensing](#licensing)
-- [Changelog](#changelog)
 - [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
+- [Changelog](#changelog)
 
 
 
@@ -246,11 +249,18 @@ Click **Verify Credentials** that you can connect successfully to your OCI.
    - **Retry Timeout Mins** - Number of minutes after which the provisioning of an instance shall be attempted using this template. Applicable only when the do not disable option is checked. (Provided that there is existing workload after the waiting period.)
 6. Click **Save** or **Apply**
 
+## Contributing
+
+This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
+
+## Security
+
+Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
 
 
-## Licensing
+## License
 
-Copyright (c) 2018, 2022, Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2018, 2023, Oracle and/or its affiliates. All rights reserved.
 
 This Plugin is licensed under the Universal Permissive License 1.0
 
@@ -259,14 +269,6 @@ This software is dual-licensed to you under the Universal Permissive License (UP
 See [LICENSE.txt](https://github.com/oracle/oci-compute-jenkins-plugin/blob/master/LICENSE.txt) for more details.
 
 
-
 ## Changelog
 
 For CHANGELOG please refer to [CHANGELOG.md](https://github.com/oracle/oci-compute-jenkins-plugin/blob/master/CHANGELOG.md).
-
-
-
-## Contributing
-OCI Compute Plugin is an open source project. See [CONTRIBUTING.md](https://github.com/oracle/oci-compute-jenkins-plugin/blob/master/CONTRIBUTING.md) for more details.
-
-Oracle gratefully acknowledges the contributions to OCI Compute Plugin that have been made by the community.
