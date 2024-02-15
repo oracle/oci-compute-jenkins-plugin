@@ -41,7 +41,8 @@ View OCI Compute Plugin page on the [plugins.jenkins.io](https://plugins.jenkins
 
 
 ## Compatibility
-Minimum Jenkins requirement: ***2.401.3***
+Minimum Jenkins requirement: ***2.426.3***
+
 
 
 
