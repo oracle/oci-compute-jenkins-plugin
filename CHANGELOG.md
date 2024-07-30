@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## 1.0.18 - July 2024
+
+### Added
+- JDK 11
+- Credential binding so BaremetalCloudCredentials can be used in jenkinsfiles
+
+
+### Fixed
+- Do not bring agent online if init script fails with non-zero return code
+- Use login shell for non opc user
+- Several dependencies updated to date
+- Removed prototype usage in jelly scripts
+- Avoid reloading instance templates in template monitor
+
 ## 1.0.17 - May 2023
 
 ### Added
