@@ -46,12 +46,13 @@ import java.util.stream.IntStream;
 
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundSetter;
 
 public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAgentTemplate>{
     private static final Logger LOGGER = Logger.getLogger(BaremetalCloud.class.getName());
     static final int FAILURE_COUNT_LIMIT = 3;
     static final int DISABLE_FAILURE_COUNT_LIMIT = 20;
-    public transient boolean templateSleep = false;
+    private transient boolean templateSleep = false;
 
     public final String compartmentId;
     public final String availableDomain;
@@ -61,12 +62,12 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String subnetId;
     public final List<BaremetalCloudNsgTemplate> nsgIds;
     public final String imageCompartmentId;
-    public final String imageId;
+    private String imageId;
     public final String shape;
     public final String sshCredentialsId;
     public final String description;
     public final String labelString;
-    public transient Collection<LabelAtom> labelAtoms;
+    private transient Collection<LabelAtom> labelAtoms;
     public final Node.Mode mode;
     public final String jenkinsAgentUser;
     public final String customJavaPath;
@@ -95,7 +96,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     private transient int failureCount=0;
     private transient String disableCause;
-    public transient long sleepStartTime = 0;
+    private transient long sleepStartTime = 0;
 
     @DataBoundConstructor
     public BaremetalCloudAgentTemplate(
@@ -211,6 +212,15 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public String getImage() {
         return imageId;
+    }
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    @DataBoundSetter
+    public void setImageId(final String imageId) {
+        this.imageId = imageId;
     }
 
     public Boolean getAutoImageUpdate() {
@@ -442,6 +452,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public Boolean getDoNotDisable() { return doNotDisable; }
 
+    @DataBoundSetter
     public synchronized void setTemplateSleep(Boolean sleepvar){
         this.templateSleep=sleepvar;
     }
