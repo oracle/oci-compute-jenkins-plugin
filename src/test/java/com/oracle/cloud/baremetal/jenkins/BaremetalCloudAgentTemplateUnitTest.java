@@ -128,8 +128,8 @@ public class BaremetalCloudAgentTemplateUnitTest {
 
     @Test
     public void testGetImageId() throws Exception {
-        Assert.assertNull(new TestBaremetalCloudAgentTemplate().getImage());
-        Assert.assertEquals("iln", new TestBaremetalCloudAgentTemplate.Builder().imageId("iln").build().getImage());
+        Assert.assertNull(new TestBaremetalCloudAgentTemplate().getImageId());
+        Assert.assertEquals("iln", new TestBaremetalCloudAgentTemplate.Builder().imageId("iln").build().getImageId());
     }
 
     @Test

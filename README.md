@@ -189,6 +189,27 @@ Separately you can select the **Instance Principals** option. Using this option 
 
 Click **Verify Credentials** that you can connect successfully to your OCI.
 
+#### Using your OCI credentials with the Credential Binding plugin
+
+The OCI config provided for creating instances can also be used as a credential in jenkins pipelines.
+
+```groovy
+pipeline {
+   agent {
+      label "my-oci-label"
+   }
+
+   stages {
+      stage("My OCI Test") {
+         steps {
+            withCredentials([ociCredential(credentialsId: 'MY_OCI_CREDENTIAL')]) {
+               sh 'oci iam compartment list'
+            }
+         }
+      }
+   }
+}
+```
 
 
 #### Add OCI Cloud
@@ -261,7 +282,7 @@ Please consult the [security guide](./SECURITY.md) for our responsible security 
 
 ## License
 
-Copyright (c) 2018, 2023, Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2018, 2024, Oracle and/or its affiliates. All rights reserved.
 
 This Plugin is licensed under the Universal Permissive License 1.0
 

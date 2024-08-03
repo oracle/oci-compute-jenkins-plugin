@@ -165,7 +165,7 @@ public class SDKBaremetalCloudClient implements BaremetalCloudClient {
             String ad = template.getAvailableDomain();
             String compartmentIdStr = template.getCompartmentId();
             String subnetIdStr = template.getSubnet();
-            String imageIdStr = template.getImage();
+            String imageIdStr = template.getImageId();
             String shape = template.getShape();
             String sshPublicKey = template.getPublicKey();
 

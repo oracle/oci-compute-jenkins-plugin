@@ -217,7 +217,9 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             LOGGER.info("Terminating instance " + instanceId);
             cloud.recycleCloudResources(instanceId);
             File f1=new File("./known_hosts");
-            if(f1.exists()) {
+            if (!f1.exists()) {
+                LOGGER.info("File: known_hosts does not exist, skipping modification.");
+            } else {
                 String[] words = null;
                 Reader fr = new InputStreamReader(new FileInputStream(f1), StandardCharsets.UTF_8);
                 BufferedReader br = new BufferedReader(fr);
@@ -240,8 +242,6 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                 }
                 br.close();
                 writer.close();
-            } else {
-                LOGGER.log(Level.INFO, "No knownHost file.");
             }
         } else {
             LOGGER.info("Stopping instance " + instanceId);

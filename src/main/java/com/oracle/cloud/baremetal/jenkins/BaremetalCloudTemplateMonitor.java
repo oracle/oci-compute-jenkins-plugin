@@ -1,8 +1,6 @@
 package com.oracle.cloud.baremetal.jenkins;
 
 import java.io.IOException;
-import java.util.ArrayList;
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -16,7 +14,6 @@ import com.oracle.cloud.baremetal.jenkins.client.SDKBaremetalCloudClientFactory;
 import hudson.Extension;
 import hudson.model.AsyncPeriodicWork;
 import hudson.model.TaskListener;
-
 import hudson.slaves.Cloud;
 
 
@@ -36,8 +33,6 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
         for (Cloud c : JenkinsUtil.getJenkinsInstance().clouds) {
             if (c instanceof BaremetalCloud) {
                 BaremetalCloud cloud = (BaremetalCloud) c;
-                List<BaremetalCloudAgentTemplate> lstTemplates = new ArrayList<>();
-                boolean updateCheck = false;
 
                 for (BaremetalCloudAgentTemplate template: cloud.getTemplates()) {
 
@@ -63,7 +58,7 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                     }
 
                     if (template.getAutoImageUpdate()) {
-                        String imageId = template.getImage();
+                        String imageId = template.getImageId();
 
                         BaremetalCloudClientFactory factory = SDKBaremetalCloudClientFactory.INSTANCE;
                         BaremetalCloudClient client = factory.createClient(cloud.getCredentialsId(), Integer.parseInt(cloud.getMaxAsyncThreads()));
@@ -80,9 +75,7 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                                                 && !image2.getId().equals(imageId)
                                                 && image2.getTimeCreated().compareTo(image.getTimeCreated()) > 0) {
                                             LOGGER.log(Level.INFO, "A new version of the image {0} was found. It is used in the template.", imageName);
-                                            updateCheck = true;
-                                            lstTemplates.add(createNewTemplate(template, image2.getId()));
-
+                                            template.setImageId(image2.getId());
                                         }
                                     }
 
@@ -92,23 +85,7 @@ public class BaremetalCloudTemplateMonitor extends AsyncPeriodicWork{
                         } catch (Exception e) {
                             LOGGER.log(Level.WARNING, "Failed to get images list", e);
                         }
-                    } else {
-                        lstTemplates.add(template);
                     }
-                }
-
-                //Update a cloud if it has updated templates
-                if (updateCheck) {
-                    BaremetalCloud newCLoud = new BaremetalCloud(
-                            cloud.getCloudName(),
-                            cloud.getCredentialsId(),
-                            cloud.getInstanceCapStr(),
-                            cloud.getMaxAsyncThreads(),
-                            cloud.getNextTemplateId(),
-                            lstTemplates);
-                    JenkinsUtil.getJenkinsInstance().clouds.replace(cloud,newCLoud);
-                    JenkinsUtil.getJenkinsInstance().save();
-                    LOGGER.log(Level.INFO, "The cloud {0} was updated by templates monitor because a new image exists in OCI.", cloud.getDisplayName());
                 }
             }
         }

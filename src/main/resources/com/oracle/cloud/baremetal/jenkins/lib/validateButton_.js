@@ -4,7 +4,7 @@ function validateButtonUsingFindNearBy(checkUrl, paramList, button) {
     button = button._button;
 
     var parameters = {};
-    paramList.split(',').each(function(name) {
+    paramList.split(',').forEach(function(name) {
         // Use findNearBy rather than findPreviousFormItem.
         var p = findNearBy(button, name);
         if (p) {
@@ -14,22 +14,26 @@ function validateButtonUsingFindNearBy(checkUrl, paramList, button) {
         }
     });
 
-    var spinner = $(button).up('DIV').next();
-    var target = spinner.next();
+    var spinner = button.closest('DIV').nextElementSibling;
+    var target = spinner.nextElementSibling;
     spinner.style.display = 'block';
+    fetch(checkUrl, {
+        method: "post",
+        body: new URLSearchParams(parameters),
+        headers: crumb.wrap(),
+      }).then((rsp) => {
+        console.log("RSP"+rsp);
+        rsp.text().then((responseText) => {
+          spinner.style.display = "none";
+          applyErrorMessage(target, rsp);
+          layoutUpdateCallback.call();
+          var s = rsp.headers.get("script");
+          try {
+            geval(s);
+          } catch (e) {
+            window.alert("failed to evaluate " + s + "\n" + e.message);
+          }
+        });
+      });
 
-    new Ajax.Request(checkUrl, {
-        parameters: parameters,
-        onComplete: function(rsp) {
-            spinner.style.display = 'none';
-            applyErrorMessage(target, rsp);
-            layoutUpdateCallback.call();
-            var s = rsp.getResponseHeader('script');
-            try {
-                geval(s);
-            } catch(e) {
-                window.alert('failed to evaluate ' + s + '\n' + e.message);
-            }
-        }
-    });
 }

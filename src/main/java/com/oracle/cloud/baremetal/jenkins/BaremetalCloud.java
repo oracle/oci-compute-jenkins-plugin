@@ -254,13 +254,13 @@ public class BaremetalCloud extends AbstractCloudImpl{
                     long numberOfSuitableInstances = allStoppedInstances.stream()
                             .filter(n -> n.getDisplayName().contains(searchName))
                             .filter(n -> n.getShape().equals(template.getShape()))
-                            .filter(n -> n.getImageId().equals(template.getImage()))
+                            .filter(n -> n.getImageId().equals(template.getImageId()))
                             .count();
                     if (numberOfSuitableInstances > 0) {
                         String instanceId = allStoppedInstances.stream()
                                 .filter(n -> n.getDisplayName().contains(searchName))
                                 .filter(n -> n.getShape().equals(template.getShape()))
-                                .filter(n -> n.getImageId().equals(template.getImage()))
+                                .filter(n -> n.getImageId().equals(template.getImageId()))
                                 .findAny().get().getId();
                         using_stopped_instance = true;
                         instance = client.startInstance(instanceId);

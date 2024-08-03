@@ -203,6 +203,19 @@ public class SshComputerLauncher extends ComputerLauncher {
         try {
             SCPClient scp = connection.createSCPClient();
             scp.put(initScript.getBytes("UTF-8"), "init.sh", remoteDirectory, "0700");
+            final String initIndicatorFile = "~/.hudson-run-init";
+            String initscriptModified = "if [[ -e " + initIndicatorFile + " ]]; then \n" +
+                    " echo 'Agent already initialized " + initIndicatorFile +" exists';\n" +
+                    "else\n" +
+                    " echo 'Running init script on agent';\n" +
+                    " /bin/bash " + remoteDirectory + "/init.sh;\n" +
+                    " if [ $? != 0 ]; then\n"+
+                    "  exit 1;\n"+
+                    " fi\n"+
+                    " echo Creating " + initIndicatorFile + " on agent;\n" +
+                    " touch " + initIndicatorFile + ";\n" +
+                    " fi\n";
+            scp.put(initscriptModified.getBytes("UTF-8"), "initModified.sh", remoteDirectory, "0700");
         } catch (IOException e) {
             listener.fatalError("Failed to copy init script");
             throw e;
@@ -210,19 +223,16 @@ public class SshComputerLauncher extends ComputerLauncher {
 
         listener.getLogger().println("Running init script on remote agent");
         Session initSession = null;
+        Session testSession = null;
         try {
             initSession = connection.openSession();
+            testSession = connection.openSession();
+            testSession.requestDumbPTY();
+            testSession.execCommand("cat ~/initModified.sh");
             initSession.requestDumbPTY();
-            final String initIndicatorFile = "~/.hudson-run-init";
+            //final String initIndicatorFile = "~/.hudson-run-init";
             final String initCommand =
-                    "/bin/bash -c \"if [[ -e " + initIndicatorFile + " ]]; then" +
-                            "  echo 'Agent already initialized '" + initIndicatorFile +" exists;" +
-                            "else" +
-                            "  echo 'Running init script on agent';" +
-                            "  /bin/bash " + remoteDirectory + "/init.sh;" +
-                            "  echo Creating " + initIndicatorFile + " on agent;" +
-                            "  touch " + initIndicatorFile + ";" +
-                            "fi\"";
+                    "/bin/bash "+remoteDirectory + "/initModified.sh;";
             initSession.execCommand(initCommand);
 
             IOUtils.copy(initSession.getStdout(), listener.getLogger());
@@ -242,6 +252,7 @@ public class SshComputerLauncher extends ComputerLauncher {
         } finally {
             if (initSession != null) {
                 initSession.close();
+                testSession.close();
             }
         }
     }
@@ -296,7 +307,7 @@ public class SshComputerLauncher extends ComputerLauncher {
             listener.getLogger().println("Jenkins Agent User is empty, default opc.");
         } else {
             launchString = "sudo chown " + jenkinsAgentUser + " " + jarfile +
-                    " && sudo -u " + jenkinsAgentUser + " " + launchString;
+                    " && sudo -i -u " + jenkinsAgentUser + " " + launchString;
         }
 
         listener.getLogger().println("Launching Agent (via Trilead SSH2 Connection): "
