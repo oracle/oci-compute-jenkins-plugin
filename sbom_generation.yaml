@@ -1,0 +1,26 @@
+version: 0.1
+component: build
+timeoutInSeconds: 1000
+shell: bash
+runAs: root
+env:
+  variables:
+    "JAVA_HOME" : "/usr/lib64/graalvm/graalvm21-ee-java11"
+steps:
+  - type: Command
+    name: "Installing the Oracle GraalVM 21 for JDK 11"
+    command: |
+      yum -y install graalvm21-ee-11-jdk
+  - type: Command
+    name: "Setting the JAVA_PATH"
+    command: |
+      export PATH=$JAVA_HOME/bin:$PATH
+  - type: Command
+    name: "Running Maven cycloneDX plugin command"
+    command: |
+      mvn org.cyclonedx:cyclonedx-maven-plugin:2.7.9:makeAggregateBom -DincludeRuntimeScope=true -DincludeCompileScope=true -DincludeProvidedScope=false -DincludeSystemScope=false -DincludeTestScope=false -DoutputFormat=json -DoutputName=artifactSBOM -DschemaVersion=1.4
+      mv target/artifactSBOM.json ${OCI_PRIMARY_SOURCE_DIR}/artifactSBOM.json
+outputArtifacts:
+  - name: artifactSBOM
+    type: BINARY
+    location: ${OCI_PRIMARY_SOURCE_DIR}/artifactSBOM.json
