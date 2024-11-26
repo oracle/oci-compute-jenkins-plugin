@@ -10,16 +10,16 @@
     <relativePath />
   </parent>
   <artifactId>oracle-cloud-infrastructure-compute</artifactId>
-  <version>1.0.18-SNAPSHOT</version>
+  <version>1.0.19-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <properties>
-    <java.level>11</java.level>
+    <java.level>17</java.level>
     <oci-java-sdk.version>2.46.0</oci-java-sdk.version>
-    <jenkins.version>2.426.3</jenkins.version>
+    <jenkins.version>2.462.3</jenkins.version>
     <enforcer.skip>true</enforcer.skip>
-    <maven.compiler.target>11</maven.compiler.target>
-    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
   </properties>
 
   <name>Oracle Cloud Infrastructure Compute Plugin</name>
@@ -56,6 +56,11 @@
       <id>dmeirowi</id>
       <name>Diane Meirowitz</name>
       <email>diane.meirowitz@oracle.com</email>
+    </developer>
+    <developer>
+      <id>jtorranc</id>
+      <name>Jake Torrance</name>
+      <email>jake.torrance@oracle.com</email>
     </developer>
   </developers>
 
@@ -111,20 +116,81 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>credentials</artifactId>
+      <version>1381.v2c3a_12074da_b_</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>ssh-credentials</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jenkins-ci</groupId>
+          <artifactId>trilead-ssh2</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci</groupId>
+      <artifactId>trilead-ssh2</artifactId>
+      <version>trilead-ssh2-build-217-jenkins-17</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>plain-credentials</artifactId>
+      <version>183.va_de8f1dd5a_2b_</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>structs</artifactId>
+      <version>338.v848422169819</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>credentials-binding</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jenkins-ci.plugins</groupId>
+          <artifactId>plain-credentials</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jenkins-ci.plugins</groupId>
+          <artifactId>structs</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>bouncycastle-api</artifactId>
+      <version>2.30.1.78.1-248.ve27176eb_46cb_</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk18on</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.78</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk18on</artifactId>
+      <version>1.78</version>
     </dependency>
     <dependency>
       <groupId>com.oracle.oci.sdk</groupId>
       <artifactId>oci-java-sdk-common</artifactId>
       <version>${oci-java-sdk.version}</version>
       <exclusions>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk15on</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.glassfish.jersey.core</groupId>
           <artifactId>*</artifactId>
@@ -153,10 +219,6 @@
           <groupId>jakarta.annotation</groupId>
           <artifactId>*</artifactId>
         </exclusion>
-        <!--        <exclusion>-->
-        <!--          <groupId>com.fasterxml.jackson.core</groupId>-->
-        <!--          <artifactId>jackson-databind</artifactId>-->
-        <!--        </exclusion>-->
       </exclusions>
     </dependency>
     <dependency>
@@ -170,16 +232,19 @@
       <version>${oci-java-sdk.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jenkins-ci.plugins</groupId>
-      <artifactId>bouncycastle-api</artifactId>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>javax-activation-api</artifactId>
+      <version>1.2.0-7</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
       <artifactId>jersey2-api</artifactId>
+      <version>2.44-151.v6df377fff741</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
+      <version>2.17.0-379.v02de8ec9f64c</version>
     </dependency>
     <dependency>
       <groupId>io.jenkins.plugins</groupId>
