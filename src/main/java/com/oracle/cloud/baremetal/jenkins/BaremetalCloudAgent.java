@@ -12,6 +12,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 import com.oracle.bmc.core.model.Instance;
+import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 import com.oracle.cloud.baremetal.jenkins.ssh.SshComputerLauncher;
 
@@ -263,6 +264,12 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
 			   currentState.equals(Instance.LifecycleState.Starting)){
 				return true;
 			}
+		} catch(BmcException e) {
+			if (e.getStatusCode() == 404) {
+				LOGGER.info("Instance " + instanceId + " no longer exists (404). Marking as not alive.");
+				return false;
+			}
+			throw new IOException(e);
 		} catch(Exception e) {
             throw new IOException(e);
 		}

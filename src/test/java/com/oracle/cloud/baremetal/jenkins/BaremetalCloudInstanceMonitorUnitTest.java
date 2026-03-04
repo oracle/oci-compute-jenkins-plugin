@@ -10,6 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.oracle.bmc.core.model.Instance;
+import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 
 import hudson.model.Node;
@@ -80,5 +81,43 @@ public class BaremetalCloudInstanceMonitorUnitTest {
         TestBaremetalCloudInstanceMonitor monitor = new TestBaremetalCloudInstanceMonitor(agent);
         monitor.execute(null);
         Assert.assertFalse(monitor.removed);
+    }
+
+    @Test
+    public void testExecuteInstanceNotFound404() throws Exception {
+        final BaremetalCloudClient client = mockery.mock(BaremetalCloudClient.class);
+        mockery.checking(new Expectations() {{
+            oneOf(client).getInstanceState("in");
+            will(throwException(new BmcException(404, "NotAuthorizedOrNotFound",
+                    "instance not found", "opc-request-id")));
+            oneOf(client).terminateInstance("in");
+            will(throwException(new BmcException(404, "NotAuthorizedOrNotFound",
+                    "instance not found", "opc-request-id")));
+        }});
+        TestBaremetalCloudAgent agent = new TestBaremetalCloudAgent.Builder()
+                .instanceId("in")
+                .cloud(new TestBaremetalCloud.Builder().client(client).clock(new TestClock()).build())
+                .build();
+        TestBaremetalCloudInstanceMonitor monitor = new TestBaremetalCloudInstanceMonitor(agent);
+        monitor.execute(null);
+        Assert.assertTrue("Node should be removed when instance returns 404", monitor.removed);
+    }
+
+    @Test
+    public void testExecuteTerminateFailsNodeStillRemoved() throws Exception {
+        final BaremetalCloudClient client = mockery.mock(BaremetalCloudClient.class);
+        mockery.checking(new Expectations() {{
+            oneOf(client).getInstanceState("in"); will(returnValue(Instance.LifecycleState.Terminated));
+            oneOf(client).terminateInstance("in");
+            will(throwException(new BmcException(404, "NotAuthorizedOrNotFound",
+                    "instance not found", "opc-request-id")));
+        }});
+        TestBaremetalCloudAgent agent = new TestBaremetalCloudAgent.Builder()
+                .instanceId("in")
+                .cloud(new TestBaremetalCloud.Builder().client(client).clock(new TestClock()).build())
+                .build();
+        TestBaremetalCloudInstanceMonitor monitor = new TestBaremetalCloudInstanceMonitor(agent);
+        monitor.execute(null);
+        Assert.assertTrue("Node should be removed even when terminate fails", monitor.removed);
     }
 }
