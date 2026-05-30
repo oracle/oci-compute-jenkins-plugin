@@ -101,6 +101,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
     public final String retryTimeoutMins;
     private long bootVolumeVPUs;
     public final Boolean disableLegacyImdsEndpoint;
+    public final int maxTotalUses;
 
     private transient int failureCount=0;
     private transient String disableCause;
@@ -146,7 +147,8 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
             final String memoryInGBs,
             final Boolean doNotDisable,
             final String retryTimeoutMins,
-            final Boolean disableLegacyImdsEndpoint){
+            final Boolean disableLegacyImdsEndpoint,
+            final int maxTotalUses){
     	this.compartmentId = compartmentId;
         this.availableDomain = availableDomain;
         this.vcnCompartmentId = vcnCompartmentId;
@@ -186,6 +188,7 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
         this.retryTimeoutMins = retryTimeoutMins;
         this.verificationStrategy = verificationStrategy;
         this.disableLegacyImdsEndpoint = disableLegacyImdsEndpoint;
+        this.maxTotalUses = maxTotalUses;
     }
 
     public String getCompartmentId() {
@@ -418,6 +421,10 @@ public class BaremetalCloudAgentTemplate implements Describable<BaremetalCloudAg
 
     public Boolean getDisableLegacyImdsEndpoint() {
         return disableLegacyImdsEndpoint;
+    }
+
+    public int getMaxTotalUses() {
+        return maxTotalUses;
     }
 
     @Override

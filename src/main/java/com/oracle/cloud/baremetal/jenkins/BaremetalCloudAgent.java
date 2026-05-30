@@ -12,6 +12,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
 import com.oracle.bmc.core.model.Instance;
+import com.oracle.bmc.model.BmcException;
 import com.oracle.cloud.baremetal.jenkins.client.BaremetalCloudClient;
 import com.oracle.cloud.baremetal.jenkins.ssh.SshComputerLauncher;
 
@@ -40,10 +41,6 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
 
     private static RetentionStrategy<? extends Computer> createRetentionStrategy(String idleTerminationMinutes) {
         int idleMinutes = idleTerminationMinutes == null || idleTerminationMinutes.trim().isEmpty() ? 0 : Integer.parseInt(idleTerminationMinutes);
-
-        if (idleMinutes == 0) {
-            return new RetentionStrategy.Always();
-        }
         return new BaremetalCloudRetentionStrategy(idleMinutes);
     }
 
@@ -56,15 +53,16 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
     public final int templateId;
     public boolean verificationStrategy;
     private String hostip="";
+    public int maxTotalUses;
 
     public BaremetalCloudAgent(final String name,
             final BaremetalCloudAgentTemplate template,
             final String cloudName,
             final String instanceId,
             final String host) throws IOException, FormException{
-    	    this(
-    		name,
-    		template.getDescription(),
+    	this(
+    			name,
+    			template.getDescription(),
                 template.getRemoteFS(),
                 template.getSshCredentialsId(),
                 template.getAssignPublicIP(),
@@ -84,7 +82,8 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                 template.getInitScriptEnvVarsVersion(),
                 template.getInitScriptTimeoutSeconds(),
                 host,
-                template.getTemplateId());
+                template.getTemplateId(),
+                template.getMaxTotalUses());
     }
 
     @DataBoundConstructor
@@ -109,7 +108,8 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             final String initScript,
             final int initScriptTimeoutSeconds,
             final String host,
-            final int templateId) throws IOException, FormException{
+            final int templateId,
+            final int maxTotalUses) throws IOException, FormException{
     	super(name,
                 description,
                 remoteFS,
@@ -137,6 +137,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
         this.customJVMOpts = customJVMOpts;
         this.verificationStrategy = verificationStrategy;
         this.hostip = host;
+        this.maxTotalUses = maxTotalUses;
     }
 
     private BaremetalCloudAgent(final String name,
@@ -155,7 +156,8 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
             final String initScript,
             final ComputerLauncher computerLauncher,
             final RetentionStrategy retentionStrategy,
-            final int templateId) throws IOException,
+            final int templateId,
+            final int maxTotalUses) throws IOException,
             FormException {
         super(name, description, remoteFS, numExecutors, mode, labelString, computerLauncher, retentionStrategy,
                 nodeProperties);
@@ -167,6 +169,7 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
         this.verificationStrategy = verificationStrategy;
         this.initScript = initScript;
         this.templateId = templateId;
+        this.maxTotalUses = maxTotalUses;
     }
 
     public String getJenkinsAgentUser() {
@@ -263,6 +266,12 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
 			   currentState.equals(Instance.LifecycleState.Starting)){
 				return true;
 			}
+		} catch(BmcException e) {
+            if (e.getStatusCode() == 404) {
+                LOGGER.info("Instance " + instanceId + " no longer exists (404). Marking as not alive.");
+                return false;
+            }
+            throw new IOException(e);
 		} catch(Exception e) {
             throw new IOException(e);
 		}
@@ -307,7 +316,8 @@ public class BaremetalCloudAgent extends AbstractCloudSlave{
                     initScript,
                     getLauncher(),
                     getRetentionStrategy(),
-                    templateId);
+                    templateId,
+                    maxTotalUses);
         } catch (FormException | IOException e) {
             LOGGER.warning("Failed to reconfigure BareMetalAgent: " + name);
         }

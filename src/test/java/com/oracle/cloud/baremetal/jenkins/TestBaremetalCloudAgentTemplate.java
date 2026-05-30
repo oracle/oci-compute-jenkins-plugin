@@ -292,7 +292,8 @@ public class TestBaremetalCloudAgentTemplate extends BaremetalCloudAgentTemplate
                 builder.memoryInGBs,
                 builder.doNotDisable,
                 builder.retryTimeoutMins,
-                builder.disaleLegacyImdsEndpoint);
+                builder.disaleLegacyImdsEndpoint,
+                -1);
 
     }
 

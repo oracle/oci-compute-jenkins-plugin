@@ -43,15 +43,21 @@ public class BaremetalCloudInstanceMonitor extends AsyncPeriodicWork {
 				try{
 					if(! agent.isAlive()){
 						LOGGER.info("Cloud Infrastructure instance is offline: " + agent.getDisplayName());
-						agent._terminate(listener);
-						LOGGER.info("Cloud Infrastructure instance is terminated: " + agent.getDisplayName());
+						try {
+							agent._terminate(listener);
+							LOGGER.info("Cloud Infrastructure instance is terminated: " + agent.getDisplayName());
+						} catch (Exception e) {
+							LOGGER.log(Level.WARNING, "Failed to terminate instance " + agent.getDisplayName()
+									+ ", proceeding with node removal. Error: " + e.getMessage());
+						}
 						removeNode(agent);
+						LOGGER.info("Removed node definition for: " + agent.getDisplayName());
 					}else{
 						LOGGER.info("Cloud Infrastructure instance is online: " + agent.getDisplayName());
 					}
 				} catch (IOException | InterruptedException | RuntimeException e){
-					LOGGER.info("Failed to terminate node : " + agent.getDisplayName());
-                                        LOGGER.info("ERROR : " + e.getMessage());
+					LOGGER.log(Level.WARNING, "Failed to check liveness of node: " + agent.getDisplayName()
+							+ ". Error: " + e.getMessage());
 				}
 			}
 		}

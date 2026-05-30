@@ -264,7 +264,8 @@ public class SshComputerLauncher extends ComputerLauncher {
 	// Delete slave.jar in case it already exists and is owned by a different
 	// user, which could happen if Jenkins Agent User is set.
 	//
-	String deleteString = "sudo rm -f " + remoteDirectory + "/slave.jar";
+	String deleteCmd = "rm -f " + remoteDirectory + "/slave.jar";
+	String deleteString = deleteCmd + " || sudo " + deleteCmd;
         listener.getLogger().println("Deleting remote slave.jar if it exists prior to copy ["
 	             + deleteString + "]");
 
@@ -305,9 +306,13 @@ public class SshComputerLauncher extends ComputerLauncher {
 
         if (jenkinsAgentUser == null || jenkinsAgentUser.trim().isEmpty()) {
             listener.getLogger().println("Jenkins Agent User is empty, default opc.");
+        } else if (jenkinsAgentUser.trim().equals(sshUser)) {
+            listener.getLogger().println("Jenkins Agent User [" + jenkinsAgentUser.trim()
+                    + "] matches SSH user, no sudo required.");
         } else {
-            launchString = "sudo chown " + jenkinsAgentUser + " " + jarfile +
-	                  " && sudo -i -u " + jenkinsAgentUser + " " + launchString;
+            String chownCmd = "chown " + jenkinsAgentUser + " " + jarfile;
+            launchString = "(" + chownCmd + " || sudo " + chownCmd + ") && " +
+	                  "sudo -i -u " + jenkinsAgentUser + " " + launchString;
         }
 
         listener.getLogger().println("Launching Agent (via Trilead SSH2 Connection): "
